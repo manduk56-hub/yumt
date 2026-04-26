@@ -230,6 +230,21 @@ function startQuiz() {
         return;
     }
 
+    // [New] Check if a profile already exists for this Name + ID combo
+    const userKey = `dino_user_${userName}_${studentId}`;
+    const existingData = localStorage.getItem(userKey);
+    if (existingData) {
+        try {
+            savedProfile = JSON.parse(existingData);
+            document.body.className = 'theme-jurassic';
+            populateDashboard();
+            showScreen(screenDashboard);
+            return; // Skip quiz and go to dashboard
+        } catch (e) {
+            console.error("Failed to load existing profile", e);
+        }
+    }
+
     currentQuestionIndex = 0;
     scores = {
         region: { volcano: 0, plains: 0, forest: 0, waterSky: 0 },
@@ -300,17 +315,19 @@ function setResultBackground(region, type) {
 
     let emojis;
     if (region === 'waterSky') {
-        emojis = type === 'weird'
-            ? ['☁️', '🌤️', '⛅', '🌬️', '🕊️']
-            : ['💧', '🌊', '🫧', '🐚', '🐋'];
-    } else {
-        if (type === 'aggressive') {
-            emojis = ['🥩', '🍖', '🦴', '🩸', '🔥'];
-        } else if (type === 'gentle') {
-            emojis = ['🌿', '🍃', '🌱', '🍀', '🌾'];
+        if (type === 'weird') {
+            // 익룡 (Sky-dweller): Clouds
+            emojis = ['☁️', '⛅', '🌥️', '☁️'];
         } else {
-            emojis = ['⭐', '✨', '🌀', '❓', '🎲'];
+            // 어룡 (Ocean-dweller): Bubbles
+            emojis = ['🫧', '🫧', '🫧', '🫧'];
         }
+    } else if (region === 'volcano') {
+        // 육식공룡 (Carnivore): Meat
+        emojis = ['🥩', '🍖', '🍗', '🥓'];
+    } else {
+        // 초식공룡 (Herbivore): Grass/Plant
+        emojis = ['🌿', '🍃', '🌱', '🍀', '🌾'];
     }
 
     for (let i = 0; i < 22; i++) {
@@ -350,16 +367,14 @@ function generateResult() {
     soc += Math.floor(Math.random() * 20) - 10;
     eat += Math.floor(Math.random() * 20) - 10;
 
-    setTimeout(() => {
-        document.getElementById('stat-active').style.width = `${Math.min(100, Math.max(10, act))}%`;
-        document.getElementById('stat-social').style.width = `${Math.min(100, Math.max(10, soc))}%`;
-        document.getElementById('stat-eat').style.width = `${Math.min(100, Math.max(10, eat))}%`;
-    }, 500);
+
 
     savedProfile = {
         name: userName,
         studentId: studentId,
         dinoName: `${randomAdjective} ${matchedDino.name}`,
+        dinoEmoji: matchedDino.emoji,
+        dinoDesc: matchedDino.desc,
         code: generateCode(),
         age: 10,
         weight: 500,
@@ -371,7 +386,10 @@ function generateResult() {
 function populateDashboard() {
     if (!savedProfile) return;
     // Main Dashboard
-    document.getElementById('dash-user-info').innerText = `전사 합류 완료. ${savedProfile.name} [${savedProfile.dinoName}] — 홍주은을 막아내라!`;
+    document.getElementById('dash-user-info').innerText = `전사 합류 완료. ${savedProfile.name} — 홍주은을 막아낼 시간입니다.`;
+    document.getElementById('dash-emoji').innerText = savedProfile.dinoEmoji || '🦖';
+    document.getElementById('dash-dino-name').innerText = savedProfile.dinoName;
+    document.getElementById('dash-dino-desc').innerText = savedProfile.dinoDesc || '';
 
     // Growth Dashboard
     elGrowthDinoName.innerText = `${savedProfile.name}님의 공룡 (${savedProfile.dinoName})`;
@@ -461,7 +479,13 @@ btnRestart.addEventListener('click', () => {
 });
 
 btnConfirm.addEventListener('click', () => {
-    if (savedProfile) localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+    if (savedProfile) {
+        // Save using a unique key for Name + ID combo
+        const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
+        localStorage.setItem(userKey, JSON.stringify(savedProfile));
+        // Also keep track of the 'last' profile for automatic login on refresh
+        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+    }
     populateDashboard();
     showScreen(screenDashboard);
 });
@@ -477,13 +501,19 @@ btnBackSch.addEventListener('click', () => showScreen(screenDashboard));
 btnBackGrowth.addEventListener('click', () => showScreen(screenDashboard));
 
 btnResetAll.addEventListener('click', () => {
-    localStorage.removeItem('dinoProfile');
-    savedProfile = null;
-    document.body.className = 'theme-valley';
-    inputName.value = '';
-    inputId.value = '';
-    showScreen(screenIntro);
-    document.querySelectorAll('.stat-fill').forEach(el => el.style.width = '0%');
+    if (confirm("정말 공룡 소환을 취소하시겠습니까? 저장된 모든 정보가 사라집니다.")) {
+        if (savedProfile) {
+            const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
+            localStorage.removeItem(userKey);
+        }
+        localStorage.removeItem('dinoProfile');
+        savedProfile = null;
+        document.body.className = 'theme-valley';
+        inputName.value = '';
+        inputId.value = '';
+        showScreen(screenIntro);
+        document.querySelectorAll('.stat-fill').forEach(el => el.style.width = '0%');
+    }
 });
 
 // Initialize app

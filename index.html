@@ -63,7 +63,7 @@
         </section>
 
         <!-- 2.6. 어라? 화면 -->
-        <section id="screen-fusion" class="screen hidden" style="background: #0a0a0a; position: relative;">
+        <section id="screen-fusion" class="screen hidden" style="background: url('plus.png') no-repeat center center / cover; position: relative;">
             <div style="position: relative; z-index: 1; text-align: center; color: white;">
                 <h1 style="font-size: 5rem; text-shadow: 0 0 20px #ff0000; margin-bottom: 20px;">어라..?</h1>
                 <p style="font-size: 1.5rem; text-shadow: 2px 2px 4px #000; opacity: 0.8;">뭔가... 이상한 기운이 느껴집니다.</p>
@@ -82,7 +82,6 @@
         <!-- 4. 결과 화면 (쥬라기 테마) -->
         <section id="screen-result" class="screen hidden">
             <div id="result-bg"></div>
-            <div class="leaves top-leaves"></div>
             <div class="result-container wooden-board">
                 <div class="dino-avatar" id="dino-emoji">🦖</div>
                 <div class="name-tag" id="result-name">이름님의 공룡 자아는</div>
@@ -92,33 +91,13 @@
                     <p id="dino-description">항상 에너지가 넘치고 무리를 이끄는 것을 좋아하는 최고의 골목대장입니다!</p>
                 </div>
 
-                <div class="stats-box">
-                    <div class="stat">
-                        <span class="stat-label">활동력</span>
-                        <div class="stat-bar">
-                            <div class="stat-fill bg-red" id="stat-active"></div>
-                        </div>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">친화력</span>
-                        <div class="stat-bar">
-                            <div class="stat-fill bg-green" id="stat-social"></div>
-                        </div>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">식욕</span>
-                        <div class="stat-bar">
-                            <div class="stat-fill bg-yellow" id="stat-eat"></div>
-                        </div>
-                    </div>
-                </div>
+
 
                 <div class="btn-group">
                     <button id="btn-restart" class="btn-jungle btn-outline">다시 해보기 🌴</button>
                     <button id="btn-confirm" class="btn-jungle">결정하기 🦕</button>
                 </div>
             </div>
-            <div class="leaves bottom-leaves"></div>
         </section>
 
         <!-- 5. 대시보드 화면 (메인 메뉴) -->
@@ -127,6 +106,15 @@
                 <div class="dash-header">
                     <h2>🦕 MT 사수 결전 작전부</h2>
                     <p id="dash-user-info">공룡 전사 합류 완료. 폭군 홍주은을 막아낼 시간입니다.</p>
+                </div>
+
+                <!-- 내 공룡 자아 정보 카드 -->
+                <div id="dash-dino-profile" class="dash-profile-card">
+                    <div class="profile-emoji" id="dash-emoji">🦖</div>
+                    <div class="profile-info">
+                        <h3 id="dash-dino-name">열정폭발 티라노사우루스</h3>
+                        <p id="dash-dino-desc">항상 에너지가 넘치고 무리를 이끄는 것을 좋아하는 최고의 골목대장입니다!</p>
+                    </div>
                 </div>
 
                 <div class="menu-grid">
