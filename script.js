@@ -329,7 +329,8 @@ function generateResult() {
         code: generateCode(),
         age: 10,
         weight: 500,
-        score: 1000
+        score: 1000,
+        usedCodes: []
     };
 }
 
@@ -359,6 +360,15 @@ function handleCodeSubmit() {
         elCodeMsg.style.color = "#d32f2f";
         return;
     }
+    if (!savedProfile.usedCodes) savedProfile.usedCodes = [];
+    if (savedProfile.usedCodes.includes(code)) {
+        elCodeMsg.innerText = "이미 사용한 코드입니다! 코드는 한 번씩만 입력할 수 있습니다.";
+        elCodeMsg.style.color = "#d32f2f";
+        return;
+    }
+
+    // Mark code as used
+    savedProfile.usedCodes.push(code);
 
     // Simulate successful growth
     savedProfile.age += 1;
