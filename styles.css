@@ -1,0 +1,615 @@
+:root {
+    /* Beach Theme Colors */
+    --beach-bg: #87CEEB;
+    --beach-text: #1E3A8A;
+    --beach-btn: #3B82F6;
+    --beach-btn-hover: #2563EB;
+    
+    /* Jurassic Theme Colors - BRIGHTENED */
+    --jungle-bg: #a5d6a7; /* Bright, cheerful green */
+    --wooden-bg: #ffffff; /* Clean white background for cards */
+    --wooden-border: #ffca28; /* Bright yellow-orange border */
+    --jungle-text: #1b5e20; /* Dark green for clean text readability */
+    --jungle-btn: #ff7043; /* Bright coral/orange button */
+    --jungle-btn-hover: #f4511e;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    overflow: hidden; /* Prevent scrolling during SPA */
+    transition: background-color 1s ease;
+}
+
+#app {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transform: translateY(20px);
+}
+
+.screen.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.hidden {
+    display: none; /* Just to remove from flow if needed, but opacity handles it mostly */
+}
+
+/* =========================================
+   1 & 2. VALLEY THEME (Intro & Quiz)
+========================================= */
+body.theme-valley {
+    background-image: url('bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Content Elements */
+.content {
+    z-index: 10;
+    text-align: center;
+    color: var(--beach-text);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    backdrop-filter: blur(5px);
+}
+
+.content h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    color: #0369a1;
+}
+
+.content p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+input[type="text"], input[type="number"] {
+    padding: 15px;
+    border-radius: 30px;
+    border: none;
+    font-size: 1.1rem;
+    width: 250px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    font-family: inherit;
+}
+
+.btn-beach {
+    padding: 15px 40px;
+    background: var(--beach-btn);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    transition: transform 0.2s, background 0.2s;
+    font-family: inherit;
+}
+
+.btn-beach:hover {
+    background: var(--beach-btn-hover);
+    transform: translateY(-3px);
+}
+
+/* Quiz Container */
+.quiz-container {
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 3rem;
+    border-radius: 25px;
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--beach-btn);
+    width: 10%;
+    transition: width 0.3s ease;
+}
+
+#question-number {
+    color: #64748b;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+#question-text {
+    color: #1e293b;
+    font-size: 2rem;
+    margin-bottom: 40px;
+    word-break: keep-all;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-option {
+    background: white;
+    border: 3px solid #cbd5e1;
+    color: #334155;
+    padding: 20px;
+    border-radius: 15px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-option:hover {
+    border-color: var(--beach-btn);
+    background: #eff6ff;
+    transform: translateY(-2px);
+}
+
+
+/* =========================================
+   3. LOADING THEME
+========================================= */
+.loading-content {
+    text-align: center;
+    color: white;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 3rem 4rem;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.spinner {
+    font-size: 5rem;
+    animation: spin bounce 2s infinite linear;
+    display: inline-block;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+
+/* =========================================
+   4. JURASSIC THEME (Result)
+========================================= */
+body.theme-jurassic {
+    background-color: var(--jungle-bg);
+}
+
+.wooden-board {
+    background-color: var(--wooden-bg);
+    border: 10px solid var(--wooden-border);
+    border-radius: 15px;
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.2);
+    background-image: repeating-linear-gradient(
+        transparent,
+        transparent 20px,
+        rgba(0,0,0,0.05) 20px,
+        rgba(0,0,0,0.05) 40px
+    ); /* Fake wood texture */
+    z-index: 10;
+}
+
+/* Leaves decoration */
+.leaves {
+    position: absolute;
+    width: 100%;
+    height: 100px;
+    background: repeating-linear-gradient(45deg, #81c784, #81c784 20px, #66bb6a 20px, #66bb6a 40px);
+    opacity: 0.5;
+    z-index: 1;
+}
+
+.top-leaves { top: 0; border-radius: 0 0 50% 50%; }
+.bottom-leaves { bottom: 0; border-radius: 50% 50% 0 0; }
+
+.dino-avatar {
+    font-size: 6rem;
+    margin-top: -80px;
+    background: white;
+    width: 140px;
+    height: 140px;
+    line-height: 140px;
+    border-radius: 50%;
+    border: 8px solid var(--wooden-border);
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.name-tag {
+    background: #e0f2f1;
+    color: #004d40;
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.dino-title {
+    color: var(--jungle-text);
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+}
+
+.dino-desc {
+    background: rgba(255,255,255,0.5);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    color: #4e342e;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+.stats-box {
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.stat {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.stat-label {
+    width: 60px;
+    font-weight: bold;
+    color: var(--jungle-text);
+}
+
+.stat-bar {
+    flex: 1;
+    height: 20px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 10px;
+    border: 2px solid rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.stat-fill {
+    height: 100%;
+    width: 0%; /* Set via JS */
+    border-radius: 10px;
+    transition: width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bg-red { background: #e53935; }
+.bg-green { background: #43a047; }
+.bg-yellow { background: #fdd835; }
+
+.btn-jungle {
+    padding: 15px 30px;
+    background: var(--jungle-btn);
+    color: white;
+    border: 4px solid #d84315;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #d84315;
+    transition: all 0.1s;
+    font-family: inherit;
+    flex: 1;
+}
+
+.btn-jungle:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 #d84315;
+}
+
+.btn-outline {
+    background: #fff3e0;
+    color: #d84315;
+}
+
+.btn-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+/* =========================================
+   5. DASHBOARD THEME (Travel Plan)
+========================================= */
+.dashboard-container {
+    max-width: 600px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.dash-header h2 {
+    color: var(--jungle-text);
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.dash-header p {
+    color: #5d4037;
+    margin-bottom: 25px;
+    font-weight: bold;
+}
+
+.paper-bg {
+    background: #fff9c4; /* Pale yellow paper look */
+    border: 2px dashed #a1887f;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.paper-bg h3 {
+    color: #e65100;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ffcc80;
+    padding-bottom: 5px;
+}
+
+.map-box {
+    background: #aed581; /* Greenish map background */
+    height: 120px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid #7cb342;
+    margin-bottom: 10px;
+    background-image: 
+        radial-gradient(#fff 1px, transparent 1px),
+        radial-gradient(#fff 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+}
+
+.map-pin {
+    background: white;
+    color: #c62828;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    animation: bounce 2s infinite;
+}
+
+.map-desc {
+    color: #4e342e;
+    font-size: 0.95rem;
+}
+
+.timeline {
+    list-style: none;
+    padding-left: 10px;
+}
+
+.timeline li {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.timeline .time {
+    background: #ffb74d;
+    color: #3e2723;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    min-width: 80px;
+    text-align: center;
+}
+
+.timeline .event {
+    color: #3e2723;
+    flex: 1;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.btn-menu {
+    padding: 20px;
+    background: #e8f5e9;
+    color: #1b5e20;
+    border: 3px solid #4caf50;
+    border-radius: 15px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+    font-family: inherit;
+    font-weight: bold;
+}
+
+.btn-menu:hover {
+    background: #c8e6c9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+}
+
+.btn-map-link {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 25px;
+    background: #03c75a; /* Naver green */
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background 0.2s;
+}
+
+.btn-map-link:hover {
+    background: #02b350;
+}
+
+/* =========================================
+   6. GROWTH & RANKING THEME
+========================================= */
+.text-center { text-align: center; }
+
+.dino-avatar {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    background: #e8f5e9;
+    border-radius: 50%;
+    border: 4px solid #4caf50;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.stats-box {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.stat-item {
+    background: #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #ffca28;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: bold;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    color: #e65100;
+    font-weight: 900;
+}
+
+.code-box {
+    background: #e8f5e9;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.highlight-code {
+    font-size: 1.3rem;
+    color: #1b5e20;
+    letter-spacing: 2px;
+}
+
+.msg-text {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #d32f2f;
+    text-align: center;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.ranking-table th, .ranking-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+}
+
+.ranking-table th {
+    background: #ffb74d;
+    color: #fff;
+    font-weight: bold;
+}
+
+.ranking-table tr.my-row {
+    background: #fff9c4;
+    font-weight: bold;
+    border: 2px solid #fbc02d;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .content h1 { font-size: 2.2rem; }
+    #question-text { font-size: 1.5rem; }
+    .btn-option { font-size: 1.1rem; }
+    .wooden-board { padding: 30px 20px; }
+    .dino-title { font-size: 1.8rem; }
+    .btn-group { flex-direction: column; }
+    .btn-menu { font-size: 1.2rem; padding: 15px; }
+}
