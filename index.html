@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,6 @@
     <meta property="og:url" content="https://manduk56-hub.github.io/yumt/">
     <meta property="og:title" content="🦕 MT 사전 성향 설문 | 영남대">
     <meta property="og:description" content="이번 MT를 더 즐겁게! 나의 공룡 전사 자아를 찾고 홍주은을 막아내자! 🔥">
-    <meta property="og:image" content="https://manduk56-hub.github.io/yumt/bluehatboy.png">
     <meta property="og:image:width" content="480">
     <meta property="og:image:height" content="240">
     <meta property="og:locale" content="ko_KR">
@@ -19,11 +19,12 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="🦕 MT 사전 성향 설문 | 영남대">
     <meta name="twitter:description" content="이번 MT를 더 즐겁게! 나의 공룡 전사 자아를 찾고 홍주은을 막아내자! 🔥">
-    <meta name="twitter:image" content="https://manduk56-hub.github.io/yumt/bluehatboy.png">
 
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
 </head>
+
 <body class="theme-valley">
     <div id="app">
         <!-- 1. 시작 화면 (계곡 테마) -->
@@ -42,7 +43,9 @@
         <!-- 2. 퀴즈 화면 (계곡 테마) -->
         <section id="screen-quiz" class="screen hidden">
             <div class="quiz-container">
-                <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
                 <h2 id="question-number">Q 1 / 10</h2>
                 <h3 id="question-text">질문 텍스트가 여기에 나옵니다.</h3>
                 <div class="options">
@@ -54,7 +57,8 @@
         </section>
 
         <!-- 2.5. 당신은... 화면 -->
-        <section id="screen-you-are" class="screen hidden" style="background: #fff; display: flex; align-items: center; justify-content: center; height: 100vh;">
+        <section id="screen-you-are" class="screen hidden"
+            style="background: #fff; display: flex; align-items: center; justify-content: center; height: 100vh;">
             <h1 style="font-size: 3rem; color: #333; animation: fadeIn 2s;">당신은...</h1>
         </section>
 
@@ -82,7 +86,7 @@
                 <div class="dino-avatar" id="dino-emoji">🦖</div>
                 <div class="name-tag" id="result-name">이름님의 공룡 자아는</div>
                 <h1 class="dino-title" id="dino-name">열정폭발 티라노사우루스</h1>
-                
+
                 <div class="dino-desc">
                     <p id="dino-description">항상 에너지가 넘치고 무리를 이끄는 것을 좋아하는 최고의 골목대장입니다!</p>
                 </div>
@@ -90,15 +94,21 @@
                 <div class="stats-box">
                     <div class="stat">
                         <span class="stat-label">활동력</span>
-                        <div class="stat-bar"><div class="stat-fill bg-red" id="stat-active"></div></div>
+                        <div class="stat-bar">
+                            <div class="stat-fill bg-red" id="stat-active"></div>
+                        </div>
                     </div>
                     <div class="stat">
                         <span class="stat-label">친화력</span>
-                        <div class="stat-bar"><div class="stat-fill bg-green" id="stat-social"></div></div>
+                        <div class="stat-bar">
+                            <div class="stat-fill bg-green" id="stat-social"></div>
+                        </div>
                     </div>
                     <div class="stat">
                         <span class="stat-label">식욕</span>
-                        <div class="stat-bar"><div class="stat-fill bg-yellow" id="stat-eat"></div></div>
+                        <div class="stat-bar">
+                            <div class="stat-fill bg-yellow" id="stat-eat"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -117,13 +127,13 @@
                     <h2>🦕 MT 사수 결전 작전부</h2>
                     <p id="dash-user-info">공룡 전사 합류 완료. 폭군 홍주은을 막아낼 시간입니다.</p>
                 </div>
-                
+
                 <div class="menu-grid">
                     <button id="btn-nav-location" class="btn-menu">🗺️ 결전의 장소 확인하기</button>
                     <button id="btn-nav-schedule" class="btn-menu">⏱️ MT 작전 일정표</button>
                     <button id="btn-nav-growth" class="btn-menu">📈 전투력 강화하기</button>
                 </div>
-                
+
                 <button id="btn-reset-all" class="btn-jungle btn-outline mt-20">공룡 소환 취소하기</button>
             </div>
             <div class="leaves bottom-leaves"></div>
@@ -136,19 +146,19 @@
                     <h2>📍 결전의 장소</h2>
                     <p>폭군 홍주은과 맞붙을 MT 현장입니다. 전사들이여, 집결하라!</p>
                 </div>
-                
+
                 <div class="dash-section paper-bg">
                     <h3>🎯 MT 집결 지점</h3>
                     <div class="map-box">
                         <div class="map-pin">영남대학교 (Yeungnam Univ.)</div>
                     </div>
                     <p class="map-desc">영남대학교 일대에서 결전이 펼쳐집니다. 전사들은 지금 당장 출동하라!</p>
-                    
+
                     <a href="https://map.naver.com/v5/search/영남대학교" target="_blank" class="btn-map-link">
                         🔍 네이버 지도로 현장 정찰하기
                     </a>
                 </div>
-                
+
                 <button id="btn-back-loc" class="btn-jungle btn-outline mt-20">🔙 작전부로 돌아가기</button>
             </div>
             <div class="leaves bottom-leaves"></div>
@@ -161,7 +171,7 @@
                     <h2>⏱️ MT 작전 타임라인</h2>
                     <p>폭군 홍주은을 처치하기 위한 당일 작전 일정입니다. 이탈하는 공룡은 용납하지 않는다.</p>
                 </div>
-                
+
                 <div class="dash-section paper-bg">
                     <h3>🦖 오늘의 작전 스케줄</h3>
                     <ul class="timeline">
@@ -198,7 +208,7 @@
                         </li>
                     </ul>
                 </div>
-                
+
                 <button id="btn-back-sch" class="btn-jungle btn-outline mt-20">🔙 작전부로 돌아가기</button>
             </div>
             <div class="leaves bottom-leaves"></div>
@@ -211,11 +221,11 @@
                     <h2>💪 전사 성장 훈련소</h2>
                     <p>코드를 교환하여 전투력을 끌어올리세요! 홍주은보다 강해져야 한다!</p>
                 </div>
-                
+
                 <div class="dash-section paper-bg text-center">
                     <img src="trex.png" alt="폭군 티라노" class="growth-dino-img">
                     <h3 id="growth-dino-name" class="mt-10" style="border:none; color:#1b5e20;">[이름]님의 공룡</h3>
-                    
+
                     <div class="stats-box">
                         <div class="stat-item">
                             <span class="stat-label">나이</span>
@@ -235,7 +245,8 @@
                     </div>
                     <div class="input-group mt-10">
                         <input type="text" id="friend-code" placeholder="동료 전사의 코드를 입력하세요">
-                        <button id="btn-submit-code" class="btn-jungle" style="padding: 10px 15px; font-size: 1rem;">성장하기 🌱</button>
+                        <button id="btn-submit-code" class="btn-jungle"
+                            style="padding: 10px 15px; font-size: 1rem;">성장하기 🌱</button>
                     </div>
                     <p id="code-msg" class="msg-text"></p>
                 </div>
@@ -255,7 +266,7 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 <button id="btn-back-growth" class="btn-jungle btn-outline mt-20">🔙 작전부로 돌아가기</button>
             </div>
             <div class="leaves bottom-leaves"></div>
@@ -264,4 +275,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
