@@ -294,9 +294,43 @@ function getHighestKey(obj) {
     return Object.keys(obj).reduce((a, b) => obj[a] > obj[b] ? a : b);
 }
 
+function setResultBackground(region, type) {
+    const bgEl = document.getElementById('result-bg');
+    bgEl.innerHTML = '';
+
+    let emojis;
+    if (region === 'waterSky') {
+        emojis = type === 'weird'
+            ? ['☁️', '🌤️', '⛅', '🌬️', '🕊️']
+            : ['💧', '🌊', '🫧', '🐚', '🐋'];
+    } else {
+        if (type === 'aggressive') {
+            emojis = ['🥩', '🍖', '🦴', '🩸', '🔥'];
+        } else if (type === 'gentle') {
+            emojis = ['🌿', '🍃', '🌱', '🍀', '🌾'];
+        } else {
+            emojis = ['⭐', '✨', '🌀', '❓', '🎲'];
+        }
+    }
+
+    for (let i = 0; i < 22; i++) {
+        const span = document.createElement('span');
+        span.className = 'bg-emoji';
+        span.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+        span.style.left = `${Math.random() * 94}%`;
+        span.style.top = `${Math.random() * 94}%`;
+        span.style.fontSize = `${1.8 + Math.random() * 2.2}rem`;
+        span.style.animationDelay = `${(Math.random() * 5).toFixed(1)}s`;
+        span.style.animationDuration = `${(4 + Math.random() * 4).toFixed(1)}s`;
+        bgEl.appendChild(span);
+    }
+}
+
 function generateResult() {
     const topRegion = getHighestKey(scores.region);
     const topType = getHighestKey(scores.type);
+
+    setResultBackground(topRegion, topType);
 
     const matchedDino = dinoTypes[topRegion][topType];
     const adjPool = adjectivesPool[topType];
