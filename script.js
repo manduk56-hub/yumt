@@ -1,91 +1,91 @@
 // --- Data: Questions (3지선다) ---
 const questions = [
     {
-        q: "여름 휴가 계획을 세울 때 나는?",
-        opt1: "무조건 액티비티! 바나나보트, 패러글라이딩 가자!",
-        opt2: "좋은 경치 보면서 여유롭게 호캉스나 카페 투어.",
-        opt3: "계획은 없다. 발길 닿는 대로 떠나는 무계획 여행!",
+        q: "MT 조장을 뽑는 시간! 나의 반응은?",
+        opt1: "내가 할게! 나만 믿고 따라와! 적극적으로 나선다.",
+        opt2: "누군가 하겠지... 조용히 박수 치며 다른 사람을 추천한다.",
+        opt3: "조장 대신 마스코트 하면 안 되나요? 엉뚱한 제안을 한다.",
         reg1: 'volcano', type1: 'aggressive',
         reg2: 'plains', type2: 'gentle',
         reg3: 'waterSky', type3: 'weird'
     },
     {
-        q: "비행기를 탔습니다. 선호하는 좌석은?",
-        opt1: "이동이 편하고 사람들과 소통하기 좋은 복도 자리.",
-        opt2: "창밖 풍경을 마음껏 볼 수 있는 창가 자리.",
-        opt3: "가운데 자리라도 상관없어, 가는 것 자체가 신나!",
+        q: "MT 가는 버스 안, 내가 앉고 싶은 자리는?",
+        opt1: "멀미하는 친구를 챙겨줄 수 있는 창가 뒷자리.",
+        opt2: "기사님 바로 뒷자리에서 기사님과 스몰토크 하기.",
+        opt3: "버스 한가운데서 마이크 잡고 노래 부르기 좋은 자리!",
         reg1: 'forest', type1: 'gentle',
         reg2: 'waterSky', type2: 'weird',
         reg3: 'volcano', type3: 'aggressive'
     },
     {
-        q: "휴가지에서 식사를 고를 때?",
-        opt1: "리뷰가 많고 검증된 안전하고 유명한 맛집!",
-        opt2: "남들이 안 가는 숨겨진 현지 로컬 맛집 탐험!",
-        opt3: "다 같이 먹을 수 있는 푸짐한 바베큐 파티!",
+        q: "저녁 바베큐 파티, 고기를 구울 때 나는?",
+        opt1: "연기 마셔가며 친구들 접시에 고기 올려주기 바쁘다.",
+        opt2: "마시멜로, 파인애플 등 고기 말고 이상한 것만 굽고 있다.",
+        opt3: "비켜! 고기는 내가 굽는다! 집게와 가위를 독점한다.",
         reg1: 'plains', type1: 'gentle',
         reg2: 'waterSky', type2: 'weird',
         reg3: 'forest', type3: 'aggressive'
     },
     {
-        q: "갑자기 비가 쏟아져서 일정이 취소되었다면?",
-        opt1: "당황하지만 빠르게 플랜 B 실내 활동을 찾아본다.",
-        opt2: "오히려 좋아! 빗소리를 들으며 낮잠을 청한다.",
-        opt3: "비를 맞으며 진흙탕에서 뛰어놀 절호의 기회다!",
+        q: "레크리에이션 시간, 장기자랑을 해야 한다면?",
+        opt1: "무대 밑에서 누구보다 열심히 호응하고 박수 친다.",
+        opt2: "정체불명의 외계어 랩이나 막춤으로 무대를 뒤집어 놓는다.",
+        opt3: "제일 먼저 뛰어나가 마이크를 뺏고 주인공이 된다.",
         reg1: 'forest', type1: 'gentle',
         reg2: 'plains', type2: 'weird',
         reg3: 'volcano', type3: 'aggressive'
     },
     {
-        q: "한여름 뙤약볕, 너무 덥다! 어떻게 할까?",
-        opt1: "에어컨이 빵빵한 실내로 재빠르게 대피한다.",
-        opt2: "이열치열! 더 신나게 땀 흘리며 에너지를 뿜어낸다!",
-        opt3: "시원한 계곡물이나 바다에 뛰어들어 수영을 즐긴다.",
+        q: "갑자기 폭우가 쏟아져 야외 일정이 취소됐다!",
+        opt1: "아쉽지만 어쩔 수 없지. 방 안에서 오순도순 보드게임을 한다.",
+        opt2: "비 오는 날엔 수중전이지! 비 맞으며 뛰어놀자고 선동한다.",
+        opt3: "비가 오니 파전이 당기네. 갑자기 부침가루를 찾으러 다닌다.",
         reg1: 'plains', type1: 'gentle',
         reg2: 'volcano', type2: 'aggressive',
         reg3: 'waterSky', type3: 'weird'
     },
     {
-        q: "여행 중 예상치 못한 낯선 사람과 대화하게 되었다!",
-        opt1: "반갑게 인사하며 여행 꿀팁을 주고받는다.",
-        opt2: "적당히 웃으며 예의 바르게 대화하다가 자리를 뜬다.",
-        opt3: "경계심을 늦추지 않고 짧게 대답만 한다.",
+        q: "밤새 놀다가 피곤해서 자려는 친구가 있다면?",
+        opt1: "벌써 자? 일어나! 친구를 깨워서 기어코 다시 앉힌다.",
+        opt2: "조용히 이불을 덮어주고 방 불을 꺼준다.",
+        opt3: "자는 친구 얼굴에 매직으로 낙서 예술 혼을 불태운다.",
         reg1: 'forest', type1: 'aggressive',
         reg2: 'waterSky', type2: 'gentle',
         reg3: 'plains', type3: 'weird'
     },
     {
-        q: "친구들과 여행 중 의견 충돌이 발생했다!",
-        opt1: "내 의견을 강하게 어필하며 사람들을 이끈다.",
-        opt2: "분위기를 망치기 싫어 적당히 맞춰주고 양보한다.",
-        opt3: "싸우든 말든 신경 안 쓴다. 난 내 갈 길 간다.",
+        q: "조별 미션 중, 길을 잃었다! 어떻게 할까?",
+        opt1: "내 직감을 믿어! 이쪽이야! 무작정 앞장서서 걷는다.",
+        opt2: "지나가는 사람에게 친절하게 길을 물어본다.",
+        opt3: "오히려 좋아. 이곳이 우리의 새로운 아지트다. 돗자리를 깐다.",
         reg1: 'volcano', type1: 'aggressive',
         reg2: 'forest', type2: 'gentle',
         reg3: 'waterSky', type3: 'weird'
     },
     {
-        q: "휴가지에서 예상치 못한 멋진 풍경을 발견했을 때?",
-        opt1: "눈에 담고 조용히 나만의 감상에 젖는다.",
-        opt2: "일단 친구들을 불러 모아 다 같이 사진을 찍는다!",
-        opt3: "신나서 이리저리 뛰어다니며 모든 구석을 탐험한다.",
+        q: "MT의 하이라이트! 술자리 게임을 할 때 나는?",
+        opt1: "룰도 모르는 나만의 자작 게임을 만들어 유행시킨다.",
+        opt2: "게임에 서툰 친구가 걸리지 않게 은근슬쩍 도와준다.",
+        opt3: "마셔라 마셔라! 게임의 템포를 최고조로 끌어올린다.",
         reg1: 'plains', type1: 'weird',
         reg2: 'forest', type2: 'gentle',
         reg3: 'volcano', type3: 'aggressive'
     },
     {
-        q: "여행의 밤, 가장 완벽한 야식은?",
-        opt1: "다 같이 둘러앉아 먹는 따뜻한 라면이나 고기.",
-        opt2: "편안한 침대 위에서 먹는 깔끔하고 가벼운 과일.",
-        opt3: "눈앞에 보이는 가장 양 많고 자극적인 야시장 음식!",
+        q: "아침이 밝았다. 기상 시간의 나는?",
+        opt1: "가장 먼저 일어나 방을 치우고 해장라면 물을 올린다.",
+        opt2: "텐트를 치고 밖에서 자고 있어서 아무도 못 찾고 있다.",
+        opt3: "아침부터 에너지 폭발! 자는 친구들 깨우러 다니기 바쁘다.",
         reg1: 'forest', type1: 'gentle',
         reg2: 'plains', type2: 'weird',
         reg3: 'volcano', type3: 'aggressive'
     },
     {
-        q: "여행의 마지막 날, 당신의 감정은?",
-        opt1: "다 같이 모여 앉아 여행의 추억을 도란도란 나눈다.",
-        opt2: "아쉬움을 뒤로하고 벌써 다음 여행을 혼자 상상한다.",
-        opt3: "아쉬워! 밤새도록 마시고 놀며 마지막 1초까지 불태운다!",
+        q: "MT를 무사히 마치고 집으로 돌아가는 길, 나의 모습은?",
+        opt1: "다들 고생했어~ 단톡방에 사진을 공유하며 훈훈하게 마무리.",
+        opt2: "나 이제 산에 들어가서 살래. 속세를 떠나 자연인 선언.",
+        opt3: "우리 다음 주에 또 어디 갈래?! 벌써 다음 모임을 기획한다.",
         reg1: 'forest', type1: 'gentle',
         reg2: 'waterSky', type2: 'weird',
         reg3: 'volcano', type3: 'aggressive'
@@ -95,24 +95,108 @@ const questions = [
 // --- Data: Dinosaurs (12 Types) ---
 const dinoTypes = {
     volcano: {
-        aggressive: { emoji: '🦖', name: '티라노사우루스', desc: '자신감이 넘치고 항상 무리의 중심이 되는 최고의 포식자! 한번 목표를 정하면 직진합니다.' },
-        gentle: { emoji: '🦎', name: '벨로시랩터', desc: '빠르고 영리하며 눈치가 100단입니다! 나서기보다는 똑똑하게 상황을 판단하는 지능캐입니다.' },
-        weird: { emoji: '🐊', name: '스피노사우루스', desc: '물과 육지를 가리지 않는 다재다능함! 남의 시선을 신경 쓰지 않고 나만의 길을 가는 마이웨이의 표본입니다.' }
+        aggressive: { 
+            emoji: '🦖', 
+            name: '티라노사우루스', 
+            desc: '자신감이 넘치고 항상 무리의 중심이 되는 최고의 포식자! 한번 목표를 정하면 직진합니다.',
+            skills: ['공포의 포효', '파괴적인 치악력'],
+            role: '든든한 지킴이',
+            mtTip: '고기 굽는 집게를 꼭 챙기세요! 맛있는 바베큐 파티를 열어주면 홍주은도 도망갈 거예요!'
+        },
+        gentle: { 
+            emoji: '🦖', 
+            name: '벨로시랩터', 
+            desc: '빠르고 영리하며 눈치가 100단이에요! 친구들 사이에서 똑똑박사 역할을 톡톡히 해낼 거예요.',
+            skills: ['살금살금 걷기', '번개 같은 기습'],
+            role: '똑똑한 정찰대장',
+            mtTip: '홍주은이 어디 있는지 제일 먼저 찾아낼 수 있어요! 친구들에게 미리 알려주는 거 잊지 마세요!'
+        },
+        weird: { 
+            emoji: '🦖', 
+            name: '스피노사우루스', 
+            desc: '물과 땅을 가리지 않는 만능 재주꾼! 남들이 뭐라 해도 나만의 길을 가는 멋쟁이 공룡이에요.',
+            skills: ['첨벙첨벙 수영', '반짝이는 돛 자랑'],
+            role: '엉뚱한 개척자',
+            mtTip: '남들이 안 가는 길을 찾아보세요! 예상치 못한 곳에서 나타나 홍주은을 깜짝 놀라게 해줄 수 있어요!'
+        }
     },
     plains: {
-        aggressive: { emoji: '🐢', name: '안킬로사우루스', desc: '단단한 등껍질과 꼬리 곤봉! 겉으로는 조용해 보이지만, 한 번 화나면 아무도 말릴 수 없는 외유내강형입니다.' },
-        gentle: { emoji: '🦏', name: '트리케라톱스', desc: '방어력 만렙! 안정을 최우선으로 생각하며 묵묵히 제 할 일을 다하는 믿음직한 평화주의자입니다.' },
-        weird: { emoji: '🦕', name: '스테고사우루스', desc: '등에 난 화려한 골판처럼 남다른 개성을 가졌습니다. 자신만의 확고한 취향을 즐기는 독특한 매력의 소유자입니다.' }
+        aggressive: { 
+            emoji: '🦖', 
+            name: '안킬로사우루스', 
+            desc: '단단한 등껍질과 멋진 꼬리 곤봉! 평소엔 조용하지만, 친구들을 괴롭히면 무시무시하게 변신해요.',
+            skills: ['철벽 방패', '꼬리 팡팡 공격'],
+            role: '듬직한 보디가드',
+            mtTip: '홍주은의 공격을 튼튼한 몸으로 막아주세요! 친구들을 등 뒤로 숨겨주는 당신은 최고의 영웅!'
+        },
+        gentle: { 
+            emoji: '🦖', 
+            name: '트리케라톱스', 
+            desc: '방어력 최고! 평화를 사랑하고 맡은 일을 묵묵히 해내는 아주 믿음직한 공룡 친구예요.',
+            skills: ['뿔 세우기', '튼튼한 경계'],
+            role: '캠프 수호천사',
+            mtTip: '우리 캠프의 평화를 지켜주세요! 지친 친구들이 편하게 쉴 수 있는 안전한 장소를 만들어봐요.'
+        },
+        weird: { 
+            emoji: '🦕', 
+            name: '스테고사우루스', 
+            desc: '등에 난 골판처럼 개성이 넘쳐요! 자신만의 취향이 확실한 아주 매력적인 공룡이랍니다.',
+            skills: ['반짝반짝 골판', '꼬리 가시 흔들기'],
+            role: '화려한 응원단장',
+            mtTip: '당신의 멋진 패션이 홍주은의 눈을 휘둥그레하게 만들 거예요! 제일 예쁜 옷을 입고 오세요!'
+        }
     },
     forest: {
-        aggressive: { emoji: '🐏', name: '파키케팔로사우루스', desc: '강력한 박치기왕! 꽂히는 일이 있으면 불도저처럼 밀어붙이는 엄청난 추진력과 열정을 가졌습니다.' },
-        gentle: { emoji: '🦕', name: '브라키오사우루스', desc: '거대하지만 느긋하고 따뜻한 마음씨를 가졌습니다. 다투는 것을 싫어하고 모두와 잘 지내는 둥글둥글한 성격입니다.' },
-        weird: { emoji: '🎺', name: '파라사우롤로푸스', desc: '독특한 울음소리로 소통하는 분위기 메이커! 감수성이 풍부하고 주변 사람들을 즐겁게 해주는 재주꾼입니다.' }
+        aggressive: { 
+            emoji: '🦖', 
+            name: '파키케팔로사우루스', 
+            desc: '엄청난 박치기왕! 하고 싶은 일이 생기면 머리부터 들이밀고 보는 열정 가득한 공룡이에요.',
+            skills: ['파워 박치기', '우다다 돌진'],
+            role: '용감한 돌격대장',
+            mtTip: '어려운 상황이 오면 가장 먼저 앞장서주세요! 당신의 용기가 친구들에게 큰 힘이 될 거예요!'
+        },
+        gentle: { 
+            emoji: '🦕', 
+            name: '브라키오사우루스', 
+            desc: '커다란 몸집만큼 마음씨도 아주 넓어요! 싸우는 걸 싫어하고 모두와 사이좋게 지내는 착한 친구예요.',
+            skills: ['높은 곳 구경하기', '평화의 노래'],
+            role: '다정한 중재자',
+            mtTip: '목을 길게 빼고 멀리까지 지켜봐 주세요! 친구들이 싸우지 않게 토닥토닥 해주는 것도 잊지 말기!'
+        },
+        weird: { 
+            emoji: '🦖', 
+            name: '파라사우롤로푸스', 
+            desc: '신기한 소리를 내는 분위기 메이커! 노래 부르는 걸 좋아하고 친구들을 항상 웃게 해줘요.',
+            skills: ['뿌우우 나팔 소리', '신나는 응원'],
+            role: '흥부자 대장님',
+            mtTip: '노래방에서 당신의 실력을 보여주세요! 신나는 노래로 홍주은의 정신을 쏙 빼놓는 거예요!'
+        }
     },
     waterSky: {
-        aggressive: { emoji: '🦈', name: '모사사우루스', desc: '바다의 폭군! 한 번 꽂히면 끝장을 보는 스케일이 남다른 야망가입니다. 압도적인 존재감을 자랑합니다.' },
-        gentle: { emoji: '🦢', name: '플레시오사우루스', desc: '물속을 여유롭게 유영하는 우아함의 대명사! 감성적이고 낭만을 즐길 줄 아는 부드러운 성격입니다.' },
-        weird: { emoji: '🦅', name: '프테라노돈', desc: '하늘을 훨훨 나는 자유로운 영혼! 얽매이는 것을 싫어하고 언제나 새로운 세상과 모험을 꿈꾸는 탐험가입니다.' }
+        aggressive: { 
+            emoji: '🦕', 
+            name: '모사사우루스', 
+            desc: '바다의 제왕! 한 번 시작하면 끝을 보는 아주 멋진 야망가 공룡이랍니다.',
+            skills: ['물속에서 숨기', '큰 파도 일으키기'],
+            role: '물속의 영웅',
+            mtTip: '계곡이나 바다로 홍주은을 유인해볼까요? 물속이라면 당신이 세상에서 제일 강하니까요!'
+        },
+        gentle: { 
+            emoji: '🦕', 
+            name: '플레시오사우루스', 
+            desc: '물속을 우아하게 헤엄치는 낭만 공룡! 마음이 따뜻하고 예쁜 풍경을 보는 걸 정말 좋아해요.',
+            skills: ['우아하게 피하기', '부드러운 물결'],
+            role: '따뜻한 마음지기',
+            mtTip: '무서운 상황에서도 여유를 잃지 마세요! 당신의 다정한 모습이 친구들의 무서움을 잊게 해줄 거예요.'
+        },
+        weird: { 
+            emoji: '🦕', 
+            name: '프테라노돈', 
+            desc: '하늘을 자유롭게 날아다녀요! 새로운 곳을 탐험하는 걸 좋아하는 호기심 많은 공룡이랍니다.',
+            skills: ['슈웅 급강하', '하늘 정찰'],
+            role: '하늘의 탐험가',
+            mtTip: '하늘 높이 올라가서 홍주은의 약점을 찾아보세요! 위에서 내려다보는 시야가 큰 도움이 될 거예요!'
+        }
     }
 };
 
@@ -124,10 +208,10 @@ const adjectivesPool = {
 
 // Mock Rankings (Simulated backend data)
 const mockRankings = [
-    { name: "MT 수호 전설", dinoName: "불도저 같은 안킬로사우루스", score: 2500, age: 25, weight: 1250 },
-    { name: "비상소집 1호", dinoName: "자유로운 영혼 프테라노돈", score: 1800, age: 18, weight: 900 },
-    { name: "홍주은 저격수", dinoName: "예측불허 모사사우루스", score: 1500, age: 15, weight: 750 },
-    { name: "조용한 수호자", dinoName: "느긋한 브라키오사우루스", score: 1200, age: 12, weight: 600 }
+    { name: "엠티 수호 대장", dinoName: "불도저 같은 안킬로사우루스", score: 2500, age: 25, weight: 1250 },
+    { name: "공룡 친구 1호", dinoName: "자유로운 영혼 프테라노돈", score: 1800, age: 18, weight: 900 },
+    { name: "홍주은 잡으러 가요", dinoName: "예측불허 모사사우루스", score: 1500, age: 15, weight: 750 },
+    { name: "다정한 친구", dinoName: "느긋한 브라키오사우루스", score: 1200, age: 12, weight: 600 }
 ];
 
 // --- State ---
@@ -150,6 +234,9 @@ const screenDashboard = document.getElementById('screen-dashboard');
 const screenLocation = document.getElementById('screen-location');
 const screenSchedule = document.getElementById('screen-schedule');
 const screenGrowth = document.getElementById('screen-growth');
+const screenBossInfo = document.getElementById('screen-boss-info');
+const screenBossWarning = document.getElementById('screen-boss-warning');
+const screenDinoDetail = document.getElementById('screen-dino-detail');
 
 const inputName = document.getElementById('user-name');
 const inputId = document.getElementById('user-id');
@@ -169,9 +256,14 @@ const btnResetAll = document.getElementById('btn-reset-all');
 const btnNavLocation = document.getElementById('btn-nav-location');
 const btnNavSchedule = document.getElementById('btn-nav-schedule');
 const btnNavGrowth = document.getElementById('btn-nav-growth');
+const btnNavBoss = document.getElementById('btn-nav-boss');
 const btnBackLoc = document.getElementById('btn-back-loc');
 const btnBackSch = document.getElementById('btn-back-sch');
 const btnBackGrowth = document.getElementById('btn-back-growth');
+const btnBackDetail = document.getElementById('btn-back-detail');
+const btnToDashboard = document.getElementById('btn-to-dashboard');
+const btnWarningNext = document.getElementById('btn-warning-next');
+const dashDinoProfile = document.getElementById('dash-dino-profile');
 
 const elGrowthDinoName = document.getElementById('growth-dino-name');
 const elValAge = document.getElementById('val-age');
@@ -181,6 +273,13 @@ const inputFriendCode = document.getElementById('friend-code');
 const btnSubmitCode = document.getElementById('btn-submit-code');
 const elCodeMsg = document.getElementById('code-msg');
 const tbodyRanking = document.getElementById('ranking-body');
+
+const elDetailEmoji = document.getElementById('detail-emoji');
+const elDetailDinoName = document.getElementById('detail-dino-name');
+const elDetailRole = document.getElementById('detail-role');
+const elDetailSkills = document.getElementById('detail-skills');
+const elDetailMtTip = document.getElementById('detail-mt-tip');
+const elDetailDesc = document.getElementById('detail-desc');
 
 // Check for saved profile on load
 let savedProfile = null;
@@ -251,9 +350,9 @@ function startQuiz() {
         type: { aggressive: 0, gentle: 0, weird: 0 }
     };
 
-    document.getElementById('loading-spinner').innerText = '🏕️';
-    document.getElementById('loading-title').innerText = 'MT 성향 분석 중...';
-    document.getElementById('loading-desc').innerText = '당신의 여행 스타일과 성향을 파악하고 있습니다.';
+    document.getElementById('loading-spinner').innerText = '';
+    document.getElementById('loading-title').innerText = '우리 엠티를 위해 분석 중...';
+    document.getElementById('loading-desc').innerText = '어떤 귀여운 공룡 친구가 도와주러 올까요?';
 
     showScreen(screenQuiz);
     renderQuestion();
@@ -317,17 +416,17 @@ function setResultBackground(region, type) {
     if (region === 'waterSky') {
         if (type === 'weird') {
             // 익룡 (Sky-dweller): Clouds
-            emojis = ['☁️', '⛅', '🌥️', '☁️'];
+            emojis = [''];
         } else {
             // 어룡 (Ocean-dweller): Bubbles
-            emojis = ['🫧', '🫧', '🫧', '🫧'];
+            emojis = [''];
         }
     } else if (region === 'volcano') {
         // 육식공룡 (Carnivore): Meat
-        emojis = ['🥩', '🍖', '🍗', '🥓'];
+        emojis = [''];
     } else {
         // 초식공룡 (Herbivore): Grass/Plant
-        emojis = ['🌿', '🍃', '🌱', '🍀', '🌾'];
+        emojis = [''];
     }
 
     for (let i = 0; i < 22; i++) {
@@ -353,7 +452,7 @@ function generateResult() {
     const adjPool = adjectivesPool[topType];
     const randomAdjective = adjPool[Math.floor(Math.random() * adjPool.length)];
 
-    document.getElementById('result-name').innerText = `${userName}님의 공룡 전사 자아는`;
+    document.getElementById('result-name').innerText = `나는 ${matchedDino.name} 이었어!`;
     document.getElementById('dino-emoji').innerText = matchedDino.emoji;
     document.getElementById('dino-name').innerText = `${randomAdjective} ${matchedDino.name}`;
     document.getElementById('dino-description').innerText = matchedDino.desc;
@@ -379,20 +478,23 @@ function generateResult() {
         age: 10,
         weight: 500,
         score: 1000,
-        usedCodes: []
+        usedCodes: [],
+        skills: matchedDino.skills,
+        role: matchedDino.role,
+        mtTip: matchedDino.mtTip
     };
 }
 
 function populateDashboard() {
     if (!savedProfile) return;
     // Main Dashboard
-    document.getElementById('dash-user-info').innerText = `전사 합류 완료. ${savedProfile.name} — 홍주은을 막아낼 시간입니다.`;
+    document.getElementById('dash-user-info').innerText = `와줘서 고마워요! ${savedProfile.dinoName}! 우리 엠티를 꼭 지켜주세요!`;
     document.getElementById('dash-emoji').innerText = savedProfile.dinoEmoji || '🦖';
     document.getElementById('dash-dino-name').innerText = savedProfile.dinoName;
     document.getElementById('dash-dino-desc').innerText = savedProfile.dinoDesc || '';
 
     // Growth Dashboard
-    elGrowthDinoName.innerText = `${savedProfile.name}님의 공룡 (${savedProfile.dinoName})`;
+    elGrowthDinoName.innerText = `${savedProfile.name} 공룡 친구 (${savedProfile.dinoName})`;
     elValAge.innerText = savedProfile.age;
     elValWeight.innerText = savedProfile.weight;
     elMyCode.innerText = savedProfile.code;
@@ -403,18 +505,18 @@ function populateDashboard() {
 function handleCodeSubmit() {
     const code = inputFriendCode.value.trim();
     if (code.length !== 6) {
-        elCodeMsg.innerText = "올바른 6자리(한글4+숫자2) 전사 코드를 입력해주세요!";
+        elCodeMsg.innerText = "올바른 6자리 공룡 코드를 써주세요!";
         elCodeMsg.style.color = "#d32f2f";
         return;
     }
     if (code === savedProfile.code) {
-        elCodeMsg.innerText = "자신의 코드는 입력할 수 없습니다! 다른 전사의 코드를 입력하세요.";
+        elCodeMsg.innerText = "내 코드는 쓸 수 없어요! 다른 친구 코드를 써주세요.";
         elCodeMsg.style.color = "#d32f2f";
         return;
     }
     if (!savedProfile.usedCodes) savedProfile.usedCodes = [];
     if (savedProfile.usedCodes.includes(code)) {
-        elCodeMsg.innerText = "이미 사용한 코드입니다! 코드는 한 번씩만 입력할 수 있습니다.";
+        elCodeMsg.innerText = "이미 약속한 친구예요! 다른 친구를 찾아볼까요?";
         elCodeMsg.style.color = "#d32f2f";
         return;
     }
@@ -431,7 +533,7 @@ function handleCodeSubmit() {
     elValAge.innerText = savedProfile.age;
     elValWeight.innerText = savedProfile.weight;
 
-    elCodeMsg.innerText = "동맹 성공! 전투력이 강화됐습니다! 홍주은을 쓰러뜨릴 수 있다! 🔥";
+    elCodeMsg.innerText = "약속 성공! 용기가 더 생겼어요! 이제 홍주은도 무섭지 않아!";
     elCodeMsg.style.color = "#388e3c";
     inputFriendCode.value = "";
 
@@ -454,10 +556,33 @@ function renderRanking() {
         tr.innerHTML = `
             <td>${index + 1}위</td>
             <td>${player.name}<br><small style="color:#555">${player.dinoName}</small></td>
-            <td>전투령: ${player.age}<br>전투중: ${player.weight}kg</td>
+            <td>용기: ${player.age}<br>무게: ${player.weight}kg</td>
         `;
         tbodyRanking.appendChild(tr);
     });
+}
+
+function showDinoDetail() {
+    if (!savedProfile) return;
+    
+    elDetailEmoji.innerText = savedProfile.dinoEmoji || '🦖';
+    elDetailDinoName.innerText = savedProfile.dinoName;
+    elDetailRole.innerText = savedProfile.role || '공룡 친구';
+    elDetailMtTip.innerText = savedProfile.mtTip || '정보가 없습니다.';
+    elDetailDesc.innerText = savedProfile.dinoDesc || '';
+
+    // Clear and add skills
+    elDetailSkills.innerHTML = '';
+    if (savedProfile.skills && Array.isArray(savedProfile.skills)) {
+        savedProfile.skills.forEach(skill => {
+            const span = document.createElement('span');
+            span.className = 'skill-badge';
+            span.innerText = skill;
+            elDetailSkills.appendChild(span);
+        });
+    }
+
+    showScreen(screenDinoDetail);
 }
 
 // --- Event Listeners ---
@@ -480,15 +605,32 @@ btnRestart.addEventListener('click', () => {
 
 btnConfirm.addEventListener('click', () => {
     if (savedProfile) {
-        // Save using a unique key for Name + ID combo
         const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
         localStorage.setItem(userKey, JSON.stringify(savedProfile));
-        // Also keep track of the 'last' profile for automatic login on refresh
         localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
     }
+    
+    // 깜빡임 효과 (Flicker Effect)
+    const overlay = document.getElementById('flicker-overlay');
+    overlay.classList.add('flicker-active');
+    
+    // 2초(애니메이션 시간) 후에 화면 전환
+    setTimeout(() => {
+        showScreen(screenBossWarning);
+        overlay.classList.remove('flicker-active');
+    }, 2000);
+});
+
+btnToDashboard.addEventListener('click', () => {
     populateDashboard();
     showScreen(screenDashboard);
 });
+
+
+
+btnNavBoss.addEventListener('click', () => showScreen(screenBossInfo));
+
+btnWarningNext.addEventListener('click', () => showScreen(screenBossInfo));
 
 btnSubmitCode.addEventListener('click', handleCodeSubmit);
 
@@ -499,9 +641,12 @@ btnNavGrowth.addEventListener('click', () => showScreen(screenGrowth));
 btnBackLoc.addEventListener('click', () => showScreen(screenDashboard));
 btnBackSch.addEventListener('click', () => showScreen(screenDashboard));
 btnBackGrowth.addEventListener('click', () => showScreen(screenDashboard));
+btnBackDetail.addEventListener('click', () => showScreen(screenDashboard));
+
+dashDinoProfile.addEventListener('click', showDinoDetail);
 
 btnResetAll.addEventListener('click', () => {
-    if (confirm("정말 공룡 소환을 취소하시겠습니까? 저장된 모든 정보가 사라집니다.")) {
+    if (confirm("정말 환생하시겠습니까? 지금까지의 기록이 모두 사라집니다.")) {
         if (savedProfile) {
             const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
             localStorage.removeItem(userKey);

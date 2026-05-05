@@ -4,21 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MT 사전 성향 설문 | 영남대</title>
+    <title>MT 사전 성향 설문 | 경주한옥펜타운</title>
 
     <!-- Open Graph / 링크 임베드 메타태그 -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://manduk56-hub.github.io/yumt/">
-    <meta property="og:title" content="🦕 MT 사전 성향 설문 | 영남대">
-    <meta property="og:description" content="이번 MT를 더 즐겁게! 나의 공룡 전사 자아를 찾고 홍주은을 막아내자! 🔥">
+    <meta property="og:title" content="🦕 MT 사전 성향 설문 | 경주한옥펜타운">
+    <meta property="og:description" content="이번 MT를 더 즐겁게! 나의 공룡 전사 자아를 찾고 홍주은을 막아내자!">
     <meta property="og:image:width" content="480">
     <meta property="og:image:height" content="240">
     <meta property="og:locale" content="ko_KR">
 
     <!-- 트위터 카드 -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="🦕 MT 사전 성향 설문 | 영남대">
-    <meta name="twitter:description" content="이번 MT를 더 즐겁게! 나의 공룡 전사 자아를 찾고 홍주은을 막아내자! 🔥">
+    <meta name="twitter:title" content="🦕 MT 사전 성향 설문 | 경주한옥펜타운">
+    <meta property="twitter:description" content="이번 MT를 더 즐겁게! 나의 공룡 전사 자아를 찾고 홍주은을 막아내자!">
 
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
@@ -26,16 +26,17 @@
 </head>
 
 <body class="theme-valley">
+    <div id="flicker-overlay"></div>
     <div id="app">
         <!-- 1. 시작 화면 (계곡 테마) -->
         <section id="screen-intro" class="screen active">
             <div class="content">
-                <h1>🏕️ MT 사전 성향 설문</h1>
-                <p>이번 MT를 더 즐겁게 만들기 위한 짧은 설문입니다.<br>솔직하게 답할수록 더 잘 맞는 결과가 나와요! 😊</p>
+                <h1>MT 사전 성향 설문</h1>
+                <p>이번 MT를 더 즐겁게 만들기 위한 짧은 설문입니다.<br>솔직하게 답할수록 더 잘 맞는 결과가 나와요!</p>
                 <div class="input-group">
                     <input type="text" id="user-name" placeholder="이름을 입력해주세요">
-                    <input type="number" id="user-id" placeholder="학번을 입력해주세요 (예: 20231234)">
-                    <button id="btn-start" class="btn-beach">설문 시작하기 🏕️</button>
+                    <input type="text" id="user-id" placeholder="학번을 입력해주세요 (예: 20231234)" inputmode="numeric" pattern="[0-9]*">
+                    <button id="btn-start" class="btn-base btn-forward">설문 시작하기</button>
                 </div>
             </div>
         </section>
@@ -58,22 +59,22 @@
 
         <!-- 2.5. 당신은... 화면 -->
         <section id="screen-you-are" class="screen hidden"
-            style="background: #fff; display: flex; align-items: center; justify-content: center; height: 100vh;">
-            <h1 style="font-size: 3rem; color: #333; animation: fadeIn 2s;">당신은...</h1>
+            style="background: #e8f5e9; display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 100;">
+            <h1 style="font-size: 3rem; color: #1b5e20; animation: fadeIn 2s;">당신은...</h1>
         </section>
 
         <!-- 2.6. 어라? 화면 -->
-        <section id="screen-fusion" class="screen hidden" style="background: url('plus.png') no-repeat center center / cover; position: relative;">
+        <section id="screen-fusion" class="screen hidden" style="background: url('plus.png') no-repeat center center / cover; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 101;">
             <div style="position: relative; z-index: 1; text-align: center; color: white;">
-                <h1 style="font-size: 5rem; text-shadow: 0 0 20px #ff0000; margin-bottom: 20px;">어라..?</h1>
-                <p style="font-size: 1.5rem; text-shadow: 2px 2px 4px #000; opacity: 0.8;">뭔가... 이상한 기운이 느껴집니다.</p>
+                <h1 style="font-size: 5rem; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 20px #ff0000; margin-bottom: 20px;">어라..?</h1>
+                <p style="font-size: 1.5rem; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 4px #000; opacity: 0.8;">뭔가... 이상한 기운이 느껴집니다.</p>
             </div>
         </section>
 
         <!-- 3. 로딩 화면 -->
         <section id="screen-loading" class="screen hidden">
             <div class="loading-content">
-                <div class="spinner" id="loading-spinner">✈️</div>
+                <div class="spinner" id="loading-spinner"></div>
                 <h2 id="loading-title">휴가지 성향 분석 중...</h2>
                 <p id="loading-desc">당신에게 딱 맞는 휴가지를 찾고 있습니다.</p>
             </div>
@@ -94,8 +95,42 @@
 
 
                 <div class="btn-group">
-                    <button id="btn-restart" class="btn-jungle btn-outline">다시 해보기 🌴</button>
-                    <button id="btn-confirm" class="btn-jungle">결정하기 🦕</button>
+                    <button id="btn-confirm" class="btn-base btn-forward">결정하기 🦕</button>
+                    <button id="btn-restart" class="btn-base btn-back">다시 해보기</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4.2. 돌발상황 경고 화면 -->
+        <section id="screen-boss-warning" class="screen hidden" style="background: #000; z-index: 105;">
+            <div style="text-align: center; color: white; padding: 20px;">
+                <h1 style="font-size: 3.5rem; color: #ff5252; text-shadow: 0 0 20px #ff0000; margin-bottom: 30px; line-height: 1.4; word-break: keep-all;">
+                    돌발상황.<br>폭군 홍주은사우루스 등장.
+                </h1>
+                <button id="btn-warning-next" class="btn-base btn-forward" style="background: #ff5252 !important; margin-top: 20px;">자세히 알아보기</button>
+            </div>
+        </section>
+
+        <section id="screen-boss-info" class="screen hidden">
+            <div class="dashboard-container wooden-board" style="max-height: 100vh; overflow: hidden;">
+                <div class="dash-section paper-bg text-center" style="padding: 10px 0; margin-bottom: 5px;">
+                    <div style="font-size: 5rem; margin: 10px 0;">🦖</div>
+                    <h3 style="color: #d32f2f; border: none; font-size: 1.8rem; margin-bottom: 10px;">폭군 홍주은사우루스</h3>
+                    <p class="map-desc" style="font-weight: bold; color: #333; font-size: 1.1rem; line-height: 1.4;">
+                        "이 엠티의 모든 고기와 간식은 다 내 거다! <br>아무도 즐겁게 놀 수 없어! 크와앙!"
+                    </p>
+                </div>
+
+                <div class="dash-section paper-bg" style="padding: 10px 0; margin-bottom: 15px;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #e65100;">무서운 소문이 들려요!</h3>
+                    <p class="map-desc" style="font-size: 0.95rem; line-height: 1.4;">
+                        평화롭던 공룡 마을의 엠티 날... 갑자기 나타난 홍주은사우루스가 모든 맛집을 독차지하고, 
+                        친구들이 놀 잔디밭을 엉망으로 만들려고 해요! 우리가 힘을 합쳐서 꼭 막아야 해요!
+                    </p>
+                </div>
+
+                <div class="btn-group" style="margin-top: 5px; justify-content: center;">
+                    <button id="btn-to-dashboard" class="btn-base btn-forward" style="padding: 12px 25px; font-size: 1.1rem; flex: 1; max-width: 300px;">도와주러 가기!</button>
                 </div>
             </div>
         </section>
@@ -104,8 +139,8 @@
         <section id="screen-dashboard" class="screen hidden">
             <div class="dashboard-container wooden-board">
                 <div class="dash-header">
-                    <h2>🦕 MT 사수 결전 작전부</h2>
-                    <p id="dash-user-info">공룡 전사 합류 완료. 폭군 홍주은을 막아낼 시간입니다.</p>
+                    <h2>우리 엠티를 지켜줘!</h2>
+                    <p id="dash-user-info">제발 도와주세요! 엠티가 위험해요...</p>
                 </div>
 
                 <!-- 내 공룡 자아 정보 카드 -->
@@ -118,97 +153,97 @@
                 </div>
 
                 <div class="menu-grid">
-                    <button id="btn-nav-location" class="btn-menu">🗺️ 결전의 장소 확인하기</button>
-                    <button id="btn-nav-schedule" class="btn-menu">⏱️ MT 작전 일정표</button>
-                    <button id="btn-nav-growth" class="btn-menu">📈 전투력 강화하기</button>
+                    <button id="btn-nav-location" class="btn-base btn-menu btn-forward">우리 어디서 모여요?</button>
+                    <button id="btn-nav-schedule" class="btn-base btn-menu btn-forward">엠티는 어떻게 놀아요?</button>
+                    <button id="btn-nav-growth" class="btn-base btn-menu btn-forward">우리 더 힘내볼까요?</button>
                 </div>
 
-                <button id="btn-reset-all" class="btn-jungle btn-outline mt-20">공룡 소환 취소하기</button>
+                <div class="btn-group mt-20">
+                    <button id="btn-nav-boss" class="btn-base btn-menu btn-forward" style="background: #f44336 !important; margin: 0; flex: 1;">홍주은사우루스가 뭐였더라?</button>
+                    <button id="btn-reset-all" class="btn-base btn-back" style="background: #c62828 !important; margin: 0; flex: 1;">환생하기</button>
+                </div>
             </div>
-            <div class="leaves bottom-leaves"></div>
         </section>
 
         <!-- 6. 영토 위치 화면 -->
         <section id="screen-location" class="screen hidden">
             <div class="dashboard-container wooden-board">
                 <div class="dash-header">
-                    <h2>📍 결전의 장소</h2>
-                    <p>폭군 홍주은과 맞붙을 MT 현장입니다. 전사들이여, 집결하라!</p>
+                    <h2>우리 여기서 만나요!</h2>
+                    <p>홍주은이 나타나면 어떡하죠? 다들 모여서 우리 엠티를 지켜주세요! 🦕</p>
                 </div>
 
                 <div class="dash-section paper-bg">
-                    <h3>🎯 MT 집결 지점</h3>
+                    <h3>MT 집결 지점</h3>
                     <div class="map-box">
-                        <div class="map-pin">영남대학교 (Yeungnam Univ.)</div>
+                        <div class="map-pin">경주한옥펜타운</div>
                     </div>
-                    <p class="map-desc">영남대학교 일대에서 결전이 펼쳐집니다. 전사들은 지금 당장 출동하라!</p>
+                    <p class="map-desc">경주한옥펜타운에서 기다리고 있을게요! 늦지 않게 꼭 와줘요!</p>
 
-                    <a href="https://map.naver.com/v5/search/영남대학교" target="_blank" class="btn-map-link">
-                        🔍 네이버 지도로 현장 정찰하기
+                    <a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%ED%95%9C%EC%98%A5%ED%8E%9C%ED%83%80%EC%9A%B4/place/1076100524?c=19.19,0,0,0,dh&placePath=/home?from=map&fromPanelNum=2&timestamp=202605060033&locale=ko&svcName=map_pcv5&searchText=%EA%B2%BD%EC%A3%BC%ED%95%9C%EC%98%A5%ED%8E%9C%ED%83%80%EC%9A%B4&businessCategory=pension" target="_blank" class="btn-map-link">
+                        지도 확인하기
                     </a>
                 </div>
 
-                <button id="btn-back-loc" class="btn-jungle btn-outline mt-20">🔙 작전부로 돌아가기</button>
+                <button id="btn-back-loc" class="btn-base btn-back mt-20">작전부로 돌아가기</button>
             </div>
-            <div class="leaves bottom-leaves"></div>
         </section>
 
         <!-- 7. 영토 통치 일정표 화면 -->
         <section id="screen-schedule" class="screen hidden">
             <div class="dashboard-container wooden-board">
                 <div class="dash-header">
-                    <h2>⏱️ MT 작전 타임라인</h2>
-                    <p>폭군 홍주은을 처치하기 위한 당일 작전 일정입니다. 이탈하는 공룡은 용납하지 않는다.</p>
+                    <h2>엠티는 이렇게 놀 거예요!</h2>
+                    <p>우리 엠티를 지키기 위한 소중한 시간표예요! 친구들, 딴 데 가면 안 돼요! 🦖</p>
                 </div>
 
                 <div class="dash-section paper-bg">
-                    <h3>🦖 오늘의 작전 스케줄</h3>
+                    <h3>🦖 오늘의 엠티 일정</h3>
                     <ul class="timeline">
                         <li>
                             <span class="time">10:00 AM</span>
-                            <span class="event">영남대 정문 집결 — 홍주은의 기습 루트 차단 및 방어선 구축</span>
+                            <span class="event">경주한옥펜타운 집결 — 무서운 홍주은이 못 오게 다 같이 모여요!</span>
                         </li>
                         <li>
                             <span class="time">12:00 PM</span>
-                            <span class="event">전사들과 함께 에너지 보충 — 맛집 원정으로 전투력 MAX</span>
+                            <span class="event">공룡 친구들과 맛있는 거 먹기 — 맛집 가서 배 든든히 채워요! 냠냠</span>
                         </li>
                         <li>
                             <span class="time">15:00 PM</span>
-                            <span class="event">작전 회의 및 휴식 — 잔디밭에서 홍주은 격퇴 전략 수립</span>
+                            <span class="event">친구들과 도란도란 수다 떨기 — 잔디밭에서 어떻게 놀지 얘기해요!</span>
                         </li>
                         <li>
                             <span class="time">18:00 PM</span>
-                            <span class="event">최종 결전 — 전 공룡 연합 vs 폭군 홍주은. MT를 사수하라!</span>
+                            <span class="event">마지막 힘내기 — 우리 다 같이 홍주은을 막고 엠티를 지켜요! 화이팅!</span>
                         </li>
                     </ul>
                 </div>
 
                 <div class="dash-section paper-bg">
-                    <h3>💰 MT 코인샵 스케줄</h3>
-                    <p class="map-desc" style="margin-bottom: 10px;">홍주은을 막아낸 용사들을 위한 특별 보상 코인샵입니다.</p>
+                    <h3>보물 창고가 열려요!</h3>
+                    <p class="map-desc" style="margin-bottom: 10px;">엠티를 지킨 착한 공룡 친구들을 위한 선물이 가득해요!</p>
                     <ul class="timeline">
                         <li>
                             <span class="time">13:00 PM</span>
-                            <span class="event">반짝 코인샵 오픈 (홍주은 격퇴 기념 한정 장신구 판매)</span>
+                            <span class="event">반짝반짝 선물 가게 (홍주은을 막아낸 기념 장식품!)</span>
                         </li>
                         <li>
                             <span class="time">20:00 PM</span>
-                            <span class="event">야간 용사 경매장 (MT 생존자 스페셜 스킨 등장)</span>
+                            <span class="event">밤에 열리는 비밀 파티 (엠티 지킴이 전용 멋진 옷 등장!)</span>
                         </li>
                     </ul>
                 </div>
 
-                <button id="btn-back-sch" class="btn-jungle btn-outline mt-20">🔙 작전부로 돌아가기</button>
+                <button id="btn-back-sch" class="btn-base btn-back mt-20">작전부로 돌아가기</button>
             </div>
-            <div class="leaves bottom-leaves"></div>
         </section>
 
         <!-- 8. 성장 및 랭킹 화면 -->
         <section id="screen-growth" class="screen hidden">
             <div class="dashboard-container wooden-board">
                 <div class="dash-header">
-                    <h2>💪 전사 성장 훈련소</h2>
-                    <p>코드를 교환하여 전투력을 끌어올리세요! 홍주은보다 강해져야 한다!</p>
+                    <h2>우리 조금만 더 힘을 내요!</h2>
+                    <p>친구들과 코드를 나눠서 더 큰 용기를 얻어봐요! 우린 할 수 있어!</p>
                 </div>
 
                 <div class="dash-section paper-bg text-center">
@@ -228,26 +263,26 @@
                 </div>
 
                 <div class="dash-section paper-bg">
-                    <h3>🤝 전사 동맹 체결 (코드 교환)</h3>
+                    <h3>공룡 친구들과 약속해요! (코드 교환)</h3>
                     <div class="code-box">
-                        <p>나의 전사 코드: <strong id="my-code" class="highlight-code">ABC123</strong></p>
+                        <p>나의 귀여운 코드: <strong id="my-code" class="highlight-code">ABC123</strong></p>
                     </div>
                     <div class="input-group mt-10">
-                        <input type="text" id="friend-code" placeholder="동료 전사의 코드를 입력하세요">
-                        <button id="btn-submit-code" class="btn-jungle"
-                            style="padding: 10px 15px; font-size: 1rem;">성장하기 🌱</button>
+                        <input type="text" id="friend-code" placeholder="다른 공룡 친구의 코드를 써주세요">
+                        <button id="btn-submit-code" class="btn-base btn-forward"
+                            style="padding: 10px 15px; font-size: 1rem;">용기 얻기</button>
                     </div>
                     <p id="code-msg" class="msg-text"></p>
                 </div>
 
                 <div class="dash-section paper-bg">
-                    <h3>🏆 전사 전투력 랭킹</h3>
+                    <h3>누가누가 잘 지켰나! 랭킹</h3>
                     <table class="ranking-table">
                         <thead>
                             <tr>
                                 <th>순위</th>
-                                <th>전사명</th>
-                                <th>스탯</th>
+                                <th>공룡 이름</th>
+                                <th>용기 점수</th>
                             </tr>
                         </thead>
                         <tbody id="ranking-body">
@@ -256,9 +291,42 @@
                     </table>
                 </div>
 
-                <button id="btn-back-growth" class="btn-jungle btn-outline mt-20">🔙 작전부로 돌아가기</button>
+                <button id="btn-back-growth" class="btn-base btn-back mt-20">작전부로 돌아가기</button>
             </div>
-            <div class="leaves bottom-leaves"></div>
+        </section>
+
+        <!-- 9. 공룡 자아 상세 정보 화면 (NEW) -->
+        <section id="screen-dino-detail" class="screen hidden">
+            <div class="dashboard-container wooden-board">
+                <div class="detail-header">
+                    <div class="detail-emoji" id="detail-emoji">🦖</div>
+                    <h2 id="detail-dino-name">열정폭발 티라노사우루스</h2>
+                    <div class="tag-role" id="detail-role">든든한 지킴이</div>
+                </div>
+
+                <div class="dash-section paper-bg">
+                    <h3>보유 스킬</h3>
+                    <div class="skills-grid" id="detail-skills">
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                </div>
+
+                <div class="dash-section paper-bg">
+                    <h3>엠티 지키는 꿀팁!</h3>
+                    <p id="detail-mt-tip" class="map-desc">
+                        고기 굽는 집게를 사수하세요. 당신의 지휘 아래 완벽한 바베큐 파티가 완성됩니다.
+                    </p>
+                </div>
+
+                <div class="dash-section paper-bg">
+                    <h3>공룡 이야기</h3>
+                    <p id="detail-desc" class="map-desc">
+                        자신감이 넘치고 항상 무리의 중심이 되는 최고의 포식자! 한번 목표를 정하면 직진합니다.
+                    </p>
+                </div>
+
+                <button id="btn-back-detail" class="btn-base btn-back mt-20">작전부로 돌아가기</button>
+            </div>
         </section>
     </div>
 
