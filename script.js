@@ -206,12 +206,15 @@ const adjectivesPool = {
     weird: ["예측불허", "자유로운 영혼", "4차원 매력의", "독보적 마이웨이", "어디로 튈지 모르는"]
 };
 
-// Mock Rankings (Simulated backend data)
+// --- Supabase 설정 ---
+const SUPABASE_URL = "https://xtymdgdnbeukkgwfmgzu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ixzG850Es4Amfs_32MZSlg_xwx5XKja"; // Anon Key
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Mock Rankings (네트워크 오류 대비용 기본 데이터)
 const mockRankings = [
     { name: "엠티 수호 대장", dinoName: "불도저 같은 안킬로사우루스", score: 2500, age: 25, weight: 1250 },
-    { name: "공룡 친구 1호", dinoName: "자유로운 영혼 프테라노돈", score: 1800, age: 18, weight: 900 },
-    { name: "홍주은 잡으러 가요", dinoName: "예측불허 모사사우루스", score: 1500, age: 15, weight: 750 },
-    { name: "다정한 친구", dinoName: "느긋한 브라키오사우루스", score: 1200, age: 12, weight: 600 }
+    { name: "공룡 친구 1호", dinoName: "자유로운 영혼 프테라노돈", score: 1800, age: 18, weight: 900 }
 ];
 
 // --- State ---
@@ -528,7 +531,12 @@ function handleCodeSubmit() {
     savedProfile.age += 1;
     savedProfile.weight += 50;
     savedProfile.score += 100;
+    
+    // 로컬 저장
     localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+    
+    // [New] 클라우드(Supabase) 저장
+    saveProfileToCloud(savedProfile);
 
     elValAge.innerText = savedProfile.age;
     elValWeight.innerText = savedProfile.weight;
@@ -540,23 +548,76 @@ function handleCodeSubmit() {
     renderRanking();
 }
 
-function renderRanking() {
-    // Combine mock data with user data
-    let allPlayers = [...mockRankings, savedProfile];
+async function saveProfileToCloud(profile) {
+    if (!profile) return;
+    try {
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .upsert({
+                code: profile.code,
+                name: profile.name,
+                student_id: profile.studentId,
+                dino_name: profile.dinoName,
+                dino_emoji: profile.dinoEmoji,
+                dino_desc: profile.dinoDesc,
+                age: profile.age,
+                weight: profile.weight,
+                score: profile.score
+            });
+        if (error) throw error;
+        console.log("Cloud save successful");
+    } catch (e) {
+        console.error("Cloud save failed", e);
+    }
+}
 
-    // Sort by score descending
+async function renderRanking() {
+    try {
+        // Supabase에서 점수 순으로 상위 20명 가져오기
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .select('*')
+            .order('score', { ascending: false })
+            .limit(20);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            updateRankingUI(data);
+        } else {
+            // 데이터가 없으면 Mock 데이터 표시
+            useFallbackRanking();
+        }
+    } catch (e) {
+        console.error("Failed to fetch rankings", e);
+        useFallbackRanking();
+    }
+}
+
+function useFallbackRanking() {
+    let allPlayers = [...mockRankings];
+    if (savedProfile) allPlayers.push(savedProfile);
     allPlayers.sort((a, b) => b.score - a.score);
+    updateRankingUI(allPlayers);
+}
 
+function updateRankingUI(allPlayers) {
     tbodyRanking.innerHTML = "";
     allPlayers.forEach((player, index) => {
-        const isMe = (player.code === savedProfile.code);
+        const isMe = (savedProfile && player.code === savedProfile.code);
         const tr = document.createElement('tr');
         if (isMe) tr.className = "my-row";
 
+        // Supabase 컬럼명에 맞춰 데이터 매핑 (snake_case 대응)
+        const name = player.name;
+        const dinoName = player.dino_name || player.dinoName;
+        const age = player.age;
+        const weight = player.weight;
+
         tr.innerHTML = `
             <td>${index + 1}위</td>
-            <td>${player.name}<br><small style="color:#555">${player.dinoName}</small></td>
-            <td>용기: ${player.age}<br>무게: ${player.weight}kg</td>
+            <td>${name}<br><small style="color:#555">${dinoName}</small></td>
+            <td>용기: ${age}<br>무게: ${weight}kg</td>
         `;
         tbodyRanking.appendChild(tr);
     });
@@ -608,6 +669,9 @@ btnConfirm.addEventListener('click', () => {
         const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
         localStorage.setItem(userKey, JSON.stringify(savedProfile));
         localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+        
+        // [New] 클라우드 저장
+        saveProfileToCloud(savedProfile);
     }
     
     // 깜빡임 효과 (Flicker Effect)
