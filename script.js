@@ -505,7 +505,7 @@ function populateDashboard() {
     renderRanking();
 }
 
-function handleCodeSubmit() {
+async function handleCodeSubmit() {
     const code = inputFriendCode.value.trim();
     if (code.length !== 6) {
         elCodeMsg.innerText = "올바른 6자리 공룡 코드를 써주세요!";
@@ -524,28 +524,54 @@ function handleCodeSubmit() {
         return;
     }
 
-    // Mark code as used
-    savedProfile.usedCodes.push(code);
+    // [New] 수퍼베이스에서 코드가 존재하는지 확인
+    try {
+        btnSubmitCode.disabled = true;
+        btnSubmitCode.innerText = "확인 중...";
 
-    // Simulate successful growth
-    savedProfile.age += 1;
-    savedProfile.weight += 50;
-    savedProfile.score += 100;
-    
-    // 로컬 저장
-    localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
-    
-    // [New] 클라우드(Supabase) 저장
-    saveProfileToCloud(savedProfile);
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .select('code')
+            .eq('code', code)
+            .single();
 
-    elValAge.innerText = savedProfile.age;
-    elValWeight.innerText = savedProfile.weight;
+        if (error || !data) {
+            elCodeMsg.innerText = "존재하지 않는 공룡 코드예요! 다시 확인해주세요.";
+            elCodeMsg.style.color = "#d32f2f";
+            btnSubmitCode.disabled = false;
+            btnSubmitCode.innerText = "용기 얻기";
+            return;
+        }
 
-    elCodeMsg.innerText = "약속 성공! 용기가 더 생겼어요! 이제 홍주은도 무섭지 않아!";
-    elCodeMsg.style.color = "#388e3c";
-    inputFriendCode.value = "";
+        // 코드가 존재함 -> 성장 처리
+        savedProfile.usedCodes.push(code);
+        savedProfile.age += 1;
+        savedProfile.weight += 50;
+        savedProfile.score += 100;
+        
+        // 로컬 저장
+        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+        
+        // 클라우드 저장
+        await saveProfileToCloud(savedProfile);
 
-    renderRanking();
+        elValAge.innerText = savedProfile.age;
+        elValWeight.innerText = savedProfile.weight;
+
+        elCodeMsg.innerText = "약속 성공! 용기가 더 생겼어요! 이제 홍주은도 무섭지 않아!";
+        elCodeMsg.style.color = "#388e3c";
+        inputFriendCode.value = "";
+
+        renderRanking();
+
+    } catch (e) {
+        console.error("Code validation failed", e);
+        elCodeMsg.innerText = "연결이 원활하지 않아요. 잠시 후 다시 시도해주세요.";
+        elCodeMsg.style.color = "#d32f2f";
+    } finally {
+        btnSubmitCode.disabled = false;
+        btnSubmitCode.innerText = "용기 얻기";
+    }
 }
 
 async function saveProfileToCloud(profile) {
