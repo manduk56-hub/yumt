@@ -292,15 +292,68 @@ try {
 } catch (e) { }
 
 // --- Functions ---
-function init() {
+async function init() {
     if (savedProfile) {
-        document.body.className = 'theme-jurassic';
-        populateDashboard();
-        showScreen(screenDashboard);
+        // 유효성 검사 중 로딩 표시
+        showScreen(screenLoading);
+        document.getElementById('loading-title').innerText = "내 공룡 불러오는 중...";
+        document.getElementById('loading-desc').innerText = "데이터베이스와 동기화하고 있습니다.";
+
+        const isValid = await validateProfileWithDB();
+        
+        if (isValid) {
+            document.body.className = 'theme-jurassic';
+            populateDashboard();
+            showScreen(screenDashboard);
+        } else {
+            // DB에 없으면 로컬 데이터도 삭제하고 처음으로
+            localStorage.removeItem('dinoProfile');
+            savedProfile = null;
+            showScreen(screenIntro);
+        }
     } else {
         showScreen(screenIntro);
     }
 }
+
+async function validateProfileWithDB() {
+    if (!savedProfile || !savedProfile.name || !savedProfile.studentId) return false;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .select('*')
+            .eq('name', savedProfile.name)
+            .eq('student_id', savedProfile.studentId)
+            .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+            // DB 데이터가 존재하면 최신 정보(점수, 나이, 무게, 코드 등)로 동기화
+            savedProfile.score = data.score;
+            savedProfile.age = data.age;
+            savedProfile.weight = data.weight;
+            savedProfile.code = data.code;
+            
+            // 공룡 이름/설명 등도 혹시 바뀌었을 수 있으니 업데이트
+            savedProfile.dinoName = data.dino_name;
+            savedProfile.dinoEmoji = data.dino_emoji;
+            savedProfile.dinoDesc = data.dino_desc;
+
+            localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+            return true;
+        } else {
+            // DB에 데이터가 없으면 (삭제되었거나 조작된 데이터)
+            return false;
+        }
+    } catch (e) {
+        console.error("유효성 검사 중 오류 발생:", e);
+        // 네트워크 오류 시에는 일단 기존 로컬 데이터를 유지하도록 처리
+        return true; 
+    }
+}
+
 
 function showScreen(screenEl) {
     document.querySelectorAll('.screen').forEach(s => {
