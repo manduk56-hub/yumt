@@ -834,9 +834,21 @@ btnBackDetail.addEventListener('click', () => showScreen(screenDashboard));
 
 dashDinoProfile.addEventListener('click', showDinoDetail);
 
-btnResetAll.addEventListener('click', () => {
-    if (confirm("정말 환생하시겠습니까? 지금까지의 기록이 모두 사라집니다.")) {
+btnResetAll.addEventListener('click', async () => {
+    if (confirm("정말 환생하시겠습니까? 지금까지의 기록이 모두 사라지며 데이터베이스에서도 삭제됩니다.")) {
         if (savedProfile) {
+            // [New] 데이터베이스에서 삭제
+            try {
+                await supabaseClient
+                    .from('rankings')
+                    .delete()
+                    .eq('name', savedProfile.name)
+                    .eq('student_id', savedProfile.studentId);
+                console.log("DB 데이터 삭제 완료");
+            } catch (e) {
+                console.error("DB 삭제 실패:", e);
+            }
+
             const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
             localStorage.removeItem(userKey);
         }
