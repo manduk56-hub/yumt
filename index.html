@@ -4,21 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MT 사전 성향 설문 | 경주한옥펜타운</title>
+    <title>MT 일정 확인 사이트</title>
 
     <!-- Open Graph / 링크 임베드 메타태그 -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://manduk56-hub.github.io/yumt/">
-    <meta property="og:title" content="🦕 MT 사전 성향 설문 | 경주한옥펜타운">
-    <meta property="og:description" content="이번 MT를 더 즐겁게! 나의 공룡 전사 자아를 찾고 홍주은을 막아내자!">
+    <meta property="og:title" content="MT 일정 확인 사이트">
+    <meta property="og:description" content="우리 엠티 일정과 장소를 확인하세요!">
     <meta property="og:image:width" content="480">
     <meta property="og:image:height" content="240">
     <meta property="og:locale" content="ko_KR">
 
     <!-- 트위터 카드 -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="🦕 MT 사전 성향 설문 | 경주한옥펜타운">
-    <meta property="twitter:description" content="이번 MT를 더 즐겁게! 나의 공룡 전사 자아를 찾고 홍주은을 막아내자!">
+    <meta name="twitter:title" content="MT 일정 확인 사이트">
+    <meta property="twitter:description" content="우리 엠티 일정과 장소를 확인하세요!">
 
     <!-- Supabase SDK 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -337,42 +337,44 @@
                     <p>홍주은사우루스님, 지배 영역에 오신 것을 환영합니다.</p>
                 </div>
 
-                <div class="dash-section paper-bg" style="background: #fff5f5;">
-                    <h3 style="color: #b71c1c;">현재 공룡 마을 현황</h3>
-                    <div class="stats-box" style="justify-content: space-around;">
-                        <div class="stat-item">
-                            <span class="stat-label">등록된 공룡 수</span>
-                            <span class="stat-value" id="boss-total-users">0</span>
+                <div class="dash-section paper-bg" style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
+                    <h3 style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">현재 공룡 마을 현황</h3>
+                    <div class="stats-box" style="justify-content: space-around; margin-top: 0;">
+                        <div class="stat-item" style="background: #1a0b0b; border-color: #ff5252; padding: 15px; flex: 1; margin: 0 5px;">
+                            <span class="stat-label" style="color: #ffcdd2;">등록된 공룡 수</span>
+                            <span class="stat-value" id="boss-total-users" style="color: #ff5252;">0</span>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-label">평균 용기 점수</span>
-                            <span class="stat-value" id="boss-avg-score">0</span>
+                        <div class="stat-item" style="background: #1a0b0b; border-color: #ff5252; padding: 15px; flex: 1; margin: 0 5px;">
+                            <span class="stat-label" style="color: #ffcdd2;">평균 용기 점수</span>
+                            <span class="stat-value" id="boss-avg-score" style="color: #ff5252;">0</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="dash-section paper-bg" style="background: transparent; border: none;">
-                    <h3 style="color: #ffffff; border-bottom: 1px solid #ff5252; padding-bottom: 5px;">보스의 메시지 발송</h3>
+                <div class="dash-section paper-bg" style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
+                    <h3 style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">보스의 메시지 발송</h3>
                     <div style="display: flex; gap: 10px; flex-direction: column;">
-                        <textarea id="boss-message-input" rows="3" placeholder="공룡들에게 보낼 무시무시한 메시지를 입력하세요..." style="width: 100%; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 1rem; border: 2px solid #ff5252; background: #333; color: white;"></textarea>
-                        <button id="btn-boss-send-msg" class="btn-base btn-forward" style="background: #ff5252 !important; align-self: flex-end; padding: 10px 20px; font-size: 1rem;">메시지 전송</button>
+                        <textarea id="boss-message-input" rows="3" placeholder="공룡들에게 보낼 무시무시한 메시지를 입력하세요..." style="width: 100%; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 1rem; border: 1px solid #ff5252; background: #1a0b0b; color: #ffcdd2; resize: none;"></textarea>
+                        <button id="btn-boss-send-msg" class="btn-base btn-forward" style="background: #ff5252 !important; color: white !important; align-self: flex-end; padding: 10px 20px; font-size: 1rem; border: none; box-shadow: 0 4px 10px rgba(255, 82, 82, 0.4);">메시지 전송</button>
                     </div>
                 </div>
 
-                <div class="dash-section paper-bg">
-                    <h3 style="color: #424242;">침입자 목록 (실시간 감시)</h3>
-                    <table class="ranking-table">
-                        <thead>
-                            <tr>
-                                <th>이름</th>
-                                <th>공룡</th>
-                                <th>점수</th>
-                            </tr>
-                        </thead>
-                        <tbody id="boss-ranking-body">
-                            <!-- JS로 동적 생성 -->
-                        </tbody>
-                    </table>
+                <div class="dash-section paper-bg" style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
+                    <h3 style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">침입자 목록 (실시간 감시)</h3>
+                    <div style="overflow-x: auto; border-radius: 8px; border: 1px solid #ff5252;">
+                        <table class="ranking-table" style="color: #ffcdd2; background: #1a0b0b; width: 100%; margin-top: 0;">
+                            <thead style="background: #b71c1c;">
+                                <tr>
+                                    <th style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">이름</th>
+                                    <th style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">공룡</th>
+                                    <th style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">점수</th>
+                                </tr>
+                            </thead>
+                            <tbody id="boss-ranking-body">
+                                <!-- JS로 동적 생성 -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="btn-group">
