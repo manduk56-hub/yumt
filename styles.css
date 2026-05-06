@@ -810,3 +810,12 @@ body.theme-jurassic {
     .detail-emoji { font-size: 4.5rem; }
     #detail-dino-name { font-size: 1.6rem; }
 }
+
+@keyframes slideInDown {
+    from { top: -100px; opacity: 0; }
+    to { top: 20px; opacity: 1; }
+}
+@keyframes slideOutUp {
+    from { top: 20px; opacity: 1; }
+    to { top: -100px; opacity: 0; }
+}

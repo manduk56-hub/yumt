@@ -31,6 +31,13 @@
 <body class="theme-valley">
     <div id="flicker-overlay"></div>
     <div id="app">
+        <div id="global-notification" class="hidden" style="position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); border: 2px solid #ff5252; color: #fff; padding: 15px 30px; border-radius: 30px; z-index: 10000; box-shadow: 0 10px 30px rgba(255,0,0,0.5); max-width: 90%; text-align: center; display: none; align-items: center; gap: 10px;">
+            <span style="font-size: 1.8rem; animation: bounce 1s infinite;">🦖</span>
+            <div style="text-align: left;">
+                <div style="color: #ff5252; font-weight: bold; font-size: 0.9rem; margin-bottom: 3px;">[보스 홍주은사우루스의 경고]</div>
+                <div id="global-notification-text" style="font-size: 1.1rem; word-break: keep-all;"></div>
+            </div>
+        </div>
         <!-- 1. 시작 화면 (계곡 테마) -->
         <section id="screen-intro" class="screen active">
             <div class="content">
@@ -345,10 +352,11 @@
                 </div>
 
                 <div class="dash-section paper-bg" style="background: transparent; border: none;">
-                    <h3 style="color: #ffffff; border-bottom: 1px solid #ff5252; padding-bottom: 5px;">보스의 메시지</h3>
-                    <p class="map-desc" style="font-style: italic; font-size: 1.1rem; line-height: 1.6; color: #ffffff;">
-                        "엠티의 모든 고기와 간식은 내 것이다... <br>애송이 공룡들이 얼마나 모였는지 지켜보겠어!"
-                    </p>
+                    <h3 style="color: #ffffff; border-bottom: 1px solid #ff5252; padding-bottom: 5px;">보스의 메시지 발송</h3>
+                    <div style="display: flex; gap: 10px; flex-direction: column;">
+                        <textarea id="boss-message-input" rows="3" placeholder="공룡들에게 보낼 무시무시한 메시지를 입력하세요..." style="width: 100%; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 1rem; border: 2px solid #ff5252; background: #333; color: white;"></textarea>
+                        <button id="btn-boss-send-msg" class="btn-base btn-forward" style="background: #ff5252 !important; align-self: flex-end; padding: 10px 20px; font-size: 1rem;">메시지 전송</button>
+                    </div>
                 </div>
 
                 <div class="dash-section paper-bg">

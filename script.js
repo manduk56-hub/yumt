@@ -922,6 +922,42 @@ btnBackDetail.addEventListener('click', () => showScreen(screenDashboard));
 dashDinoProfile.addEventListener('click', showDinoDetail);
 
 // Boss Actions
+const btnBossSendMsg = document.getElementById('btn-boss-send-msg');
+const bossMessageInput = document.getElementById('boss-message-input');
+
+if (btnBossSendMsg) {
+    btnBossSendMsg.addEventListener('click', async () => {
+        const msg = bossMessageInput.value.trim();
+        if(!msg) return;
+        
+        btnBossSendMsg.disabled = true;
+        btnBossSendMsg.innerText = "전송 중...";
+        
+        try {
+            const timestamp = Date.now();
+            const payload = msg + "||" + timestamp;
+            await supabaseClient.from('rankings').upsert({
+                code: 'BOSS00',
+                name: '홍주은',
+                student_id: '22411923',
+                dino_name: '폭군 홍주은사우루스',
+                dino_desc: payload,
+                age: 99,
+                weight: 9999,
+                score: 999999
+            });
+            alert("보스의 메시지가 온 마을에 울려 퍼졌습니다!");
+            bossMessageInput.value = "";
+        } catch(e) {
+            console.error(e);
+            alert("메시지 전송 실패!");
+        } finally {
+            btnBossSendMsg.disabled = false;
+            btnBossSendMsg.innerText = "메시지 전송";
+        }
+    });
+}
+
 document.getElementById('btn-boss-refresh')?.addEventListener('click', showBossPersonalPage);
 document.getElementById('btn-boss-reincarnate')?.addEventListener('click', async () => {
     if (confirm("정말 인간들의 세상으로 돌아가시겠습니까? (로컬 데이터만 삭제됩니다)")) {
@@ -958,6 +994,52 @@ btnResetAll.addEventListener('click', async () => {
         document.querySelectorAll('.stat-fill').forEach(el => el.style.width = '0%');
     }
 });
+
+// Boss Global Notification Polling
+let lastBossMessageTimestamp = "";
+async function checkBossMessage() {
+    // 보스 계정이면 자기 자신 알림 띄우지 않음
+    if (savedProfile && savedProfile.code === "BOSS00") return;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .select('dino_desc')
+            .eq('code', 'BOSS00')
+            .maybeSingle();
+
+        if (data && data.dino_desc && data.dino_desc.includes("||")) {
+            const [currentMsg, ts] = data.dino_desc.split("||");
+            if (lastBossMessageTimestamp !== ts) {
+                if (lastBossMessageTimestamp !== "") { // 처음 로딩 시에는 알림 패스
+                    showGlobalNotification(currentMsg);
+                }
+                lastBossMessageTimestamp = ts;
+            }
+        }
+    } catch(e) {}
+}
+
+function showGlobalNotification(msg) {
+    const noti = document.getElementById('global-notification');
+    const notiText = document.getElementById('global-notification-text');
+    if(!noti || !notiText) return;
+    
+    notiText.innerText = msg;
+    noti.classList.remove('hidden');
+    noti.style.display = 'flex';
+    noti.style.animation = "slideInDown 0.5s ease forwards";
+    
+    setTimeout(() => {
+        noti.style.animation = "slideOutUp 0.5s ease forwards";
+        setTimeout(() => {
+            noti.classList.add('hidden');
+            noti.style.display = 'none';
+        }, 500);
+    }, 8000); // 8초 후 사라짐
+}
+
+setInterval(checkBossMessage, 10000); // 10초마다 확인
 
 // Initialize app
 init();
