@@ -240,6 +240,7 @@ const screenGrowth = document.getElementById('screen-growth');
 const screenBossInfo = document.getElementById('screen-boss-info');
 const screenBossWarning = document.getElementById('screen-boss-warning');
 const screenDinoDetail = document.getElementById('screen-dino-detail');
+const screenBossPersonal = document.getElementById('screen-boss-personal');
 
 const inputName = document.getElementById('user-name');
 const inputId = document.getElementById('user-id');
@@ -294,6 +295,12 @@ try {
 // --- Functions ---
 async function init() {
     if (savedProfile) {
+        // [Special Case] 홍주은사우루스 체크
+        if (savedProfile.name === "홍주은" && savedProfile.studentId === "22411923") {
+            showBossPersonalPage();
+            return;
+        }
+
         // 유효성 검사 중 로딩 표시
         showScreen(screenLoading);
         document.getElementById('loading-title').innerText = "내 공룡 불러오는 중...";
@@ -390,6 +397,20 @@ async function startQuiz() {
 
     if (!userName || !studentId) {
         alert("이름과 학번을 모두 입력해주세요!");
+        return;
+    }
+
+    // [Special Case] 홍주은사우루스 체크
+    if (userName === "홍주은" && studentId === "22411923") {
+        savedProfile = {
+            name: userName,
+            studentId: studentId,
+            dinoName: "폭군 홍주은사우루스",
+            dinoEmoji: "🦖",
+            code: "BOSS00"
+        };
+        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+        showBossPersonalPage();
         return;
     }
 
@@ -771,6 +792,45 @@ function showDinoDetail() {
     showScreen(screenDinoDetail);
 }
 
+async function showBossPersonalPage() {
+    document.body.className = 'theme-jurassic';
+    showScreen(screenBossPersonal);
+    
+    // 데이터 불러오기
+    try {
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .select('*')
+            .order('score', { ascending: false });
+
+        if (error) throw error;
+
+        // 통계 계산
+        const totalUsers = data.length;
+        const avgScore = totalUsers > 0 
+            ? Math.round(data.reduce((acc, cur) => acc + (cur.score || 0), 0) / totalUsers) 
+            : 0;
+
+        document.getElementById('boss-total-users').innerText = totalUsers;
+        document.getElementById('boss-avg-score').innerText = avgScore;
+
+        // 랭킹 테이블 채우기
+        const bossRankingBody = document.getElementById('boss-ranking-body');
+        bossRankingBody.innerHTML = '';
+        data.forEach(user => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${user.name}</td>
+                <td><small>${user.dino_name || '진화 중'}</small></td>
+                <td>${user.score || 0}</td>
+            `;
+            bossRankingBody.appendChild(tr);
+        });
+    } catch (e) {
+        console.error("보스 데이터 로드 실패:", e);
+    }
+}
+
 // --- Event Listeners ---
 btnStart.addEventListener('click', startQuiz);
 inputId.addEventListener('keypress', (e) => {
@@ -833,6 +893,16 @@ btnBackGrowth.addEventListener('click', () => showScreen(screenDashboard));
 btnBackDetail.addEventListener('click', () => showScreen(screenDashboard));
 
 dashDinoProfile.addEventListener('click', showDinoDetail);
+
+// Boss Actions
+document.getElementById('btn-boss-refresh')?.addEventListener('click', showBossPersonalPage);
+document.getElementById('btn-boss-reincarnate')?.addEventListener('click', async () => {
+    if (confirm("정말 인간들의 세상으로 돌아가시겠습니까? (로컬 데이터만 삭제됩니다)")) {
+        localStorage.removeItem('dinoProfile');
+        savedProfile = null;
+        showScreen(screenIntro);
+    }
+});
 
 btnResetAll.addEventListener('click', async () => {
     if (confirm("정말 환생하시겠습니까? 지금까지의 기록이 모두 사라지며 데이터베이스에서도 삭제됩니다.")) {

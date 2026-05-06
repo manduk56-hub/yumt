@@ -331,6 +331,57 @@
                 <button id="btn-back-detail" class="btn-base btn-back mt-20">작전부로 돌아가기</button>
             </div>
         </section>
+        <!-- 10. 홍주은사우루스 전용 페이지 (SECRET) -->
+        <section id="screen-boss-personal" class="screen hidden" style="background: #1a1a1a;">
+            <div class="dashboard-container wooden-board" style="border-color: #ff5252; box-shadow: 0 0 30px rgba(255, 82, 82, 0.3); max-height: 90vh; overflow-y: auto;">
+                <div class="dash-header" style="background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white; border-radius: 10px; padding: 20px;">
+                    <h1 style="font-size: 2.2rem; margin-bottom: 5px;">👑 보스 대시보드</h1>
+                    <p>홍주은사우루스님, 지배 영역에 오신 것을 환영합니다.</p>
+                </div>
+
+                <div class="dash-section paper-bg" style="background: #fff5f5; border-left: 5px solid #ff5252;">
+                    <h3 style="color: #b71c1c;">현재 공룡 마을 현황</h3>
+                    <div class="stats-box" style="justify-content: space-around;">
+                        <div class="stat-item">
+                            <span class="stat-label">등록된 공룡 수</span>
+                            <span class="stat-value" id="boss-total-users">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">평균 용기 점수</span>
+                            <span class="stat-value" id="boss-avg-score">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-section paper-bg">
+                    <h3 style="color: #424242;">보스의 메시지</h3>
+                    <p class="map-desc" style="font-style: italic; font-size: 1.1rem; line-height: 1.6;">
+                        "엠티의 모든 고기와 간식은 내 것이다... <br>애송이 공룡들이 얼마나 모였는지 지켜보겠어!"
+                    </p>
+                </div>
+
+                <div class="dash-section paper-bg">
+                    <h3 style="color: #424242;">침입자 목록 (실시간 감시)</h3>
+                    <table class="ranking-table">
+                        <thead>
+                            <tr>
+                                <th>이름</th>
+                                <th>공룡</th>
+                                <th>점수</th>
+                            </tr>
+                        </thead>
+                        <tbody id="boss-ranking-body">
+                            <!-- JS로 동적 생성 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="btn-group">
+                    <button id="btn-boss-refresh" class="btn-base btn-forward" style="background: #ff5252 !important;">감시 데이터 갱신</button>
+                    <button id="btn-boss-reincarnate" class="btn-base btn-back">일코하러 가기 (환생)</button>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script src="script.js"></script>
