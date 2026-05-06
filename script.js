@@ -313,14 +313,22 @@ function showScreen(screenEl) {
 }
 
 function generateCode() {
-    const chars = "가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호기니디리미비시이지치키티피히";
-    let code = "";
-    for (let i = 0; i < 4; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    const adj3 = ["멍청한", "뜨거운", "차가운", "용감한", "귀여운", "날렵한", "커다란", "즐거운", "졸고있는", "배고픈", "배부른", "화가난", "신비로운", "어리숙한"];
+    const noun3 = ["비둘기", "도마뱀", "다람쥐", "개구리", "코끼리", "너구리", "독수리", "펭귄", "팬더", "기린", "하마", "거북이", "고양이", "강아지"];
+    
+    const adj2 = ["멋진", "빠른", "착한", "기쁜", "슬픈", "힘센", "밝은", "푸른", "검은", "맑은", "깊은", "작은"];
+    const noun4 = ["사슴벌레", "스테고사우", "프테라노돈", "아기공룡", "작은새들", "산토끼들", "시골쥐들", "들고양이"];
+
+    // 50% 확률로 3+3 또는 2+4 조합 생성
+    if (Math.random() > 0.5) {
+        const a = adj3[Math.floor(Math.random() * adj3.length)];
+        const n = noun3[Math.floor(Math.random() * noun3.length)];
+        return (a + n).substring(0, 6); // 확실히 6자리 보장
+    } else {
+        const a = adj2[Math.floor(Math.random() * adj2.length)];
+        const n = noun4[Math.floor(Math.random() * noun4.length)];
+        return (a + n).substring(0, 6);
     }
-    // add 2 random numbers
-    code += Math.floor(Math.random() * 90 + 10);
-    return code;
 }
 
 async function startQuiz() {
