@@ -323,7 +323,7 @@ function generateCode() {
     return code;
 }
 
-function startQuiz() {
+async function startQuiz() {
     userName = inputName.value.trim();
     studentId = inputId.value.trim();
 
@@ -332,21 +332,67 @@ function startQuiz() {
         return;
     }
 
-    // [New] Check if a profile already exists for this Name + ID combo
-    const userKey = `dino_user_${userName}_${studentId}`;
-    const existingData = localStorage.getItem(userKey);
-    if (existingData) {
-        try {
-            savedProfile = JSON.parse(existingData);
+    // 버튼 비활성화 및 상태 표시
+    btnStart.disabled = true;
+    const originalBtnText = btnStart.innerText;
+    btnStart.innerText = "데이터 확인 중...";
+
+    try {
+        // [New] 데이터베이스(Supabase)에서 이름과 학번으로 검색
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .select('*')
+            .eq('name', userName)
+            .eq('student_id', studentId)
+            .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+            // 데이터가 있다면 가져오기
+            savedProfile = {
+                name: data.name,
+                studentId: data.student_id,
+                dinoName: data.dino_name,
+                dinoEmoji: data.dino_emoji,
+                dinoDesc: data.dino_desc,
+                code: data.code,
+                age: data.age,
+                weight: data.weight,
+                score: data.score,
+                usedCodes: [], // DB에 저장되지 않는 필드들은 기본값
+                skills: [], 
+                role: "지킴이",
+                mtTip: "다시 오신 것을 환영합니다!"
+            };
+
+            // 공룡 종류 정보를 다시 매칭하여 스킬 등 복구 시도
+            for (const region in dinoTypes) {
+                for (const type in dinoTypes[region]) {
+                    const d = dinoTypes[region][type];
+                    if (data.dino_emoji === d.emoji && data.dino_name.includes(d.name)) {
+                        savedProfile.skills = d.skills;
+                        savedProfile.role = d.role;
+                        savedProfile.mtTip = d.mtTip;
+                        break;
+                    }
+                }
+            }
+
+            localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
             document.body.className = 'theme-jurassic';
             populateDashboard();
             showScreen(screenDashboard);
-            return; // Skip quiz and go to dashboard
-        } catch (e) {
-            console.error("Failed to load existing profile", e);
+            return;
         }
+    } catch (e) {
+        console.error("데이터 조회 실패:", e);
+    } finally {
+        btnStart.disabled = false;
+        btnStart.innerText = originalBtnText;
     }
 
+    // 데이터가 없으면 설문 시작 (새로운 유저)
     currentQuestionIndex = 0;
     scores = {
         region: { volcano: 0, plains: 0, forest: 0, waterSky: 0 },
