@@ -294,31 +294,39 @@ try {
 
 // --- Functions ---
 async function init() {
-    if (savedProfile) {
-        // [Special Case] 홍주은사우루스 체크
-        if (savedProfile.name === "홍주은" && savedProfile.studentId === "22411923") {
-            showBossPersonalPage();
-            return;
-        }
+    try {
+        if (savedProfile) {
+            // [Special Case] 홍주은사우루스 체크
+            if (savedProfile.name === "홍주은" && savedProfile.studentId === "22411923") {
+                showBossPersonalPage();
+                return;
+            }
 
-        // 유효성 검사 중 로딩 표시
-        showScreen(screenLoading);
-        document.getElementById('loading-title').innerText = "내 공룡 불러오는 중...";
-        document.getElementById('loading-desc').innerText = "데이터베이스와 동기화하고 있습니다.";
+            // 유효성 검사 중 로딩 표시
+            showScreen(screenLoading);
+            document.getElementById('loading-title').innerText = "내 공룡 불러오는 중...";
+            document.getElementById('loading-desc').innerText = "데이터베이스와 동기화하고 있습니다.";
 
-        const isValid = await validateProfileWithDB();
-        
-        if (isValid) {
-            document.body.className = 'theme-jurassic';
-            populateDashboard();
-            showScreen(screenDashboard);
+            // 5초 타임아웃 추가 (DB 응답이 너무 늦으면 그냥 진행)
+            const validatePromise = validateProfileWithDB();
+            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(true), 5000));
+            
+            const isValid = await Promise.race([validatePromise, timeoutPromise]);
+            
+            if (isValid) {
+                document.body.className = 'theme-jurassic';
+                populateDashboard();
+                showScreen(screenDashboard);
+            } else {
+                localStorage.removeItem('dinoProfile');
+                savedProfile = null;
+                showScreen(screenIntro);
+            }
         } else {
-            // DB에 없으면 로컬 데이터도 삭제하고 처음으로
-            localStorage.removeItem('dinoProfile');
-            savedProfile = null;
             showScreen(screenIntro);
         }
-    } else {
+    } catch (err) {
+        console.error("초기화 중 오류:", err);
         showScreen(screenIntro);
     }
 }
@@ -363,13 +371,36 @@ async function validateProfileWithDB() {
 
 
 function showScreen(screenEl) {
-    document.querySelectorAll('.screen').forEach(s => {
-        s.classList.remove('active');
-        setTimeout(() => { if (!s.classList.contains('active')) s.classList.add('hidden'); }, 600);
+    if (!screenEl) return;
+
+    // 기존 타이머들 정리 (충돌 방지)
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(s => {
+        if (s.dataset.hideTimer) {
+            clearTimeout(parseInt(s.dataset.hideTimer));
+            delete s.dataset.hideTimer;
+        }
+        if (s !== screenEl) {
+            s.classList.remove('active');
+            // 애니메이션(0.5s) 후 완전히 숨김
+            const timer = setTimeout(() => {
+                if (!s.classList.contains('active')) {
+                    s.classList.add('hidden');
+                }
+            }, 600);
+            s.dataset.hideTimer = timer;
+        }
     });
 
+    // 대상 화면 표시
     screenEl.classList.remove('hidden');
-    setTimeout(() => { screenEl.classList.add('active'); }, 50);
+    // 브라우저 리플로우 강제 (transition 보장)
+    void screenEl.offsetWidth;
+    
+    // 약간의 지연 후 활성화 (hidden 제거와 active 추가 사이의 간격)
+    setTimeout(() => {
+        screenEl.classList.add('active');
+    }, 20);
 }
 
 function generateCode() {
@@ -415,16 +446,21 @@ async function startQuiz() {
     }
 
     try {
-        // [New] 데이터베이스(Supabase)에서 이름과 학번으로 검색 (백그라운드에서 실행)
-        const { data, error } = await supabaseClient
+        // [New] 데이터베이스(Supabase)에서 이름과 학번으로 검색
+        // 5초 타임아웃 추가
+        const fetchPromise = supabaseClient
             .from('rankings')
             .select('*')
             .eq('name', userName)
             .eq('student_id', studentId)
             .maybeSingle();
+            
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve({ data: null }), 5000));
+        
+        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
         if (error) throw error;
-
+        
         if (data) {
             // 데이터가 있다면 가져오기
             savedProfile = {
@@ -437,13 +473,12 @@ async function startQuiz() {
                 age: data.age,
                 weight: data.weight,
                 score: data.score,
-                usedCodes: [], // DB에 저장되지 않는 필드들은 기본값
+                usedCodes: [], 
                 skills: [], 
                 role: "지킴이",
                 mtTip: "다시 오신 것을 환영합니다!"
             };
 
-            // 공룡 종류 정보를 다시 매칭하여 스킬 등 복구 시도
             for (const region in dinoTypes) {
                 for (const type in dinoTypes[region]) {
                     const d = dinoTypes[region][type];
@@ -565,48 +600,41 @@ function setResultBackground(region, type) {
     }
 }
 
-function generateResult() {
-    const topRegion = getHighestKey(scores.region);
-    const topType = getHighestKey(scores.type);
+    try {
+        const topRegion = getHighestKey(scores.region);
+        const topType = getHighestKey(scores.type);
 
-    setResultBackground(topRegion, topType);
+        setResultBackground(topRegion, topType);
 
-    const matchedDino = dinoTypes[topRegion][topType];
-    const adjPool = adjectivesPool[topType];
-    const randomAdjective = adjPool[Math.floor(Math.random() * adjPool.length)];
+        const matchedDino = dinoTypes[topRegion][topType];
+        const adjPool = adjectivesPool[topType];
+        const randomAdjective = adjPool[Math.floor(Math.random() * adjPool.length)];
 
-    document.getElementById('result-name').innerText = `나는 ${matchedDino.name} 이었어!`;
-    document.getElementById('dino-emoji').innerText = matchedDino.emoji;
-    document.getElementById('dino-name').innerText = `${randomAdjective} ${matchedDino.name}`;
-    document.getElementById('dino-description').innerText = matchedDino.desc;
+        document.getElementById('result-name').innerText = `나는 ${matchedDino.name} 이었어!`;
+        document.getElementById('dino-emoji').innerText = matchedDino.emoji;
+        document.getElementById('dino-name').innerText = `${randomAdjective} ${matchedDino.name}`;
+        document.getElementById('dino-description').innerText = matchedDino.desc;
 
-    let act = 50, soc = 50, eat = 50;
-    if (topType === 'aggressive') { act = 90; soc = 40; eat = 80; }
-    if (topType === 'gentle') { act = 30; soc = 90; eat = 60; }
-    if (topType === 'weird') { act = 70; soc = 50; eat = 40; }
-
-    act += Math.floor(Math.random() * 20) - 10;
-    soc += Math.floor(Math.random() * 20) - 10;
-    eat += Math.floor(Math.random() * 20) - 10;
-
-
-
-    savedProfile = {
-        name: userName,
-        studentId: studentId,
-        dinoName: `${randomAdjective} ${matchedDino.name}`,
-        dinoEmoji: matchedDino.emoji,
-        dinoDesc: matchedDino.desc,
-        code: generateCode(),
-        age: 10,
-        weight: 500,
-        score: 1000,
-        usedCodes: [],
-        skills: matchedDino.skills,
-        role: matchedDino.role,
-        mtTip: matchedDino.mtTip
-    };
-}
+        savedProfile = {
+            name: userName,
+            studentId: studentId,
+            dinoName: `${randomAdjective} ${matchedDino.name}`,
+            dinoEmoji: matchedDino.emoji,
+            dinoDesc: matchedDino.desc,
+            code: generateCode(),
+            age: 10,
+            weight: 500,
+            score: 1000,
+            usedCodes: [],
+            skills: matchedDino.skills,
+            role: matchedDino.role,
+            mtTip: matchedDino.mtTip
+        };
+    } catch (err) {
+        console.error("결과 생성 중 오류:", err);
+        // 기본값 설정으로 튕김 방지
+        savedProfile = { name: userName, studentId: studentId, dinoName: "용감한 공룡", dinoEmoji: "🦖", code: "ERR000" };
+    }
 
 function populateDashboard() {
     if (!savedProfile) return;
@@ -775,19 +803,10 @@ function showDinoDetail() {
     elDetailEmoji.innerText = savedProfile.dinoEmoji || '🦖';
     elDetailDinoName.innerText = savedProfile.dinoName;
     elDetailRole.innerText = savedProfile.role || '공룡 친구';
-    elDetailMtTip.innerText = savedProfile.mtTip || '정보가 없습니다.';
+    elDetailMtTip.innerText = '공룡친구들과 코드를 교환하면 강해질 수 있어요!';
     elDetailDesc.innerText = savedProfile.dinoDesc || '';
 
-    // Clear and add skills
-    elDetailSkills.innerHTML = '';
-    if (savedProfile.skills && Array.isArray(savedProfile.skills)) {
-        savedProfile.skills.forEach(skill => {
-            const span = document.createElement('span');
-            span.className = 'skill-badge';
-            span.innerText = skill;
-            elDetailSkills.appendChild(span);
-        });
-    }
+    // elDetailSkills is removed from HTML
 
     showScreen(screenDinoDetail);
 }
