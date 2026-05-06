@@ -510,19 +510,15 @@ body.theme-jurassic {
 }
 
 .map-box {
-    background: #aed581; /* Greenish map background */
-    height: 120px;
+    background: #f5f5f5;
+    height: 200px;
     border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
     border: 3px solid #7cb342;
     margin-bottom: 10px;
-    background-image: 
-        radial-gradient(#fff 1px, transparent 1px),
-        radial-gradient(#fff 1px, transparent 1px);
-    background-size: 20px 20px;
-    background-position: 0 0, 10px 10px;
+    overflow: hidden;
 }
 
 .map-pin {
