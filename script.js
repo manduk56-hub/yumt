@@ -302,12 +302,7 @@ async function init() {
                 return;
             }
 
-            // 유효성 검사 중 로딩 표시
-            showScreen(screenLoading);
-            document.getElementById('loading-title').innerText = "내 공룡 불러오는 중...";
-            document.getElementById('loading-desc').innerText = "데이터베이스와 동기화하고 있습니다.";
-
-            // 5초 타임아웃 추가 (DB 응답이 너무 늦으면 그냥 진행)
+            // 배경에서 유효성 검사 진행 (로딩 화면 없이)
             const validatePromise = validateProfileWithDB();
             const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(true), 5000));
             
@@ -431,6 +426,11 @@ async function startQuiz() {
         return;
     }
 
+    // UI 피드백 추가
+    btnStart.disabled = true;
+    const originalBtnText = btnStart.innerText;
+    btnStart.innerText = "참석자 확인 중...";
+
     // [Special Case] 홍주은사우루스 체크
     if (userName === "홍주은" && studentId === "22411923") {
         savedProfile = {
@@ -442,12 +442,15 @@ async function startQuiz() {
         };
         localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
         showBossPersonalPage();
+        
+        btnStart.disabled = false;
+        btnStart.innerText = originalBtnText;
         return;
     }
 
     try {
         // [New] 데이터베이스(Supabase)에서 이름과 학번으로 검색
-        // 5초 타임아웃 추가
+        // 3초 타임아웃 추가
         const fetchPromise = supabaseClient
             .from('rankings')
             .select('*')
@@ -455,7 +458,7 @@ async function startQuiz() {
             .eq('student_id', studentId)
             .maybeSingle();
             
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve({ data: null }), 5000));
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve({ data: null, error: null }), 3000));
         
         const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
@@ -512,6 +515,10 @@ async function startQuiz() {
     document.getElementById('loading-title').innerText = '우리 엠티를 위해 분석 중...';
     document.getElementById('loading-desc').innerText = '어떤 귀여운 공룡 친구가 도와주러 올까요?';
 
+    // UI 복구
+    btnStart.disabled = false;
+    btnStart.innerText = "설문 시작하기";
+
     showScreen(screenQuiz);
     renderQuestion();
 }
@@ -553,13 +560,13 @@ function finishQuiz() {
 
     setTimeout(() => {
         showScreen(screenFusion);
-    }, 2500);
+    }, 1500);
 
     setTimeout(() => {
         document.body.className = 'theme-jurassic';
         generateResult();
         showScreen(screenResult);
-    }, 6000);
+    }, 4000);
 }
 
 function getHighestKey(obj) {
@@ -599,7 +606,7 @@ function setResultBackground(region, type) {
         bgEl.appendChild(span);
     }
 }
-
+function generateResult() {
     try {
         const topRegion = getHighestKey(scores.region);
         const topType = getHighestKey(scores.type);
@@ -635,6 +642,7 @@ function setResultBackground(region, type) {
         // 기본값 설정으로 튕김 방지
         savedProfile = { name: userName, studentId: studentId, dinoName: "용감한 공룡", dinoEmoji: "🦖", code: "ERR000" };
     }
+}
 
 function populateDashboard() {
     if (!savedProfile) return;
