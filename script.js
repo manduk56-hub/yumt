@@ -332,13 +332,8 @@ async function startQuiz() {
         return;
     }
 
-    // 버튼 비활성화 및 상태 표시
-    btnStart.disabled = true;
-    const originalBtnText = btnStart.innerText;
-    btnStart.innerText = "데이터 확인 중...";
-
     try {
-        // [New] 데이터베이스(Supabase)에서 이름과 학번으로 검색
+        // [New] 데이터베이스(Supabase)에서 이름과 학번으로 검색 (백그라운드에서 실행)
         const { data, error } = await supabaseClient
             .from('rankings')
             .select('*')
@@ -387,9 +382,6 @@ async function startQuiz() {
         }
     } catch (e) {
         console.error("데이터 조회 실패:", e);
-    } finally {
-        btnStart.disabled = false;
-        btnStart.innerText = originalBtnText;
     }
 
     // 데이터가 없으면 설문 시작 (새로운 유저)
