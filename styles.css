@@ -605,6 +605,28 @@ body.theme-jurassic {
 ========================================= */
 .text-center { text-align: center; }
 
+#screen-growth .dashboard-container {
+    text-align: center;
+}
+
+#screen-growth .paper-bg {
+    text-align: center;
+}
+
+#screen-growth .paper-bg h3 {
+    text-align: center;
+}
+
+#screen-growth .input-group {
+    align-items: center;
+}
+
+#screen-growth .btn-back {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .growth-dino-img {
     width: 120px;
     height: 120px;
