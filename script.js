@@ -677,7 +677,7 @@ async function handleCodeSubmit() {
         elCodeMsg.style.color = "#d32f2f";
     } finally {
         btnSubmitCode.disabled = false;
-        btnSubmitCode.innerText = "\uC6A9\uAE30 \uC5BB\uAE30";
+        btnSubmitCode.innerText = "용기 얻기";
     }
 }
 
