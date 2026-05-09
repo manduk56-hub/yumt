@@ -257,6 +257,15 @@ let savedProfile = null;
 let hasCoinsColumn = true;
 let hasUsedCodesColumn = true;
 let isPendingNewProfile = false;
+const BOSS_NAME = "\uD64D\uC8FC\uC740";
+const BOSS_STUDENT_ID = "22411923";
+const BOSS_CODE = "BOSS00";
+let appControls = {
+    growthEnabled: true,
+    resetEnabled: true,
+    message: "",
+    messageTs: ""
+};
 
 // --- Functions ---
 function isCompletedProfile(profile) {
@@ -313,6 +322,108 @@ function normalizeUsedCodes(value) {
         }
     }
     return [];
+}
+
+function parseBossControls(rawValue) {
+    const defaults = {
+        growthEnabled: true,
+        resetEnabled: true,
+        message: "",
+        messageTs: ""
+    };
+
+    if (!rawValue) return defaults;
+
+    try {
+        const parsed = JSON.parse(rawValue);
+        return {
+            ...defaults,
+            ...parsed,
+            growthEnabled: parsed.growthEnabled !== false,
+            resetEnabled: parsed.resetEnabled !== false,
+            message: parsed.message || "",
+            messageTs: String(parsed.messageTs || "")
+        };
+    } catch (e) {
+        const [message, messageTs] = String(rawValue).split("||");
+        return {
+            ...defaults,
+            message: message || "",
+            messageTs: messageTs || ""
+        };
+    }
+}
+
+function serializeBossControls(controls = appControls) {
+    return JSON.stringify({
+        growthEnabled: controls.growthEnabled !== false,
+        resetEnabled: controls.resetEnabled !== false,
+        message: controls.message || "",
+        messageTs: String(controls.messageTs || "")
+    });
+}
+
+async function fetchBossControls() {
+    const { data, error } = await supabaseClient
+        .from('rankings')
+        .select('dino_desc')
+        .eq('code', BOSS_CODE)
+        .maybeSingle();
+
+    if (error) throw error;
+    appControls = parseBossControls(data?.dino_desc);
+    applyAppControls();
+    updateBossControlUI();
+    return appControls;
+}
+
+async function saveBossControls() {
+    const payload = {
+        code: BOSS_CODE,
+        name: BOSS_NAME,
+        student_id: BOSS_STUDENT_ID,
+        dino_name: "\uD3ED\uAD70 \uD64D\uC8FC\uC740\uC0AC\uC6B0\uB8E8\uC2A4",
+        dino_emoji: "\uD83E\uDD96",
+        dino_desc: serializeBossControls(),
+        age: 99,
+        weight: 9999,
+        score: 999999
+    };
+
+    const { error } = await supabaseClient
+        .from('rankings')
+        .upsert(payload, { onConflict: 'name,student_id' });
+
+    if (error) throw error;
+}
+
+function setManagedButtonState(button, enabled, enabledText, disabledText) {
+    if (!button) return;
+    button.disabled = !enabled;
+    button.innerText = enabled ? enabledText : disabledText;
+    button.style.opacity = enabled ? '1' : '0.45';
+    button.style.cursor = enabled ? 'pointer' : 'not-allowed';
+}
+
+function applyAppControls() {
+    setManagedButtonState(btnNavGrowth, appControls.growthEnabled, "\uD30C\uC6CC\uC5C5!", "\uD30C\uC6CC\uC5C5! \uBE44\uD65C\uC131");
+    setManagedButtonState(btnResetAll, appControls.resetEnabled, "\uD658\uC0DD\uD558\uAE30", "\uD658\uC0DD\uD558\uAE30 \uBE44\uD65C\uC131");
+}
+
+function updateBossControlUI() {
+    const btnToggleGrowth = document.getElementById('btn-toggle-growth');
+    const btnToggleReset = document.getElementById('btn-toggle-reset');
+    const bossControlStatus = document.getElementById('boss-control-status');
+
+    if (btnToggleGrowth) {
+        btnToggleGrowth.innerText = appControls.growthEnabled ? "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uD65C\uC131" : "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uBE44\uD65C\uC131";
+    }
+    if (btnToggleReset) {
+        btnToggleReset.innerText = appControls.resetEnabled ? "\uD658\uC0DD\uD558\uAE30 \uBC84\uD2BC \uD65C\uC131" : "\uD658\uC0DD\uD558\uAE30 \uBC84\uD2BC \uBE44\uD65C\uC131";
+    }
+    if (bossControlStatus) {
+        bossControlStatus.innerText = `파워업: ${appControls.growthEnabled ? '활성' : '비활성'} / 환생하기: ${appControls.resetEnabled ? '활성' : '비활성'}`;
+    }
 }
 
 async function init() {
@@ -399,7 +510,7 @@ async function startQuiz() {
     btnStart.innerText = "데이터베이스 확인 중...";
 
     try {
-        if (userName === "\uD64D\uC8FC\uC740" && studentId === "22411923") {
+        if (userName === BOSS_NAME && studentId === BOSS_STUDENT_ID) {
             savedProfile = await fetchProfileFromDB(userName, studentId);
             if (!savedProfile) {
                 savedProfile = {
@@ -408,7 +519,7 @@ async function startQuiz() {
                     dinoName: "\uD3ED\uAD70 \uD64D\uC8FC\uC740\uC0AC\uC6B0\uB8E8\uC2A4",
                     dinoEmoji: "\uD83E\uDD96",
                     dinoDesc: "",
-                    code: "BOSS00",
+                    code: BOSS_CODE,
                     age: 99,
                     weight: 9999,
                     score: 999999,
@@ -592,6 +703,8 @@ function populateDashboard() {
     elMyCode.innerText = savedProfile.code;
 
     renderRanking();
+    applyAppControls();
+    fetchBossControls().catch(e => console.error("Failed to fetch app controls", e));
 }
 
 async function handleCodeSubmit() {
@@ -935,6 +1048,7 @@ function showDinoDetail() {
 async function showBossPersonalPage() {
     document.body.className = 'theme-jurassic';
     showScreen(screenBossPersonal);
+    await fetchBossControls().catch(e => console.error("Failed to fetch boss controls", e));
 
     // 데이터 불러오기
     try {
@@ -1063,6 +1177,28 @@ dashDinoProfile.addEventListener('click', showDinoDetail);
 // Boss Actions
 const btnBossSendMsg = document.getElementById('btn-boss-send-msg');
 const bossMessageInput = document.getElementById('boss-message-input');
+const btnToggleGrowth = document.getElementById('btn-toggle-growth');
+const btnToggleReset = document.getElementById('btn-toggle-reset');
+
+async function handleBossControlToggle(controlKey, button) {
+    if (!button) return;
+
+    button.disabled = true;
+    try {
+        appControls[controlKey] = !appControls[controlKey];
+        await saveBossControls();
+        updateBossControlUI();
+        applyAppControls();
+    } catch (e) {
+        console.error("Boss control save failed", e);
+        alert("버튼 설정 저장에 실패했어요.");
+    } finally {
+        button.disabled = false;
+    }
+}
+
+btnToggleGrowth?.addEventListener('click', () => handleBossControlToggle('growthEnabled', btnToggleGrowth));
+btnToggleReset?.addEventListener('click', () => handleBossControlToggle('resetEnabled', btnToggleReset));
 
 if (btnBossSendMsg) {
     btnBossSendMsg.addEventListener('click', async () => {
@@ -1074,13 +1210,18 @@ if (btnBossSendMsg) {
 
         try {
             const timestamp = Date.now();
-            const payload = msg + "||" + timestamp;
+            appControls.message = msg;
+            appControls.messageTs = String(timestamp);
+            await saveBossControls();
+            alert("보스 메시지가 온 마을에 내려갔습니다!");
+            bossMessageInput.value = "";
+            return;
             await supabaseClient.from('rankings').upsert({
-                code: 'BOSS00',
+                code: BOSS_CODE,
                 name: '홍주은',
-                student_id: '22411923',
+                student_id: BOSS_STUDENT_ID,
                 dino_name: '폭군 홍주은사우루스',
-                dino_desc: payload,
+                dino_desc: serializeBossControls(),
                 age: 99,
                 weight: 9999,
                 score: 999999
@@ -1136,14 +1277,27 @@ btnResetAll.addEventListener('click', async () => {
 let lastBossMessageTimestamp = "";
 async function checkBossMessage() {
     // 보스 계정이면 자기 자신 알림 띄우지 않음
-    if (savedProfile && savedProfile.code === "BOSS00") return;
+    if (savedProfile && savedProfile.code === BOSS_CODE) return;
 
     try {
         const { data, error } = await supabaseClient
             .from('rankings')
             .select('dino_desc')
-            .eq('code', 'BOSS00')
+            .eq('code', BOSS_CODE)
             .maybeSingle();
+
+        if (data && data.dino_desc) {
+            const controls = parseBossControls(data.dino_desc);
+            appControls = controls;
+            applyAppControls();
+            if (controls.message && lastBossMessageTimestamp !== controls.messageTs) {
+                if (lastBossMessageTimestamp !== "") {
+                    showGlobalNotification(controls.message);
+                }
+                lastBossMessageTimestamp = controls.messageTs;
+            }
+            return;
+        }
 
         if (data && data.dino_desc && data.dino_desc.includes("||")) {
             const [currentMsg, ts] = data.dino_desc.split("||");
