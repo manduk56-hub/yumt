@@ -211,7 +211,6 @@ const screenFusion = document.getElementById('screen-fusion');
 const screenLoading = document.getElementById('screen-loading');
 const screenResult = document.getElementById('screen-result');
 const screenDashboard = document.getElementById('screen-dashboard');
-const screenLocation = document.getElementById('screen-location');
 const screenSchedule = document.getElementById('screen-schedule');
 const screenGrowth = document.getElementById('screen-growth');
 const screenBossInfo = document.getElementById('screen-boss-info');
@@ -234,11 +233,9 @@ const btnRestart = document.getElementById('btn-restart');
 const btnConfirm = document.getElementById('btn-confirm');
 const btnResetAll = document.getElementById('btn-reset-all');
 
-const btnNavLocation = document.getElementById('btn-nav-location');
 const btnNavSchedule = document.getElementById('btn-nav-schedule');
 const btnNavGrowth = document.getElementById('btn-nav-growth');
 const btnNavBoss = document.getElementById('btn-nav-boss');
-const btnBackLoc = document.getElementById('btn-back-loc');
 const btnBackSch = document.getElementById('btn-back-sch');
 const btnBackGrowth = document.getElementById('btn-back-growth');
 const btnBackDetail = document.getElementById('btn-back-detail');
@@ -270,6 +267,68 @@ try {
 } catch (e) { }
 
 // --- Functions ---
+function isCompletedProfile(profile) {
+    if (!profile) return false;
+    return (profile.score || 0) > 0 || Boolean(profile.dinoName && profile.dinoEmoji && profile.dinoDesc);
+}
+
+function getStoredProfileForUser(name, id) {
+    const keys = [
+        `dino_user_${name}_${id}`,
+        'dinoProfile'
+    ];
+
+    for (const key of keys) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) continue;
+
+            const profile = JSON.parse(raw);
+            if (profile && profile.name === name && profile.studentId === id) {
+                return profile;
+            }
+        } catch (e) { }
+    }
+
+    return null;
+}
+
+function applyDinoDetailsFromCatalog(profile) {
+    if (!profile || !profile.dinoName) return profile;
+
+    for (const type in dinoTypes) {
+        for (const d of dinoTypes[type]) {
+            if (profile.dinoEmoji === d.emoji && profile.dinoName.includes(d.name)) {
+                profile.skills = d.skills;
+                profile.role = d.role;
+                profile.mtTip = d.mtTip;
+                return profile;
+            }
+        }
+    }
+
+    return profile;
+}
+
+function buildProfileFromRanking(data) {
+    return applyDinoDetailsFromCatalog({
+        name: data.name,
+        studentId: data.student_id,
+        dinoName: data.dino_name,
+        dinoEmoji: data.dino_emoji,
+        dinoDesc: data.dino_desc,
+        code: data.code,
+        age: data.age,
+        weight: data.weight,
+        score: data.score,
+        coins: data.coins ?? 0,
+        usedCodes: [],
+        skills: [],
+        role: "지킴이",
+        mtTip: "다시 오신 것을 환영합니다."
+    });
+}
+
 async function init() {
     try {
         if (savedProfile) {
@@ -285,10 +344,14 @@ async function init() {
 
             const isValid = await Promise.race([validatePromise, timeoutPromise]);
 
-            if (isValid) {
+            if (isValid && isCompletedProfile(savedProfile)) {
                 document.body.className = 'theme-jurassic';
                 populateDashboard();
                 showScreen(screenDashboard);
+            } else if (isValid) {
+                inputName.value = savedProfile.name || '';
+                inputId.value = savedProfile.studentId || '';
+                showScreen(screenIntro);
             } else {
                 localStorage.removeItem('dinoProfile');
                 savedProfile = null;
@@ -317,18 +380,34 @@ async function validateProfileWithDB() {
         if (error) throw error;
 
         if (data) {
+            const localProfileWasComplete = isCompletedProfile(savedProfile);
+            const dbProfileIsComplete = isCompletedProfile({
+                score: data.score,
+                dinoName: data.dino_name,
+                dinoEmoji: data.dino_emoji,
+                dinoDesc: data.dino_desc
+            });
+
+            if (localProfileWasComplete && !dbProfileIsComplete) {
+                saveProfileToCloud(savedProfile);
+                return true;
+            }
+
+            savedProfile = buildProfileFromRanking(data);
+
             // DB 데이터가 존재하면 최신 정보(점수, 나이, 무게, 코드 등)로 동기화
             savedProfile.score = data.score;
             savedProfile.age = data.age;
             savedProfile.weight = data.weight;
             savedProfile.code = data.code;
-            savedProfile.coins = savedProfile.coins ?? 3;
+            savedProfile.coins = data.coins ?? savedProfile.coins ?? 0;
 
             // 공룡 이름/설명 등도 혹시 바뀌었을 수 있으니 업데이트
             savedProfile.dinoName = data.dino_name;
             savedProfile.dinoEmoji = data.dino_emoji;
             savedProfile.dinoDesc = data.dino_desc;
 
+            savedProfile = buildProfileFromRanking(data);
             localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
             return true;
         } else {
@@ -407,6 +486,17 @@ async function startQuiz() {
     // UI 피드백 추가
     btnStart.disabled = true;
     const originalBtnText = btnStart.innerText;
+    const localProfile = getStoredProfileForUser(userName, studentId);
+    if (isCompletedProfile(localProfile)) {
+        savedProfile = applyDinoDetailsFromCatalog(localProfile);
+        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+        document.body.className = 'theme-jurassic';
+        populateDashboard();
+        showScreen(screenDashboard);
+        btnStart.disabled = false;
+        btnStart.innerText = originalBtnText;
+        return;
+    }
     btnStart.innerText = "참석자 확인 중...";
 
     // [Special Case] 홍주은사우루스 체크
@@ -444,6 +534,8 @@ async function startQuiz() {
 
         if (data) {
             // 데이터가 있다면 가져오기
+            savedProfile = buildProfileFromRanking(data);
+            /*
             savedProfile = {
                 name: data.name,
                 studentId: data.student_id,
@@ -454,7 +546,7 @@ async function startQuiz() {
                 age: data.age,
                 weight: data.weight,
                 score: data.score,
-                coins: data.coins ?? 3,
+                coins: data.coins ?? 0,
                 usedCodes: [],
                 skills: [],
                 role: "지킴이",
@@ -471,18 +563,46 @@ async function startQuiz() {
                     }
                 }
             }
+            */
 
+            savedProfile = buildProfileFromRanking(data);
             localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
-            document.body.className = 'theme-jurassic';
-            populateDashboard();
-            showScreen(screenDashboard);
-            return;
+
+            if (isCompletedProfile(savedProfile)) {
+                const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
+                localStorage.setItem(userKey, JSON.stringify(savedProfile));
+                document.body.className = 'theme-jurassic';
+                populateDashboard();
+                showScreen(screenDashboard);
+                return;
+            }
         }
     } catch (e) {
         console.error("데이터 조회 실패:", e);
     }
 
     // 데이터가 없으면 설문 시작 (새로운 유저)
+    if (!savedProfile || savedProfile.name !== userName || savedProfile.studentId !== studentId) {
+        savedProfile = {
+            name: userName,
+            studentId: studentId,
+            dinoName: "",
+            dinoEmoji: "",
+            dinoDesc: "",
+            code: generateCode(),
+            age: 0,
+            weight: 0,
+            score: 0,
+            coins: 0,
+            usedCodes: [],
+            skills: [],
+            role: "",
+            mtTip: ""
+        };
+        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+        await saveProfileToCloud(savedProfile);
+    }
+
     currentQuestionIndex = 0;
     scores = {
         type: { aggressive: 0, gentle: 0, weird: 0 }
@@ -570,6 +690,7 @@ function setResultBackground() {
 }
 function generateResult() {
     try {
+        const existingProfile = savedProfile || {};
         const topType = getHighestKey(scores.type);
 
         setResultBackground();
@@ -590,20 +711,23 @@ function generateResult() {
             dinoName: `${randomAdjective} ${matchedDino.name}`,
             dinoEmoji: matchedDino.emoji,
             dinoDesc: matchedDino.desc,
-            code: generateCode(),
+            code: existingProfile.code || generateCode(),
             age: 10,
             weight: 500,
             score: 1000,
-            coins: 3,
-            usedCodes: [],
+            coins: existingProfile.coins ?? 0,
+            usedCodes: existingProfile.usedCodes || [],
             skills: matchedDino.skills,
             role: matchedDino.role,
             mtTip: matchedDino.mtTip
         };
+
+        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
     } catch (err) {
         console.error("결과 생성 중 오류:", err);
         // 기본값 설정으로 튕김 방지
-        savedProfile = { name: userName, studentId: studentId, dinoName: "용감한 공룡", dinoEmoji: "🦖", code: "ERR000", coins: 3 };
+        savedProfile = { name: userName, studentId: studentId, dinoName: "용감한 공룡", dinoEmoji: "🦖", code: "ERR000", coins: 0 };
+        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
     }
 }
 
@@ -708,7 +832,7 @@ async function saveProfileToCloud(profile) {
                 age: profile.age,
                 weight: profile.weight,
                 score: profile.score,
-                coins: profile.coins || 3
+                coins: profile.coins ?? 0
             });
         if (error) throw error;
         console.log("Cloud save successful");
@@ -780,7 +904,7 @@ function showDinoDetail() {
 
     const elDetailCoins = document.getElementById('detail-coins');
     if (elDetailCoins) {
-        elDetailCoins.innerText = savedProfile.coins ?? 3;
+        elDetailCoins.innerText = savedProfile.coins ?? 0;
     }
 
     // elDetailSkills is removed from HTML
@@ -827,6 +951,24 @@ async function showBossPersonalPage() {
     }
 }
 
+function grantSurveyCompletionCoins() {
+    if (!savedProfile) return false;
+
+    const hasCompletedSurvey = (savedProfile.score || 0) > 0;
+    const hasNoCoinsYet = (savedProfile.coins ?? 0) === 0;
+
+    if (!hasCompletedSurvey || !hasNoCoinsYet) return false;
+
+    savedProfile.coins = 3;
+    localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+
+    const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
+    localStorage.setItem(userKey, JSON.stringify(savedProfile));
+
+    saveProfileToCloud(savedProfile);
+    return true;
+}
+
 // --- Event Listeners ---
 btnStart.addEventListener('click', startQuiz);
 inputId.addEventListener('keypress', (e) => {
@@ -867,6 +1009,7 @@ btnConfirm.addEventListener('click', () => {
 });
 
 btnToDashboard.addEventListener('click', () => {
+    grantSurveyCompletionCoins();
     populateDashboard();
     showScreen(screenDashboard);
 });
@@ -880,10 +1023,8 @@ btnWarningNext.addEventListener('click', () => showScreen(screenBossInfo));
 btnSubmitCode.addEventListener('click', handleCodeSubmit);
 
 // Menu Navigations
-btnNavLocation.addEventListener('click', () => showScreen(screenLocation));
 btnNavSchedule.addEventListener('click', () => showScreen(screenSchedule));
 btnNavGrowth.addEventListener('click', () => showScreen(screenGrowth));
-btnBackLoc.addEventListener('click', () => showScreen(screenDashboard));
 btnBackSch.addEventListener('click', () => showScreen(screenDashboard));
 btnBackGrowth.addEventListener('click', () => showScreen(screenDashboard));
 btnBackDetail.addEventListener('click', () => showScreen(screenDashboard));
