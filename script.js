@@ -282,6 +282,7 @@ function applyDinoDetailsFromCatalog(profile) {
 }
 
 function buildProfileFromRanking(data) {
+    const usedCodes = normalizeUsedCodes(data.used_codes);
     return applyDinoDetailsFromCatalog({
         name: data.name,
         studentId: data.student_id,
@@ -293,7 +294,8 @@ function buildProfileFromRanking(data) {
         weight: data.weight,
         score: data.score,
         coins: data.coins ?? 0,
-        usedCodes: normalizeUsedCodes(data.used_codes),
+        codeExchangeCount: data.code_exchange_count ?? usedCodes.length,
+        usedCodes,
         skills: [],
         role: "지킴이",
         mtTip: "다시 오신 것을 환영합니다."
@@ -649,6 +651,8 @@ async function handleCodeSubmit() {
             throw new Error("rankings.used_codes column is required for duplicate-code prevention");
         }
 
+        const coinsBeforeRedeem = savedProfile.coins ?? 0;
+        const exchangeCountBeforeRedeem = savedProfile.codeExchangeCount ?? (savedProfile.usedCodes || []).length;
         const { data: redeemedProfile, error: redeemError } = await supabaseClient.rpc('redeem_friend_code', {
             p_name: savedProfile.name,
             p_student_id: savedProfile.studentId,
@@ -659,6 +663,15 @@ async function handleCodeSubmit() {
         if (!redeemedProfile) throw new Error("Growth save failed");
 
         savedProfile = buildProfileFromRanking(Array.isArray(redeemedProfile) ? redeemedProfile[0] : redeemedProfile);
+        const exchangeCountAfterRedeem = savedProfile.codeExchangeCount ?? (savedProfile.usedCodes || []).length;
+        let earnedCoins = (savedProfile.coins ?? 0) - coinsBeforeRedeem;
+        const reachedCoinRewardStep = exchangeCountAfterRedeem > exchangeCountBeforeRedeem && exchangeCountAfterRedeem % 5 === 0;
+
+        if (earnedCoins <= 0 && reachedCoinRewardStep) {
+            savedProfile.coins = coinsBeforeRedeem + 1;
+            const savedCoinReward = await saveProfileToCloud(savedProfile, { verify: true, requireCoins: true });
+            earnedCoins = savedCoinReward ? 1 : 0;
+        }
 
         elValAge.innerText = savedProfile.age;
         elValWeight.innerText = savedProfile.weight;
@@ -668,6 +681,9 @@ async function handleCodeSubmit() {
         inputFriendCode.value = "";
 
         renderRanking();
+        if (earnedCoins > 0) {
+            showCoinRewardNotification(earnedCoins);
+        }
     } catch (e) {
         console.error("Code validation failed", e);
         const message = e.message && e.message.includes('used_codes')
@@ -699,6 +715,9 @@ async function createProfileInCloud(profile) {
 
         if (hasCoinsColumn) payload.coins = profile.coins ?? 0;
         if (hasUsedCodesColumn) payload.used_codes = profile.usedCodes || [];
+        if (Object.prototype.hasOwnProperty.call(profile, 'codeExchangeCount')) {
+            payload.code_exchange_count = profile.codeExchangeCount ?? 0;
+        }
 
         try {
             let { data, error } = await supabaseClient
@@ -722,6 +741,17 @@ async function createProfileInCloud(profile) {
             if (error && error.code === 'PGRST204' && String(error.message || '').includes('used_codes')) {
                 hasUsedCodesColumn = false;
                 delete payload.used_codes;
+                const retry = await supabaseClient
+                    .from('rankings')
+                    .insert(payload)
+                    .select('*')
+                    .maybeSingle();
+                data = retry.data;
+                error = retry.error;
+            }
+
+            if (error && error.code === 'PGRST204' && String(error.message || '').includes('code_exchange_count')) {
+                delete payload.code_exchange_count;
                 const retry = await supabaseClient
                     .from('rankings')
                     .insert(payload)
@@ -776,6 +806,9 @@ async function saveProfileToCloud(profile, options = {}) {
     if (hasUsedCodesColumn && Object.prototype.hasOwnProperty.call(profile, 'usedCodes')) {
         payload.used_codes = profile.usedCodes || [];
     }
+    if (Object.prototype.hasOwnProperty.call(profile, 'codeExchangeCount')) {
+        payload.code_exchange_count = profile.codeExchangeCount ?? 0;
+    }
 
     try {
         let { data, error } = await supabaseClient
@@ -805,6 +838,17 @@ async function saveProfileToCloud(profile, options = {}) {
                 throw error;
             }
             delete payload.used_codes;
+            const retry = await supabaseClient
+                .from('rankings')
+                .upsert(payload, { onConflict: 'name,student_id' })
+                .select('*')
+                .maybeSingle();
+            data = retry.data;
+            error = retry.error;
+        }
+
+        if (error && error.code === 'PGRST204' && String(error.message || '').includes('code_exchange_count')) {
+            delete payload.code_exchange_count;
             const retry = await supabaseClient
                 .from('rankings')
                 .upsert(payload, { onConflict: 'name,student_id' })
@@ -1111,6 +1155,43 @@ async function checkBossMessage() {
             }
         }
     } catch (e) { }
+}
+
+function showCoinRewardNotification(amount = 1) {
+    const existing = document.getElementById('coin-reward-notification');
+    if (existing) existing.remove();
+
+    const noti = document.createElement('div');
+    noti.id = 'coin-reward-notification';
+    noti.innerText = amount === 1 ? '1\uCF54\uC778\uC774 \uC9C0\uAE09\uB410\uC5B4\uC694!' : `${amount}\uCF54\uC778\uC774 \uC9C0\uAE09\uB410\uC5B4\uC694!`;
+    noti.style.position = 'fixed';
+    noti.style.left = '50%';
+    noti.style.top = '50%';
+    noti.style.transform = 'translate(-50%, -50%) scale(0.95)';
+    noti.style.zIndex = '20000';
+    noti.style.padding = '22px 34px';
+    noti.style.borderRadius = '18px';
+    noti.style.background = 'rgba(20, 20, 20, 0.92)';
+    noti.style.color = '#ffeb3b';
+    noti.style.fontSize = '1.45rem';
+    noti.style.fontWeight = '900';
+    noti.style.textAlign = 'center';
+    noti.style.boxShadow = '0 18px 50px rgba(0, 0, 0, 0.4)';
+    noti.style.border = '2px solid rgba(255, 235, 59, 0.85)';
+    noti.style.opacity = '0';
+    noti.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+
+    (screenGrowth || document.body).appendChild(noti);
+    requestAnimationFrame(() => {
+        noti.style.opacity = '1';
+        noti.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+
+    setTimeout(() => {
+        noti.style.opacity = '0';
+        noti.style.transform = 'translate(-50%, -50%) scale(0.96)';
+        setTimeout(() => noti.remove(), 300);
+    }, 2500);
 }
 
 function showGlobalNotification(msg) {

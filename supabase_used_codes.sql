@@ -5,15 +5,20 @@ alter table public.rankings
 add column if not exists coins integer not null default 0;
 
 alter table public.rankings
+add column if not exists code_exchange_count integer not null default 0;
+
+alter table public.rankings
 alter column used_codes set default '{}',
 alter column coins set default 0,
+alter column code_exchange_count set default 0,
 alter column score set default 0,
 alter column age set default 0,
 alter column weight set default 0;
 
 alter table public.rankings
 alter column used_codes set not null,
-alter column coins set not null;
+alter column coins set not null,
+alter column code_exchange_count set not null;
 
 create unique index if not exists rankings_name_student_unique
 on public.rankings (name, student_id);
@@ -37,11 +42,18 @@ alter table public.rankings
 drop constraint if exists rankings_coins_nonnegative,
 add constraint rankings_coins_nonnegative check (coins >= 0);
 
+alter table public.rankings
+drop constraint if exists rankings_code_exchange_count_nonnegative,
+add constraint rankings_code_exchange_count_nonnegative check (code_exchange_count >= 0);
+
 comment on column public.rankings.used_codes is
 'Codes this user has already redeemed. Used by the client to prevent duplicate code rewards.';
 
 comment on column public.rankings.coins is
 'Coins earned by the user. Stored in Supabase as the source of truth.';
+
+comment on column public.rankings.code_exchange_count is
+'Number of other-user codes this user has redeemed. Stored only in Supabase and not shown in the site UI.';
 
 create or replace function public.redeem_friend_code(
     p_name text,
@@ -57,6 +69,7 @@ declare
     current_user_row public.rankings%rowtype;
     friend_row public.rankings%rowtype;
     updated_user_row public.rankings%rowtype;
+    next_exchange_count integer;
 begin
     select *
     into current_user_row
@@ -92,8 +105,12 @@ begin
         raise exception 'CANNOT_REDEEM_OWN_CODE';
     end if;
 
+    next_exchange_count := coalesce(current_user_row.code_exchange_count, array_length(current_user_row.used_codes, 1), 0) + 1;
+
     update public.rankings
     set used_codes = array_append(current_user_row.used_codes, p_friend_code),
+        code_exchange_count = next_exchange_count,
+        coins = coalesce(coins, 0) + case when next_exchange_count % 5 = 0 then 1 else 0 end,
         age = coalesce(age, 0) + 1,
         weight = coalesce(weight, 0) + 50,
         score = coalesce(score, 0) + 100
