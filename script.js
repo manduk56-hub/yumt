@@ -206,6 +206,7 @@ const screenLoading = document.getElementById('screen-loading');
 const screenResult = document.getElementById('screen-result');
 const screenDashboard = document.getElementById('screen-dashboard');
 const screenSchedule = document.getElementById('screen-schedule');
+const screenStorybook = document.getElementById('screen-storybook');
 const screenGrowth = document.getElementById('screen-growth');
 const screenBossInfo = document.getElementById('screen-boss-info');
 const screenBossWarning = document.getElementById('screen-boss-warning');
@@ -230,7 +231,9 @@ const btnResetAll = document.getElementById('btn-reset-all');
 const btnNavSchedule = document.getElementById('btn-nav-schedule');
 const btnNavGrowth = document.getElementById('btn-nav-growth');
 const btnNavBoss = document.getElementById('btn-nav-boss');
+const btnNavStorybook = document.getElementById('btn-nav-storybook');
 const btnBackSch = document.getElementById('btn-back-sch');
+const btnBackStorybook = document.getElementById('btn-back-storybook');
 const btnBackGrowth = document.getElementById('btn-back-growth');
 const btnBackDetail = document.getElementById('btn-back-detail');
 const btnToDashboard = document.getElementById('btn-to-dashboard');
@@ -694,7 +697,6 @@ function populateDashboard() {
     document.getElementById('dash-user-info').innerText = `와줘서 고마워요! ${savedProfile.dinoName}! 우리 엠티를 꼭 지켜주세요!`;
     document.getElementById('dash-emoji').innerText = savedProfile.dinoEmoji || '🦖';
     document.getElementById('dash-dino-name').innerText = savedProfile.dinoName;
-    document.getElementById('dash-dino-desc').innerText = savedProfile.dinoDesc || '';
 
     // Growth Dashboard
     elGrowthDinoName.innerText = `${savedProfile.name} 공룡 친구 (${savedProfile.dinoName})`;
@@ -1167,8 +1169,10 @@ btnSubmitCode.addEventListener('click', handleCodeSubmit);
 
 // Menu Navigations
 btnNavSchedule.addEventListener('click', () => showScreen(screenSchedule));
+btnNavStorybook?.addEventListener('click', () => showScreen(screenStorybook));
 btnNavGrowth.addEventListener('click', () => showScreen(screenGrowth));
 btnBackSch.addEventListener('click', () => showScreen(screenDashboard));
+btnBackStorybook?.addEventListener('click', () => showScreen(screenDashboard));
 btnBackGrowth.addEventListener('click', () => showScreen(screenDashboard));
 btnBackDetail.addEventListener('click', () => showScreen(screenDashboard));
 

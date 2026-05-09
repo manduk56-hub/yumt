@@ -82,10 +82,10 @@
             <div style="position: relative; z-index: 1; text-align: center; color: white;">
                 <h1
                     style="font-size: 5rem; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 20px #ff0000; margin-bottom: 20px;">
-                    어라..?</h1>
+                    엥?</h1>
                 <p
                     style="font-size: 1.5rem; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 4px #000; opacity: 0.8;">
-                    뭔가... 이상한 기운이 느껴집니다.</p>
+                    뭐고 이거.</p>
             </div>
         </section>
 
@@ -137,7 +137,7 @@
                     <div style="font-size: 5rem; margin: 10px 0;">🦖</div>
                     <h3 style="color: #d32f2f; border: none; font-size: 1.8rem; margin-bottom: 10px;">폭군 홍주은사우루스</h3>
                     <p class="map-desc" style="font-weight: bold; color: #333; font-size: 1.1rem; line-height: 1.4;">
-                        "이 엠티의 모든 고기와 간식은 다 내 거다! <br>아무도 즐겁게 놀 수 없어! 크와앙!"
+                        이 엠티의 모든 고기와 간식은 다 내 거다! <br>마라탕 갖고와!!
                     </p>
                 </div>
 
@@ -159,6 +159,7 @@
         <!-- 5. 대시보드 화면 (메인 메뉴) -->
         <section id="screen-dashboard" class="screen hidden">
             <div class="dashboard-container wooden-board">
+                <button id="btn-nav-storybook" class="storybook-button">스토리북</button>
                 <div class="dash-header">
                     <h2>살고싶어!</h2>
                     <p id="dash-user-info">제발 도와주세요! 엠티가 위험해요...</p>
@@ -169,7 +170,6 @@
                     <div class="profile-emoji" id="dash-emoji">🦖</div>
                     <div class="profile-info">
                         <h3 id="dash-dino-name">열정폭발 티라노사우루스</h3>
-                        <p id="dash-dino-desc">항상 에너지가 넘치고 무리를 이끄는 것을 좋아하는 최고의 골목대장입니다!</p>
                     </div>
                 </div>
 
@@ -188,6 +188,12 @@
         </section>
 
         <!-- 6. 영토 통치 일정표 화면 -->
+        <section id="screen-storybook" class="screen hidden">
+            <div class="dashboard-container wooden-board">
+                <button id="btn-back-storybook" class="btn-base btn-back mt-20">돌아가기</button>
+            </div>
+        </section>
+
         <section id="screen-schedule" class="screen hidden">
             <div class="dashboard-container wooden-board">
                 <div class="dash-header">
