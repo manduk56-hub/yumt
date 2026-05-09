@@ -189,12 +189,6 @@ const SUPABASE_URL = "https://xtymdgdnbeukkgwfmgzu.supabase.co";
 const SUPABASE_KEY = "sb_publishable_ixzG850Es4Amfs_32MZSlg_xwx5XKja"; // Anon Key
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Mock Rankings (네트워크 오류 대비용 기본 데이터)
-const mockRankings = [
-    { name: "엠티 수호 대장", dinoName: "불도저 같은 안킬로사우루스", score: 2500, age: 25, weight: 1250 },
-    { name: "공룡 친구 1호", dinoName: "자유로운 영혼 프테라노돈", score: 1800, age: 18, weight: 900 }
-];
-
 // --- State ---
 let currentQuestionIndex = 0;
 let userName = "";
@@ -259,38 +253,15 @@ const elDetailSkills = document.getElementById('detail-skills');
 const elDetailMtTip = document.getElementById('detail-mt-tip');
 const elDetailDesc = document.getElementById('detail-desc');
 
-// Check for saved profile on load
 let savedProfile = null;
-try {
-    const data = localStorage.getItem('dinoProfile');
-    if (data) savedProfile = JSON.parse(data);
-} catch (e) { }
+let hasCoinsColumn = true;
+let hasUsedCodesColumn = true;
+let isPendingNewProfile = false;
 
 // --- Functions ---
 function isCompletedProfile(profile) {
     if (!profile) return false;
     return (profile.score || 0) > 0 || Boolean(profile.dinoName && profile.dinoEmoji && profile.dinoDesc);
-}
-
-function getStoredProfileForUser(name, id) {
-    const keys = [
-        `dino_user_${name}_${id}`,
-        'dinoProfile'
-    ];
-
-    for (const key of keys) {
-        try {
-            const raw = localStorage.getItem(key);
-            if (!raw) continue;
-
-            const profile = JSON.parse(raw);
-            if (profile && profile.name === name && profile.studentId === id) {
-                return profile;
-            }
-        } catch (e) { }
-    }
-
-    return null;
 }
 
 function applyDinoDetailsFromCatalog(profile) {
@@ -322,105 +293,43 @@ function buildProfileFromRanking(data) {
         weight: data.weight,
         score: data.score,
         coins: data.coins ?? 0,
-        usedCodes: [],
+        usedCodes: normalizeUsedCodes(data.used_codes),
         skills: [],
         role: "지킴이",
         mtTip: "다시 오신 것을 환영합니다."
     });
 }
 
+function normalizeUsedCodes(value) {
+    if (Array.isArray(value)) return value.map(String);
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) return parsed.map(String);
+        } catch (e) {
+            return value.split(',').map(code => code.trim()).filter(Boolean);
+        }
+    }
+    return [];
+}
+
 async function init() {
-    try {
-        if (savedProfile) {
-            // [Special Case] 홍주은사우루스 체크
-            if (savedProfile.name === "홍주은" && savedProfile.studentId === "22411923") {
-                showBossPersonalPage();
-                return;
-            }
-
-            // 배경에서 유효성 검사 진행 (로딩 화면 없이)
-            const validatePromise = validateProfileWithDB();
-            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(true), 5000));
-
-            const isValid = await Promise.race([validatePromise, timeoutPromise]);
-
-            if (isValid && isCompletedProfile(savedProfile)) {
-                document.body.className = 'theme-jurassic';
-                populateDashboard();
-                showScreen(screenDashboard);
-            } else if (isValid) {
-                inputName.value = savedProfile.name || '';
-                inputId.value = savedProfile.studentId || '';
-                showScreen(screenIntro);
-            } else {
-                localStorage.removeItem('dinoProfile');
-                savedProfile = null;
-                showScreen(screenIntro);
-            }
-        } else {
-            showScreen(screenIntro);
-        }
-    } catch (err) {
-        console.error("초기화 중 오류:", err);
-        showScreen(screenIntro);
-    }
+    savedProfile = null;
+    isPendingNewProfile = false;
+    showScreen(screenIntro);
 }
 
-async function validateProfileWithDB() {
-    if (!savedProfile || !savedProfile.name || !savedProfile.studentId) return false;
+async function fetchProfileFromDB(name, id) {
+    const { data, error } = await supabaseClient
+        .from('rankings')
+        .select('*')
+        .eq('name', name)
+        .eq('student_id', id)
+        .maybeSingle();
 
-    try {
-        const { data, error } = await supabaseClient
-            .from('rankings')
-            .select('*')
-            .eq('name', savedProfile.name)
-            .eq('student_id', savedProfile.studentId)
-            .maybeSingle();
-
-        if (error) throw error;
-
-        if (data) {
-            const localProfileWasComplete = isCompletedProfile(savedProfile);
-            const dbProfileIsComplete = isCompletedProfile({
-                score: data.score,
-                dinoName: data.dino_name,
-                dinoEmoji: data.dino_emoji,
-                dinoDesc: data.dino_desc
-            });
-
-            if (localProfileWasComplete && !dbProfileIsComplete) {
-                saveProfileToCloud(savedProfile);
-                return true;
-            }
-
-            savedProfile = buildProfileFromRanking(data);
-
-            // DB 데이터가 존재하면 최신 정보(점수, 나이, 무게, 코드 등)로 동기화
-            savedProfile.score = data.score;
-            savedProfile.age = data.age;
-            savedProfile.weight = data.weight;
-            savedProfile.code = data.code;
-            savedProfile.coins = data.coins ?? savedProfile.coins ?? 0;
-
-            // 공룡 이름/설명 등도 혹시 바뀌었을 수 있으니 업데이트
-            savedProfile.dinoName = data.dino_name;
-            savedProfile.dinoEmoji = data.dino_emoji;
-            savedProfile.dinoDesc = data.dino_desc;
-
-            savedProfile = buildProfileFromRanking(data);
-            localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
-            return true;
-        } else {
-            // DB에 데이터가 없으면 (삭제되었거나 조작된 데이터)
-            return false;
-        }
-    } catch (e) {
-        console.error("유효성 검사 중 오류 발생:", e);
-        // 네트워크 오류 시에는 일단 기존 로컬 데이터를 유지하도록 처리
-        return true;
-    }
+    if (error) throw error;
+    return data ? buildProfileFromRanking(data) : null;
 }
-
 
 function showScreen(screenEl) {
     if (!screenEl) return;
@@ -483,141 +392,79 @@ async function startQuiz() {
         return;
     }
 
-    // UI 피드백 추가
     btnStart.disabled = true;
     const originalBtnText = btnStart.innerText;
-    const localProfile = getStoredProfileForUser(userName, studentId);
-    if (isCompletedProfile(localProfile)) {
-        savedProfile = applyDinoDetailsFromCatalog(localProfile);
-        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
-        document.body.className = 'theme-jurassic';
-        populateDashboard();
-        showScreen(screenDashboard);
-        btnStart.disabled = false;
-        btnStart.innerText = originalBtnText;
-        return;
-    }
-    btnStart.innerText = "참석자 확인 중...";
-
-    // [Special Case] 홍주은사우루스 체크
-    if (userName === "홍주은" && studentId === "22411923") {
-        savedProfile = {
-            name: userName,
-            studentId: studentId,
-            dinoName: "폭군 홍주은사우루스",
-            dinoEmoji: "🦖",
-            code: "BOSS00"
-        };
-        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
-        showBossPersonalPage();
-
-        btnStart.disabled = false;
-        btnStart.innerText = originalBtnText;
-        return;
-    }
+    btnStart.innerText = "데이터베이스 확인 중...";
 
     try {
-        // [New] 데이터베이스(Supabase)에서 이름과 학번으로 검색
-        // 3초 타임아웃 추가
-        const fetchPromise = supabaseClient
-            .from('rankings')
-            .select('*')
-            .eq('name', userName)
-            .eq('student_id', studentId)
-            .maybeSingle();
+        if (userName === "\uD64D\uC8FC\uC740" && studentId === "22411923") {
+            savedProfile = await fetchProfileFromDB(userName, studentId);
+            if (!savedProfile) {
+                savedProfile = {
+                    name: userName,
+                    studentId: studentId,
+                    dinoName: "\uD3ED\uAD70 \uD64D\uC8FC\uC740\uC0AC\uC6B0\uB8E8\uC2A4",
+                    dinoEmoji: "\uD83E\uDD96",
+                    dinoDesc: "",
+                    code: "BOSS00",
+                    age: 99,
+                    weight: 9999,
+                    score: 999999,
+                    coins: 0
+                };
+                const saved = await saveProfileToCloud(savedProfile, { verify: true });
+                if (!saved) throw new Error('Boss profile save failed');
+            }
+            showBossPersonalPage();
+            return;
+        }
 
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve({ data: null, error: null }), 3000));
+        savedProfile = await fetchProfileFromDB(userName, studentId);
+        isPendingNewProfile = false;
 
-        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+        if (savedProfile) {
+            document.body.className = 'theme-jurassic';
+            populateDashboard();
+            showScreen(screenDashboard);
+            return;
+        }
 
-        if (error) throw error;
-
-        if (data) {
-            // 데이터가 있다면 가져오기
-            savedProfile = buildProfileFromRanking(data);
-            /*
+        if (!savedProfile) {
             savedProfile = {
-                name: data.name,
-                studentId: data.student_id,
-                dinoName: data.dino_name,
-                dinoEmoji: data.dino_emoji,
-                dinoDesc: data.dino_desc,
-                code: data.code,
-                age: data.age,
-                weight: data.weight,
-                score: data.score,
-                coins: data.coins ?? 0,
+                name: userName,
+                studentId: studentId,
+                dinoName: "",
+                dinoEmoji: "",
+                dinoDesc: "",
+                code: generateCode(),
+                age: 0,
+                weight: 0,
+                score: 0,
+                coins: 0,
                 usedCodes: [],
                 skills: [],
-                role: "지킴이",
-                mtTip: "다시 오신 것을 환영합니다!"
+                role: "",
+                mtTip: ""
             };
-
-            for (const type in dinoTypes) {
-                for (const d of dinoTypes[type]) {
-                    if (data.dino_emoji === d.emoji && data.dino_name.includes(d.name)) {
-                        savedProfile.skills = d.skills;
-                        savedProfile.role = d.role;
-                        savedProfile.mtTip = d.mtTip;
-                        break;
-                    }
-                }
-            }
-            */
-
-            savedProfile = buildProfileFromRanking(data);
-            localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
-
-            if (isCompletedProfile(savedProfile)) {
-                const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
-                localStorage.setItem(userKey, JSON.stringify(savedProfile));
-                document.body.className = 'theme-jurassic';
-                populateDashboard();
-                showScreen(screenDashboard);
-                return;
-            }
+            isPendingNewProfile = true;
         }
+
+        currentQuestionIndex = 0;
+        scores = { type: { aggressive: 0, gentle: 0, weird: 0 } };
+
+        document.getElementById('loading-spinner').innerText = '';
+        document.getElementById('loading-title').innerText = '?? ?? ???? ???? ?...';
+        document.getElementById('loading-desc').innerText = 'Supabase? ??? ???? ?????.';
+
+        showScreen(screenQuiz);
+        renderQuestion();
     } catch (e) {
-        console.error("데이터 조회 실패:", e);
+        console.error('Supabase profile check failed:', e);
+        alert('?????? ?? ?? ??? ?????. ?? ? ?? ??????.');
+    } finally {
+        btnStart.disabled = false;
+        btnStart.innerText = originalBtnText;
     }
-
-    // 데이터가 없으면 설문 시작 (새로운 유저)
-    if (!savedProfile || savedProfile.name !== userName || savedProfile.studentId !== studentId) {
-        savedProfile = {
-            name: userName,
-            studentId: studentId,
-            dinoName: "",
-            dinoEmoji: "",
-            dinoDesc: "",
-            code: generateCode(),
-            age: 0,
-            weight: 0,
-            score: 0,
-            coins: 0,
-            usedCodes: [],
-            skills: [],
-            role: "",
-            mtTip: ""
-        };
-        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
-        await saveProfileToCloud(savedProfile);
-    }
-
-    currentQuestionIndex = 0;
-    scores = {
-        type: { aggressive: 0, gentle: 0, weird: 0 }
-    };
-
-    document.getElementById('loading-spinner').innerText = '';
-    document.getElementById('loading-title').innerText = '우리 엠티를 위해 분석 중...';
-    document.getElementById('loading-desc').innerText = '어떤 귀여운 공룡 친구가 도와주러 올까요?';
-
-    // UI 복구
-    btnStart.disabled = false;
-    btnStart.innerText = "설문 시작하기";
-
-    showScreen(screenQuiz);
-    renderQuestion();
 }
 
 function renderQuestion() {
@@ -688,7 +535,7 @@ function setResultBackground() {
         bgEl.appendChild(span);
     }
 }
-function generateResult() {
+async function generateResult() {
     try {
         const existingProfile = savedProfile || {};
         const topType = getHighestKey(scores.type);
@@ -700,15 +547,15 @@ function generateResult() {
         const adjPool = adjectivesPool[topType];
         const randomAdjective = adjPool[Math.floor(Math.random() * adjPool.length)];
 
-        document.getElementById('result-name').innerText = `나는 ${matchedDino.name} 이었어!`;
+        document.getElementById('result-name').innerText = '나는 ' + matchedDino.name + ' 였어!';
         document.getElementById('dino-emoji').innerText = matchedDino.emoji;
-        document.getElementById('dino-name').innerText = `${randomAdjective} ${matchedDino.name}`;
+        document.getElementById('dino-name').innerText = randomAdjective + ' ' + matchedDino.name;
         document.getElementById('dino-description').innerText = matchedDino.desc;
 
         savedProfile = {
             name: userName,
             studentId: studentId,
-            dinoName: `${randomAdjective} ${matchedDino.name}`,
+            dinoName: randomAdjective + ' ' + matchedDino.name,
             dinoEmoji: matchedDino.emoji,
             dinoDesc: matchedDino.desc,
             code: existingProfile.code || generateCode(),
@@ -722,15 +569,12 @@ function generateResult() {
             mtTip: matchedDino.mtTip
         };
 
-        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
     } catch (err) {
-        console.error("결과 생성 중 오류:", err);
-        // 기본값 설정으로 튕김 방지
-        savedProfile = { name: userName, studentId: studentId, dinoName: "용감한 공룡", dinoEmoji: "🦖", code: "ERR000", coins: 0 };
-        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+        console.error("결과 저장 중 오류:", err);
+        alert('결과를 데이터베이스에 저장하지 못했어요. 다시 시도해주세요.');
+        showScreen(screenIntro);
     }
 }
-
 function populateDashboard() {
     if (!savedProfile) return;
     // Main Dashboard
@@ -749,101 +593,247 @@ function populateDashboard() {
 }
 
 async function handleCodeSubmit() {
-    const code = inputFriendCode.value.trim();
+    if (!savedProfile) return;
+    const code = inputFriendCode.value.trim().normalize('NFC');
+
     if (code.length !== 6) {
-        elCodeMsg.innerText = "찍진 말자 친구야";
-        elCodeMsg.style.color = "#d32f2f";
-        return;
-    }
-    if (code === savedProfile.code) {
-        elCodeMsg.innerText = "댓츠 노노~";
-        elCodeMsg.style.color = "#d32f2f";
-        return;
-    }
-    if (!savedProfile.usedCodes) savedProfile.usedCodes = [];
-    if (savedProfile.usedCodes.includes(code)) {
-        elCodeMsg.innerText = "중복은 나빠요~";
+        elCodeMsg.innerText = "\uCE5C\uAD6C \uCF54\uB4DC\uB294 6\uAE00\uC790\uC608\uC694.";
         elCodeMsg.style.color = "#d32f2f";
         return;
     }
 
-    // [New] 수퍼베이스에서 코드가 존재하는지 확인
     try {
         btnSubmitCode.disabled = true;
-        btnSubmitCode.innerText = "확인 중...";
+        btnSubmitCode.innerText = "\uD655\uC778 \uC911...";
 
-        const { data, error } = await supabaseClient
-            .from('rankings')
-            .select('code')
-            .eq('code', code)
-            .single();
+        const latestProfile = await fetchProfileFromDB(savedProfile.name, savedProfile.studentId);
+        if (!latestProfile) throw new Error("Current profile missing in Supabase");
+        savedProfile = latestProfile;
 
-        if (error || !data) {
-            elCodeMsg.innerText = "그건 없지롱";
+        if (code === savedProfile.code) {
+            elCodeMsg.innerText = "\uC790\uAE30 \uCF54\uB4DC\uB294 \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC5B4\uC694.";
             elCodeMsg.style.color = "#d32f2f";
-            btnSubmitCode.disabled = false;
-            btnSubmitCode.innerText = "강해지기";
             return;
         }
 
-        // 코드가 존재함 -> 성장 처리
-        savedProfile.usedCodes.push(code);
-        savedProfile.age += 1;
-        savedProfile.weight += 50;
-        savedProfile.score += 100;
+        if ((savedProfile.usedCodes || []).map(c => String(c).normalize('NFC')).includes(code)) {
+            elCodeMsg.innerText = "\uC774\uBBF8 \uC0AC\uC6A9\uD55C \uCF54\uB4DC\uC608\uC694.";
+            elCodeMsg.style.color = "#d32f2f";
+            return;
+        }
 
-        // 로컬 저장
-        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .select('code,name,student_id')
+            .eq('code', code)
+            .limit(5);
 
-        // 클라우드 저장
-        await saveProfileToCloud(savedProfile);
+        if (error) throw error;
+        const matchingUsers = data || [];
+        if (matchingUsers.length === 0) {
+            elCodeMsg.innerText = "\uB4F1\uB85D\uB418\uC9C0 \uC54A\uC740 \uCF54\uB4DC\uC608\uC694.";
+            elCodeMsg.style.color = "#d32f2f";
+            return;
+        }
+
+        const isOnlyCurrentUserCode = matchingUsers.every(user =>
+            user.name === savedProfile.name && user.student_id === savedProfile.studentId
+        );
+        if (isOnlyCurrentUserCode) {
+            elCodeMsg.innerText = "\uC790\uAE30 \uCF54\uB4DC\uB294 \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC5B4\uC694.";
+            elCodeMsg.style.color = "#d32f2f";
+            return;
+        }
+
+        if (!hasUsedCodesColumn) {
+            throw new Error("rankings.used_codes column is required for duplicate-code prevention");
+        }
+
+        const { data: redeemedProfile, error: redeemError } = await supabaseClient.rpc('redeem_friend_code', {
+            p_name: savedProfile.name,
+            p_student_id: savedProfile.studentId,
+            p_friend_code: code
+        });
+
+        if (redeemError) throw redeemError;
+        if (!redeemedProfile) throw new Error("Growth save failed");
+
+        savedProfile = buildProfileFromRanking(Array.isArray(redeemedProfile) ? redeemedProfile[0] : redeemedProfile);
 
         elValAge.innerText = savedProfile.age;
         elValWeight.innerText = savedProfile.weight;
 
-        elCodeMsg.innerText = "약속 성공! 용기가 더 생겼어요! 이제 홍주은도 무섭지 않아!";
+        elCodeMsg.innerText = "\uC131\uACF5! \uB370\uC774\uD130\uBCA0\uC774\uC2A4\uC5D0 \uC131\uC7A5\uC774 \uBC18\uC601\uB410\uC5B4\uC694.";
         elCodeMsg.style.color = "#388e3c";
         inputFriendCode.value = "";
 
         renderRanking();
-
     } catch (e) {
         console.error("Code validation failed", e);
-        elCodeMsg.innerText = "연결이 원활하지 않아요. 잠시 후 다시 시도해주세요.";
+        const message = e.message && e.message.includes('used_codes')
+            ? "\uC911\uBCF5 \uC0AC\uC6A9 \uBC29\uC9C0\uB97C \uC704\uD55C DB \uCEEC\uB7FC used_codes\uAC00 \uD544\uC694\uD574\uC694. \uB9C8\uC774\uADF8\uB808\uC774\uC158\uC744 \uBA3C\uC800 \uC801\uC6A9\uD574\uC8FC\uC138\uC694."
+            : "\uB370\uC774\uD130\uBCA0\uC774\uC2A4 \uD655\uC778 \uB610\uB294 \uC800\uC7A5\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694. \uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.";
+        elCodeMsg.innerText = message;
         elCodeMsg.style.color = "#d32f2f";
     } finally {
         btnSubmitCode.disabled = false;
-        btnSubmitCode.innerText = "용기 얻기";
+        btnSubmitCode.innerText = "\uD798\uAE30 \uBC1B\uAE30";
     }
 }
 
-async function saveProfileToCloud(profile) {
-    if (!profile) return;
+async function createProfileInCloud(profile) {
+    if (!profile) return false;
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+        const payload = {
+            code: profile.code,
+            name: profile.name,
+            student_id: profile.studentId,
+            dino_name: profile.dinoName,
+            dino_emoji: profile.dinoEmoji,
+            dino_desc: profile.dinoDesc,
+            age: profile.age,
+            weight: profile.weight,
+            score: profile.score
+        };
+
+        if (hasCoinsColumn) payload.coins = profile.coins ?? 0;
+        if (hasUsedCodesColumn) payload.used_codes = profile.usedCodes || [];
+
+        try {
+            let { data, error } = await supabaseClient
+                .from('rankings')
+                .insert(payload)
+                .select('*')
+                .maybeSingle();
+
+            if (error && error.code === 'PGRST204' && String(error.message || '').includes('coins')) {
+                hasCoinsColumn = false;
+                delete payload.coins;
+                const retry = await supabaseClient
+                    .from('rankings')
+                    .insert(payload)
+                    .select('*')
+                    .maybeSingle();
+                data = retry.data;
+                error = retry.error;
+            }
+
+            if (error && error.code === 'PGRST204' && String(error.message || '').includes('used_codes')) {
+                hasUsedCodesColumn = false;
+                delete payload.used_codes;
+                const retry = await supabaseClient
+                    .from('rankings')
+                    .insert(payload)
+                    .select('*')
+                    .maybeSingle();
+                data = retry.data;
+                error = retry.error;
+            }
+
+            if (error && error.code === '23505' && String(error.message || '').includes('code')) {
+                profile.code = generateCode();
+                continue;
+            }
+
+            if (error && error.code === '23505') {
+                const existing = await fetchProfileFromDB(profile.name, profile.studentId);
+                if (existing) {
+                    savedProfile = existing;
+                    return true;
+                }
+            }
+
+            if (error) throw error;
+            if (data) savedProfile = buildProfileFromRanking(data);
+            return true;
+        } catch (e) {
+            console.error("Profile create failed", e);
+            return false;
+        }
+    }
+
+    return false;
+}
+async function saveProfileToCloud(profile, options = {}) {
+    if (!profile) return false;
+
+    const payload = {
+        code: profile.code,
+        name: profile.name,
+        student_id: profile.studentId,
+        dino_name: profile.dinoName,
+        dino_emoji: profile.dinoEmoji,
+        dino_desc: profile.dinoDesc,
+        age: profile.age,
+        weight: profile.weight,
+        score: profile.score
+    };
+
+    if (hasCoinsColumn && Object.prototype.hasOwnProperty.call(profile, 'coins')) {
+        payload.coins = profile.coins ?? 0;
+    }
+    if (hasUsedCodesColumn && Object.prototype.hasOwnProperty.call(profile, 'usedCodes')) {
+        payload.used_codes = profile.usedCodes || [];
+    }
+
     try {
-        const { data, error } = await supabaseClient
+        let { data, error } = await supabaseClient
             .from('rankings')
-            .upsert({
-                code: profile.code,
-                name: profile.name,
-                student_id: profile.studentId,
-                dino_name: profile.dinoName,
-                dino_emoji: profile.dinoEmoji,
-                dino_desc: profile.dinoDesc,
-                age: profile.age,
-                weight: profile.weight,
-                score: profile.score,
-                coins: profile.coins ?? 0
-            });
+            .upsert(payload, { onConflict: 'name,student_id' })
+            .select('*')
+            .maybeSingle();
+
+        if (error && error.code === 'PGRST204' && String(error.message || '').includes('coins')) {
+            if (options.requireCoins) {
+                throw error;
+            }
+            hasCoinsColumn = false;
+            delete payload.coins;
+            const retry = await supabaseClient
+                .from('rankings')
+                .upsert(payload, { onConflict: 'name,student_id' })
+                .select('*')
+                .maybeSingle();
+            data = retry.data;
+            error = retry.error;
+        }
+
+        if (error && error.code === 'PGRST204' && String(error.message || '').includes('used_codes')) {
+            hasUsedCodesColumn = false;
+            if (options.requireUsedCodes) {
+                throw error;
+            }
+            delete payload.used_codes;
+            const retry = await supabaseClient
+                .from('rankings')
+                .upsert(payload, { onConflict: 'name,student_id' })
+                .select('*')
+                .maybeSingle();
+            data = retry.data;
+            error = retry.error;
+        }
+
         if (error) throw error;
-        console.log("Cloud save successful");
+
+        if (options.verify) {
+            const fresh = await fetchProfileFromDB(profile.name, profile.studentId);
+            if (!fresh || fresh.code !== profile.code) {
+                throw new Error('Saved profile could not be verified in Supabase');
+            }
+            savedProfile = fresh;
+        } else if (data) {
+            savedProfile = buildProfileFromRanking(data);
+        }
+
+        return true;
     } catch (e) {
         console.error("Cloud save failed", e);
+        return false;
     }
 }
-
 async function renderRanking() {
     try {
-        // Supabase에서 점수 순으로 상위 20명 가져오기
         const { data, error } = await supabaseClient
             .from('rankings')
             .select('*')
@@ -851,26 +841,12 @@ async function renderRanking() {
             .limit(20);
 
         if (error) throw error;
-
-        if (data && data.length > 0) {
-            updateRankingUI(data);
-        } else {
-            // 데이터가 없으면 Mock 데이터 표시
-            useFallbackRanking();
-        }
+        updateRankingUI(data || []);
     } catch (e) {
         console.error("Failed to fetch rankings", e);
-        useFallbackRanking();
+        tbodyRanking.innerHTML = `<tr><td colspan="3">랭킹을 데이터베이스에서 불러오지 못했어요.</td></tr>`;
     }
 }
-
-function useFallbackRanking() {
-    let allPlayers = [...mockRankings];
-    if (savedProfile) allPlayers.push(savedProfile);
-    allPlayers.sort((a, b) => b.score - a.score);
-    updateRankingUI(allPlayers);
-}
-
 function updateRankingUI(allPlayers) {
     tbodyRanking.innerHTML = "";
     allPlayers.forEach((player, index) => {
@@ -951,8 +927,12 @@ async function showBossPersonalPage() {
     }
 }
 
-function grantSurveyCompletionCoins() {
+async function grantSurveyCompletionCoins() {
     if (!savedProfile) return false;
+
+    const latestProfile = await fetchProfileFromDB(savedProfile.name, savedProfile.studentId);
+    if (!latestProfile) return false;
+    savedProfile = latestProfile;
 
     const hasCompletedSurvey = (savedProfile.score || 0) > 0;
     const hasNoCoinsYet = (savedProfile.coins ?? 0) === 0;
@@ -960,15 +940,8 @@ function grantSurveyCompletionCoins() {
     if (!hasCompletedSurvey || !hasNoCoinsYet) return false;
 
     savedProfile.coins = 3;
-    localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
-
-    const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
-    localStorage.setItem(userKey, JSON.stringify(savedProfile));
-
-    saveProfileToCloud(savedProfile);
-    return true;
+    return saveProfileToCloud(savedProfile, { verify: true, requireCoins: true });
 }
-
 // --- Event Listeners ---
 btnStart.addEventListener('click', startQuiz);
 inputId.addEventListener('keypress', (e) => {
@@ -983,33 +956,45 @@ btnRestart.addEventListener('click', () => {
     document.body.className = 'theme-valley';
     inputName.value = '';
     inputId.value = '';
+    savedProfile = null;
+    isPendingNewProfile = false;
     showScreen(screenIntro);
     document.querySelectorAll('.stat-fill').forEach(el => el.style.width = '0%');
 });
 
-btnConfirm.addEventListener('click', () => {
+btnConfirm.addEventListener('click', async () => {
     if (savedProfile) {
-        const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
-        localStorage.setItem(userKey, JSON.stringify(savedProfile));
-        localStorage.setItem('dinoProfile', JSON.stringify(savedProfile));
+        btnConfirm.disabled = true;
+        const originalText = btnConfirm.innerText;
+        btnConfirm.innerText = "\uC800\uC7A5 \uC911...";
 
-        // [New] 클라우드 저장
-        saveProfileToCloud(savedProfile);
+        const saved = isPendingNewProfile
+            ? await createProfileInCloud(savedProfile)
+            : await saveProfileToCloud(savedProfile, { verify: true });
+        if (!saved) {
+            alert('데이터베이스 저장에 실패했어요. 잠시 후 다시 시도해주세요.');
+            btnConfirm.disabled = false;
+            btnConfirm.innerText = originalText;
+            return;
+        }
+        isPendingNewProfile = false;
+        btnConfirm.disabled = false;
+        btnConfirm.innerText = originalText;
     }
 
-    // 깜빡임 효과 (Flicker Effect)
     const overlay = document.getElementById('flicker-overlay');
     overlay.classList.add('flicker-active');
 
-    // 2초(애니메이션 시간) 후에 화면 전환
     setTimeout(() => {
         showScreen(screenBossWarning);
         overlay.classList.remove('flicker-active');
     }, 2000);
 });
-
-btnToDashboard.addEventListener('click', () => {
-    grantSurveyCompletionCoins();
+btnToDashboard.addEventListener('click', async () => {
+    const coinSaved = await grantSurveyCompletionCoins();
+    if (!coinSaved) {
+        console.warn('Coin grant was not saved. Check that the rankings.coins column exists.');
+    }
     populateDashboard();
     showScreen(screenDashboard);
 });
@@ -1055,7 +1040,7 @@ if (btnBossSendMsg) {
                 age: 99,
                 weight: 9999,
                 score: 999999
-            });
+            }, { onConflict: 'name,student_id' });
             alert("보스의 메시지가 온 마을에 울려 퍼졌습니다!");
             bossMessageInput.value = "";
         } catch (e) {
@@ -1071,8 +1056,9 @@ if (btnBossSendMsg) {
 document.getElementById('btn-boss-refresh')?.addEventListener('click', showBossPersonalPage);
 document.getElementById('btn-boss-reincarnate')?.addEventListener('click', async () => {
     if (confirm("정말 인간들의 세상으로 돌아가시겠습니까? (로컬 데이터만 삭제됩니다)")) {
-        localStorage.removeItem('dinoProfile');
+
         savedProfile = null;
+        isPendingNewProfile = false;
         showScreen(screenIntro);
     }
 });
@@ -1091,12 +1077,9 @@ btnResetAll.addEventListener('click', async () => {
             } catch (e) {
                 console.error("DB 삭제 실패:", e);
             }
-
-            const userKey = `dino_user_${savedProfile.name}_${savedProfile.studentId}`;
-            localStorage.removeItem(userKey);
         }
-        localStorage.removeItem('dinoProfile');
         savedProfile = null;
+        isPendingNewProfile = false;
         document.body.className = 'theme-valley';
         inputName.value = '';
         inputId.value = '';
