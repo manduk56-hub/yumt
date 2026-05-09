@@ -31,10 +31,12 @@
 <body class="theme-valley">
     <div id="flicker-overlay"></div>
     <div id="app">
-        <div id="global-notification" class="hidden" style="position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); border: 2px solid #ff5252; color: #fff; padding: 15px 30px; border-radius: 30px; z-index: 10000; box-shadow: 0 10px 30px rgba(255,0,0,0.5); max-width: 90%; text-align: center; display: none; align-items: center; gap: 10px;">
+        <div id="global-notification" class="hidden"
+            style="position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); border: 2px solid #ff5252; color: #fff; padding: 15px 30px; border-radius: 30px; z-index: 10000; box-shadow: 0 10px 30px rgba(255,0,0,0.5); max-width: 90%; text-align: center; display: none; align-items: center; gap: 10px;">
             <span style="font-size: 1.8rem; animation: bounce 1s infinite;">🦖</span>
             <div style="text-align: left;">
-                <div style="color: #ff5252; font-weight: bold; font-size: 0.9rem; margin-bottom: 3px;">[보스 홍주은사우루스의 경고]</div>
+                <div style="color: #ff5252; font-weight: bold; font-size: 0.9rem; margin-bottom: 3px;">[보스 홍주은사우루스의 경고]
+                </div>
                 <div id="global-notification-text" style="font-size: 1.1rem; word-break: keep-all;"></div>
             </div>
         </div>
@@ -45,7 +47,8 @@
                 <p>이번 MT를 더 즐겁게 만들기 위한 짧은 설문입니다.<br>솔직하게 답할수록 더 잘 맞는 결과가 나와요!</p>
                 <div class="input-group">
                     <input type="text" id="user-name" placeholder="이름을 입력해주세요">
-                    <input type="text" id="user-id" placeholder="학번을 입력해주세요 (예: 20231234)" inputmode="numeric" pattern="[0-9]*">
+                    <input type="text" id="user-id" placeholder="학번을 입력해주세요 (예: 20231234)" inputmode="numeric"
+                        pattern="[0-9]*">
                     <button id="btn-start" class="btn-base btn-forward">설문 시작하기</button>
                 </div>
             </div>
@@ -74,10 +77,15 @@
         </section>
 
         <!-- 2.6. 어라? 화면 -->
-        <section id="screen-fusion" class="screen hidden" style="background: url('plus.png') no-repeat center center / cover; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 101;">
+        <section id="screen-fusion" class="screen hidden"
+            style="background: url('plus.png') no-repeat center center / cover; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 101;">
             <div style="position: relative; z-index: 1; text-align: center; color: white;">
-                <h1 style="font-size: 5rem; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 20px #ff0000; margin-bottom: 20px;">어라..?</h1>
-                <p style="font-size: 1.5rem; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 4px #000; opacity: 0.8;">뭔가... 이상한 기운이 느껴집니다.</p>
+                <h1
+                    style="font-size: 5rem; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 20px #ff0000; margin-bottom: 20px;">
+                    어라..?</h1>
+                <p
+                    style="font-size: 1.5rem; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 2px 2px 4px #000; opacity: 0.8;">
+                    뭔가... 이상한 기운이 느껴집니다.</p>
             </div>
         </section>
 
@@ -114,10 +122,12 @@
         <!-- 4.2. 돌발상황 경고 화면 -->
         <section id="screen-boss-warning" class="screen hidden" style="background: #000; z-index: 105;">
             <div style="text-align: center; color: white; padding: 20px;">
-                <h1 style="font-size: 3.5rem; color: #ff5252; text-shadow: 0 0 20px #ff0000; margin-bottom: 30px; line-height: 1.4; word-break: keep-all;">
+                <h1
+                    style="font-size: 3.5rem; color: #ff5252; text-shadow: 0 0 20px #ff0000; margin-bottom: 30px; line-height: 1.4; word-break: keep-all;">
                     돌발상황.<br>폭군 홍주은사우루스 등장.
                 </h1>
-                <button id="btn-warning-next" class="btn-base btn-forward" style="background: #ff5252 !important; margin-top: 20px;">자세히 알아보기</button>
+                <button id="btn-warning-next" class="btn-base btn-forward"
+                    style="background: #ff5252 !important; margin-top: 20px;">이게 뭐고..</button>
             </div>
         </section>
 
@@ -132,14 +142,16 @@
                 </div>
 
                 <div class="dash-section paper-bg" style="padding: 10px 0; margin-bottom: 15px;">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #e65100;">도와주세요!</h3>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #e65100;">헤압!</h3>
                     <p class="map-desc" style="font-size: 0.95rem; line-height: 1.4;">
                         제가 열심히 사냥한 고기와 간식을 갑자기 나타난 홍주은사우루스가 뺏어먹으려고해요. 힘을 키워 저를 도와주시면 멋진 보상을 해드릴게요!
                     </p>
                 </div>
 
                 <div class="btn-group" style="margin-top: 5px; justify-content: center;">
-                    <button id="btn-to-dashboard" class="btn-base btn-forward" style="padding: 12px 25px; font-size: 1.1rem; width: 100%; max-width: 300px; margin: 0 auto;">도와주러 가기!</button>
+                    <button id="btn-to-dashboard" class="btn-base btn-forward"
+                        style="padding: 12px 25px; font-size: 1.1rem; width: 100%; max-width: 300px; margin: 0 auto;">아이
+                        펀치 라잌 킹콩 투 폭군홍주은사우루스</button>
                 </div>
             </div>
         </section>
@@ -168,8 +180,10 @@
                 </div>
 
                 <div class="btn-group mt-20">
-                    <button id="btn-nav-boss" class="btn-base btn-menu btn-forward" style="background: #f44336 !important; margin: 0; flex: 1;">홍주은사우루스가 뭐였더라?</button>
-                    <button id="btn-reset-all" class="btn-base btn-back" style="background: #c62828 !important; margin: 0; flex: 1;">환생하기</button>
+                    <button id="btn-nav-boss" class="btn-base btn-menu btn-forward"
+                        style="background: #f44336 !important; margin: 0; flex: 1;">홍주은사우루스가 뭐였더라?</button>
+                    <button id="btn-reset-all" class="btn-base btn-back"
+                        style="background: #c62828 !important; margin: 0; flex: 1;">환생하기</button>
                 </div>
             </div>
         </section>
@@ -183,10 +197,12 @@
 
                 <div class="dash-section paper-bg">
                     <div class="map-box">
-                        <img src="map_view.png" alt="MT 장소 지도" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px;">
+                        <img src="map_view.png" alt="MT 장소 지도"
+                            style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px;">
                     </div>
 
-                    <a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%ED%95%9C%EC%98%A5%ED%8E%9C%ED%83%80%EC%9A%B4/place/1076100524?c=19.19,0,0,0,dh&placePath=/home?from=map&fromPanelNum=2&timestamp=202605060033&locale=ko&svcName=map_pcv5&searchText=%EA%B2%BD%EC%A3%BC%ED%95%9C%EC%98%A5%ED%8E%9C%ED%83%80%EC%9A%B4&businessCategory=pension" target="_blank" class="btn-map-link">
+                    <a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%ED%95%9C%EC%98%A5%ED%8E%9C%ED%83%80%EC%9A%B4/place/1076100524?c=19.19,0,0,0,dh&placePath=/home?from=map&fromPanelNum=2&timestamp=202605060033&locale=ko&svcName=map_pcv5&searchText=%EA%B2%BD%EC%A3%BC%ED%95%9C%EC%98%A5%ED%8E%9C%ED%83%80%EC%9A%B4&businessCategory=pension"
+                        target="_blank" class="btn-map-link">
                         지도 확인하기
                     </a>
                 </div>
@@ -291,6 +307,7 @@
                                 <th>순위</th>
                                 <th>공룡 이름</th>
                                 <th>용기 점수</th>
+                                <th>코인</th>
                             </tr>
                         </thead>
                         <tbody id="ranking-body">
@@ -310,6 +327,9 @@
                     <div class="detail-emoji" id="detail-emoji">🦖</div>
                     <h2 id="detail-dino-name">열정폭발 티라노사우루스</h2>
                     <div class="tag-role" id="detail-role">든든한 지킴이</div>
+                    <div class="coin-display" style="margin-top: 15px; font-weight: bold; color: #ffeb3b; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 1.2rem;">
+                        보유 코인: <span id="detail-coins">3</span> 개
+                    </div>
                 </div>
 
 
@@ -333,43 +353,69 @@
         </section>
         <!-- 10. 홍주은사우루스 전용 페이지 (SECRET) -->
         <section id="screen-boss-personal" class="screen hidden" style="background: #1a1a1a;">
-            <div class="dashboard-container wooden-board" style="border-color: #ff5252; box-shadow: 0 0 30px rgba(255, 82, 82, 0.3); max-height: 90vh; overflow-y: auto;">
-                <div class="dash-header" style="background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white; border-radius: 10px; padding: 20px;">
+            <div class="dashboard-container wooden-board"
+                style="border-color: #ff5252; box-shadow: 0 0 30px rgba(255, 82, 82, 0.3); max-height: 90vh; overflow-y: auto;">
+                <div class="dash-header"
+                    style="background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white; border-radius: 10px; padding: 20px;">
                     <h1 style="font-size: 2.2rem; margin-bottom: 5px;">👑 보스 대시보드</h1>
                     <p>홍주은사우루스님, 지배 영역에 오신 것을 환영합니다.</p>
                 </div>
 
-                <div class="dash-section paper-bg" style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
-                    <h3 style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">현재 공룡 마을 현황</h3>
+                <div class="dash-section paper-bg"
+                    style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
+                    <h3
+                        style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">
+                        현재 공룡 마을 현황</h3>
                     <div class="stats-box" style="justify-content: space-around; margin-top: 0;">
-                        <div class="stat-item" style="background: #1a0b0b; border-color: #ff5252; padding: 15px; flex: 1; margin: 0 5px;">
+                        <div class="stat-item"
+                            style="background: #1a0b0b; border-color: #ff5252; padding: 15px; flex: 1; margin: 0 5px;">
                             <span class="stat-label" style="color: #ffcdd2;">등록된 공룡 수</span>
                             <span class="stat-value" id="boss-total-users" style="color: #ff5252;">0</span>
                         </div>
-                        <div class="stat-item" style="background: #1a0b0b; border-color: #ff5252; padding: 15px; flex: 1; margin: 0 5px;">
+                        <div class="stat-item"
+                            style="background: #1a0b0b; border-color: #ff5252; padding: 15px; flex: 1; margin: 0 5px;">
                             <span class="stat-label" style="color: #ffcdd2;">평균 용기 점수</span>
                             <span class="stat-value" id="boss-avg-score" style="color: #ff5252;">0</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="dash-section paper-bg" style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
-                    <h3 style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">보스의 메시지 발송</h3>
+                <div class="dash-section paper-bg"
+                    style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
+                    <h3
+                        style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">
+                        보스의 메시지 발송</h3>
                     <div style="display: flex; gap: 10px; flex-direction: column;">
-                        <textarea id="boss-message-input" rows="3" placeholder="공룡들에게 보낼 무시무시한 메시지를 입력하세요..." style="width: 100%; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 1rem; border: 1px solid #ff5252; background: #1a0b0b; color: #ffcdd2; resize: none;"></textarea>
-                        <button id="btn-boss-send-msg" class="btn-base btn-forward" style="background: #ff5252 !important; color: white !important; align-self: flex-end; padding: 10px 20px; font-size: 1rem; border: none; box-shadow: 0 4px 10px rgba(255, 82, 82, 0.4);">메시지 전송</button>
+                        <textarea id="boss-message-input" rows="3" placeholder="공룡들에게 보낼 무시무시한 메시지를 입력하세요..."
+                            style="width: 100%; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 1rem; border: 1px solid #ff5252; background: #1a0b0b; color: #ffcdd2; resize: none;"></textarea>
+                        <button id="btn-boss-send-msg" class="btn-base btn-forward"
+                            style="background: #ff5252 !important; color: white !important; align-self: flex-end; padding: 10px 20px; font-size: 1rem; border: none; box-shadow: 0 4px 10px rgba(255, 82, 82, 0.4);">메시지
+                            전송</button>
                     </div>
                 </div>
 
-                <div class="dash-section paper-bg" style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
-                    <h3 style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">침입자 목록 (실시간 감시)</h3>
+                <div class="dash-section paper-bg"
+                    style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
+                    <h3
+                        style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">
+                        침입자 목록 (실시간 감시)</h3>
                     <div style="overflow-x: auto; border-radius: 8px; border: 1px solid #ff5252;">
-                        <table class="ranking-table" style="color: #ffcdd2; background: #1a0b0b; width: 100%; margin-top: 0;">
+                        <table class="ranking-table"
+                            style="color: #ffcdd2; background: #1a0b0b; width: 100%; margin-top: 0;">
                             <thead style="background: #b71c1c;">
                                 <tr>
-                                    <th style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">이름</th>
-                                    <th style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">공룡</th>
-                                    <th style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">점수</th>
+                                    <th
+                                        style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">
+                                        이름</th>
+                                    <th
+                                        style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">
+                                        공룡</th>
+                                    <th
+                                        style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">
+                                        점수</th>
+                                    <th
+                                        style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">
+                                        코인</th>
                                 </tr>
                             </thead>
                             <tbody id="boss-ranking-body">
@@ -380,7 +426,8 @@
                 </div>
 
                 <div class="btn-group">
-                    <button id="btn-boss-refresh" class="btn-base btn-forward" style="background: #ff5252 !important;">감시 데이터 갱신</button>
+                    <button id="btn-boss-refresh" class="btn-base btn-forward"
+                        style="background: #ff5252 !important;">감시 데이터 갱신</button>
                     <button id="btn-boss-reincarnate" class="btn-base btn-back">일코하러 가기 (환생)</button>
                 </div>
             </div>
