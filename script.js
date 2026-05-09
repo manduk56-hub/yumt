@@ -677,7 +677,7 @@ async function handleCodeSubmit() {
         elCodeMsg.style.color = "#d32f2f";
     } finally {
         btnSubmitCode.disabled = false;
-        btnSubmitCode.innerText = "\uD798\uAE30 \uBC1B\uAE30";
+        btnSubmitCode.innerText = "\uC6A9\uAE30 \uC5BB\uAE30";
     }
 }
 
