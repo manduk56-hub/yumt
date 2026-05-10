@@ -258,10 +258,8 @@ const elTotalPowerHighlight = document.getElementById('total-power-highlight');
 
 const elDetailEmoji = document.getElementById('detail-emoji');
 const elDetailDinoName = document.getElementById('detail-dino-name');
-const elDetailRole = document.getElementById('detail-role');
 const elDetailSkills = document.getElementById('detail-skills');
 const elDetailMtTip = document.getElementById('detail-mt-tip');
-const elDetailDesc = document.getElementById('detail-desc');
 
 let savedProfile = null;
 let hasCoinsColumn = true;
@@ -1139,9 +1137,7 @@ function showDinoDetail() {
 
     elDetailEmoji.innerText = savedProfile.dinoEmoji || '🦖';
     elDetailDinoName.innerText = savedProfile.dinoName;
-    elDetailRole.innerText = savedProfile.role || '공룡 친구';
     elDetailMtTip.innerText = '공룡친구들과 코드를 교환하면 강해질 수 있어요!';
-    elDetailDesc.innerText = savedProfile.dinoDesc || '';
 
     const elDetailCoins = document.getElementById('detail-coins');
     if (elDetailCoins) {

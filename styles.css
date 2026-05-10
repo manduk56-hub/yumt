@@ -13,6 +13,12 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
 }
 
 body {
@@ -987,17 +993,18 @@ body.theme-jurassic {
 .coin-shop-grid {
     display: grid;
     gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .coin-shop-item {
     display: grid;
-    grid-template-columns: 1.1fr 1fr auto;
-    gap: 10px;
-    align-items: center;
+    gap: 6px;
+    align-items: start;
     background: rgba(255, 249, 196, 0.45);
     border-radius: 8px;
     padding: 10px 12px;
     color: #3e2723;
+    min-width: 0;
 }
 
 .coin-shop-item strong {
@@ -1016,6 +1023,7 @@ body.theme-jurassic {
     font-weight: 900;
     padding: 5px 9px;
     white-space: nowrap;
+    justify-self: start;
 }
 
 .boss-coin-manager {
@@ -1036,7 +1044,7 @@ body.theme-jurassic {
 
 .boss-code-search {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
 }
 
@@ -1047,7 +1055,16 @@ body.theme-jurassic {
     color: #ffcdd2;
     font-family: inherit;
     font-size: 1rem;
+    min-width: 0;
     padding: 10px;
+    width: 100%;
+}
+
+#btn-boss-find-user {
+    border-radius: 10px;
+    min-width: 68px;
+    padding: 10px 14px;
+    white-space: nowrap;
 }
 
 .boss-selected-user {
@@ -1112,12 +1129,32 @@ body.theme-jurassic {
 }
 
 @media (max-width: 600px) {
-    .coin-shop-item {
-        grid-template-columns: 1fr;
+    .boss-coin-manager {
+        padding: 16px !important;
     }
 
-    .coin-shop-item em {
-        justify-self: start;
+    .boss-code-search {
+        gap: 8px;
+        grid-template-columns: minmax(0, 1fr) 58px;
+    }
+
+    .boss-code-search input {
+        font-size: 0.95rem;
+        padding: 10px 8px;
+    }
+
+    #btn-boss-find-user {
+        min-width: 0;
+        padding: 10px 6px;
+        width: 58px;
+    }
+
+    .coin-shop-grid {
+        gap: 7px;
+    }
+
+    .coin-shop-item {
+        padding: 9px 10px;
     }
 }
 
