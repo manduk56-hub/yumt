@@ -171,6 +171,7 @@
                     <div class="profile-info">
                         <h3 id="dash-dino-name">열정폭발 티라노사우루스</h3>
                     </div>
+                    <p class="profile-coins">보유 코인: <strong id="dash-coins">0</strong>개</p>
                 </div>
 
                 <div class="menu-grid">
@@ -196,47 +197,59 @@
 
         <section id="screen-schedule" class="screen hidden">
             <div class="dashboard-container wooden-board">
+                <div class="dash-section paper-bg schedule-updated">
+                    <h3>첫날 일정표</h3>
+                    <div class="schedule-toggle" role="group" aria-label="첫날 일정 선택">
+                        <button type="button" id="btn-schedule-normal" class="schedule-toggle-btn active" aria-pressed="true">첫날</button>
+                        <button type="button" id="btn-schedule-rain" class="schedule-toggle-btn" aria-pressed="false">우천시 첫날</button>
+                    </div>
+                    <div id="schedule-normal" class="schedule-panel">
+                        <ul class="timeline schedule-list">
+                            <li><span class="time">12:30</span><span class="event">인원 점검</span></li>
+                            <li><span class="time">13:00</span><span class="event">출발 (차량 이동중 캐릭터 생성 및 콘텐츠 설명)</span></li>
+                            <li><span class="time">14:00~14:30</span><span class="event">도착 및 짐정리</span></li>
+                            <li><span class="time">14:30~17:00</span><span class="event">계곡 물놀이</span></li>
+                            <li><span class="time">17:00~18:00</span><span class="event">코인 교환</span></li>
+                            <li><span class="time">17:30~18:00</span><span class="event">저녁 준비</span></li>
+                            <li><span class="time">18:00~19:30</span><span class="event">저녁 식사(BBQ)</span></li>
+                            <li><span class="time">19:30~20:00</span><span class="event">저녁 식사 정리</span></li>
+                            <li><span class="time">19:30~20:30</span><span class="event">코인 교환 및 상점</span></li>
+                            <li><span class="time">20:00~</span><span class="event">야간 활동</span></li>
+                        </ul>
+                    </div>
+                    <div id="schedule-rain" class="schedule-panel hidden">
+                        <ul class="timeline schedule-list">
+                            <li><span class="time">12:30</span><span class="event">인원 점검</span></li>
+                            <li><span class="time">13:00</span><span class="event">출발 (차량 이동중 캐릭터 생성 및 콘텐츠 설명)</span></li>
+                            <li><span class="time">14:00~14:30</span><span class="event">도착 및 짐정리</span></li>
+                            <li><span class="time">14:30~17:00</span><span class="event">레크레이션</span></li>
+                            <li><span class="time">17:00~18:00</span><span class="event">코인 교환</span></li>
+                            <li><span class="time">17:30~18:00</span><span class="event">저녁 준비</span></li>
+                            <li><span class="time">18:00~19:30</span><span class="event">저녁 식사(BBQ)</span></li>
+                            <li><span class="time">19:30~20:00</span><span class="event">저녁식사 정리</span></li>
+                            <li><span class="time">19:30~20:30</span><span class="event">코인 교환 및 상점</span></li>
+                            <li><span class="time">20:00</span><span class="event">야간활동</span></li>
+                        </ul>
+                    </div>
+                    <p class="schedule-note">16:00~18:00까지 코인 교환을 계속해준다.</p>
+                    <p class="schedule-note">22:00 코인상점 재오픈 남은 안주 떨이 판매</p>
+                </div>
+
+                <div class="dash-section paper-bg schedule-updated">
+                    <h3>둘째 날 일정표</h3>
+                    <ul class="timeline schedule-list">
+                        <li><span class="time">09:00~10:00</span><span class="event">기상</span></li>
+                        <li><span class="time">10:00~11:00</span><span class="event">숙소 정리 및 퇴실준비</span></li>
+                        <li><span class="time">11:00~11:10</span><span class="event">인원 점검 및 버스탑승</span></li>
+                        <li><span class="time">12:30</span><span class="event">영남대 도착</span></li>
+                    </ul>
+                </div>
                 <div class="dash-header">
                     <h2>엠티는 이렇게 놀 거예요!</h2>
                     <p>우리 엠티를 지키기 위한 소중한 시간표예요! 친구들, 딴 데 가면 안 돼요! 🦖</p>
                 </div>
 
-                <div class="dash-section paper-bg">
-                    <h3>🦖 오늘의 엠티 일정</h3>
-                    <ul class="timeline">
-                        <li>
-                            <span class="time">10:00 AM</span>
-                            <span class="event">경주한옥펜타운 집결 — 무서운 홍주은이 못 오게 다 같이 모여요!</span>
-                        </li>
-                        <li>
-                            <span class="time">12:00 PM</span>
-                            <span class="event">공룡 친구들과 맛있는 거 먹기 — 맛집 가서 배 든든히 채워요! 냠냠</span>
-                        </li>
-                        <li>
-                            <span class="time">15:00 PM</span>
-                            <span class="event">친구들과 도란도란 수다 떨기 — 잔디밭에서 어떻게 놀지 얘기해요!</span>
-                        </li>
-                        <li>
-                            <span class="time">18:00 PM</span>
-                            <span class="event">마지막 힘내기 — 우리 다 같이 홍주은을 막고 엠티를 지켜요! 화이팅!</span>
-                        </li>
-                    </ul>
-                </div>
 
-                <div class="dash-section paper-bg">
-                    <h3>보물 창고가 열려요!</h3>
-                    <p class="map-desc" style="margin-bottom: 10px;">엠티를 지킨 착한 공룡 친구들을 위한 선물이 가득해요!</p>
-                    <ul class="timeline">
-                        <li>
-                            <span class="time">13:00 PM</span>
-                            <span class="event">반짝반짝 선물 가게 (홍주은을 막아낸 기념 장식품!)</span>
-                        </li>
-                        <li>
-                            <span class="time">20:00 PM</span>
-                            <span class="event">밤에 열리는 비밀 파티 (엠티 지킴이 전용 멋진 옷 등장!)</span>
-                        </li>
-                    </ul>
-                </div>
 
                 <button id="btn-back-sch" class="btn-base btn-back mt-20">돌아가기</button>
             </div>
@@ -250,18 +263,20 @@
                     <p>친구들과 코드를 나눠서 더 큰 용기를 얻어봐요! 우린 할 수 있어!</p>
                 </div>
 
+                <div id="boss-ranking-highlight" class="boss-ranking-highlight hidden"></div>
+                <div id="total-power-highlight" class="total-power-highlight hidden"></div>
+
                 <div class="dash-section paper-bg text-center">
-                    <img src="trex.png" alt="폭군 티라노" class="growth-dino-img">
                     <h3 id="growth-dino-name" class="mt-10" style="border:none; color:#1b5e20;">[이름]님의 공룡</h3>
 
                     <div class="stats-box">
                         <div class="stat-item">
-                            <span class="stat-label">나이</span>
-                            <span class="stat-value"><span id="val-age">10</span> 살</span>
+                            <span class="stat-label">용기</span>
+                            <span class="stat-value"><span id="val-courage">1</span></span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">몸무게</span>
-                            <span class="stat-value"><span id="val-weight">500</span> kg</span>
+                            <span class="stat-label">전투력</span>
+                            <span class="stat-value"><span id="val-battle-power">10</span></span>
                         </div>
                     </div>
                 </div>
@@ -327,6 +342,31 @@
                     <p id="detail-desc" class="map-desc">
                         자신감이 넘치고 항상 무리의 중심이 되는 최고의 포식자! 한번 목표를 정하면 직진합니다.
                     </p>
+                </div>
+
+                <div class="dash-section paper-bg coin-shop-section">
+                    <h3>코인 상점</h3>
+                    <p class="map-desc">코인으로 교환할 수 있는 물품이에요.</p>
+                    <h4 class="coin-shop-title">저녁 식사 교환</h4>
+                    <div class="coin-shop-grid">
+                        <div class="coin-shop-item"><strong>소시지 세트</strong><span>소시지 12개</span><em>5코인</em></div>
+                        <div class="coin-shop-item"><strong>새우 세트</strong><span>새우 12마리</span><em>5코인</em></div>
+                        <div class="coin-shop-item"><strong>구워먹는 치즈</strong><span>1팩</span><em>5코인</em></div>
+                        <div class="coin-shop-item"><strong>된장 찌개</strong><span>1~2팩</span><em>4코인</em></div>
+                        <div class="coin-shop-item"><strong>과일소주</strong><span>6병?</span><em>4코인</em></div>
+                    </div>
+                    <h4 class="coin-shop-title">야간 활동 교환</h4>
+                    <div class="coin-shop-grid">
+                        <div class="coin-shop-item"><strong>과일 소주</strong><span>6개</span><em>4코인</em></div>
+                        <div class="coin-shop-item"><strong>양주</strong><span>1병</span><em>8코인?</em></div>
+                        <div class="coin-shop-item"><strong>탄산수</strong><span>6EA</span><em>4코인</em></div>
+                        <div class="coin-shop-item"><strong>과자</strong><span>과자 5종</span><em>4코인</em></div>
+                        <div class="coin-shop-item"><strong>치킨</strong><span>치킨 1마리</span><em>5코인</em></div>
+                        <div class="coin-shop-item"><strong>피자</strong><span>라지 1판</span><em>5코인</em></div>
+                        <div class="coin-shop-item"><strong>마른 안주</strong><span>육포 + 견과</span><em>5코인</em></div>
+                        <div class="coin-shop-item"><strong>숙취 해소제</strong><span>6개</span><em>4코인?</em></div>
+                        <div class="coin-shop-item"><strong>밀키트</strong><span>1개</span><em>4코인?</em></div>
+                    </div>
                 </div>
 
                 <button id="btn-back-detail" class="btn-base btn-back mt-20">돌아가기</button>

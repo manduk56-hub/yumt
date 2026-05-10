@@ -239,15 +239,22 @@ const btnBackDetail = document.getElementById('btn-back-detail');
 const btnToDashboard = document.getElementById('btn-to-dashboard');
 const btnWarningNext = document.getElementById('btn-warning-next');
 const dashDinoProfile = document.getElementById('dash-dino-profile');
+const btnScheduleNormal = document.getElementById('btn-schedule-normal');
+const btnScheduleRain = document.getElementById('btn-schedule-rain');
+const scheduleNormal = document.getElementById('schedule-normal');
+const scheduleRain = document.getElementById('schedule-rain');
 
 const elGrowthDinoName = document.getElementById('growth-dino-name');
-const elValAge = document.getElementById('val-age');
-const elValWeight = document.getElementById('val-weight');
+const elValCourage = document.getElementById('val-courage');
+const elValBattlePower = document.getElementById('val-battle-power');
+const elDashCoins = document.getElementById('dash-coins');
 const elMyCode = document.getElementById('my-code');
 const inputFriendCode = document.getElementById('friend-code');
 const btnSubmitCode = document.getElementById('btn-submit-code');
 const elCodeMsg = document.getElementById('code-msg');
 const tbodyRanking = document.getElementById('ranking-body');
+const elBossRankingHighlight = document.getElementById('boss-ranking-highlight');
+const elTotalPowerHighlight = document.getElementById('total-power-highlight');
 
 const elDetailEmoji = document.getElementById('detail-emoji');
 const elDetailDinoName = document.getElementById('detail-dino-name');
@@ -295,6 +302,8 @@ function applyDinoDetailsFromCatalog(profile) {
 
 function buildProfileFromRanking(data) {
     const usedCodes = normalizeUsedCodes(data.used_codes);
+    const courage = data.courage ?? 1;
+    const battlePower = data.battle_power ?? 10;
     return applyDinoDetailsFromCatalog({
         name: data.name,
         studentId: data.student_id,
@@ -302,8 +311,8 @@ function buildProfileFromRanking(data) {
         dinoEmoji: data.dino_emoji,
         dinoDesc: data.dino_desc,
         code: data.code,
-        age: data.age,
-        weight: data.weight,
+        courage,
+        battlePower,
         score: data.score,
         coins: data.coins ?? 0,
         codeExchangeCount: data.code_exchange_count ?? usedCodes.length,
@@ -388,8 +397,8 @@ async function saveBossControls() {
         dino_name: "\uD3ED\uAD70 \uD64D\uC8FC\uC740\uC0AC\uC6B0\uB8E8\uC2A4",
         dino_emoji: "\uD83E\uDD96",
         dino_desc: serializeBossControls(),
-        age: 99,
-        weight: 9999,
+        courage: 99,
+        battle_power: 9999,
         score: 999999
     };
 
@@ -411,6 +420,16 @@ function setManagedButtonState(button, enabled, enabledText, disabledText) {
 function applyAppControls() {
     setManagedButtonState(btnNavGrowth, appControls.growthEnabled, "\uD30C\uC6CC\uC5C5!", "\uD30C\uC6CC\uC5C5! \uBE44\uD65C\uC131");
     setManagedButtonState(btnResetAll, appControls.resetEnabled, "\uD658\uC0DD\uD558\uAE30", "\uD658\uC0DD\uD558\uAE30 \uBE44\uD65C\uC131");
+}
+
+function setScheduleMode(mode) {
+    const isRain = mode === 'rain';
+    scheduleNormal?.classList.toggle('hidden', isRain);
+    scheduleRain?.classList.toggle('hidden', !isRain);
+    btnScheduleNormal?.classList.toggle('active', !isRain);
+    btnScheduleRain?.classList.toggle('active', isRain);
+    btnScheduleNormal?.setAttribute('aria-pressed', String(!isRain));
+    btnScheduleRain?.setAttribute('aria-pressed', String(isRain));
 }
 
 function updateBossControlUI() {
@@ -523,8 +542,8 @@ async function startQuiz() {
                     dinoEmoji: "\uD83E\uDD96",
                     dinoDesc: "",
                     code: BOSS_CODE,
-                    age: 99,
-                    weight: 9999,
+                    courage: 99,
+                    battlePower: 9999,
                     score: 999999,
                     coins: 0
                 };
@@ -553,8 +572,8 @@ async function startQuiz() {
                 dinoEmoji: "",
                 dinoDesc: "",
                 code: generateCode(),
-                age: 0,
-                weight: 0,
+                courage: 0,
+                battlePower: 0,
                 score: 0,
                 coins: 0,
                 usedCodes: [],
@@ -675,8 +694,8 @@ async function generateResult() {
             dinoEmoji: matchedDino.emoji,
             dinoDesc: matchedDino.desc,
             code: existingProfile.code || generateCode(),
-            age: 10,
-            weight: 500,
+            courage: 1,
+            battlePower: 10,
             score: 1000,
             coins: existingProfile.coins ?? 0,
             usedCodes: existingProfile.usedCodes || [],
@@ -698,10 +717,12 @@ function populateDashboard() {
     document.getElementById('dash-emoji').innerText = savedProfile.dinoEmoji || '🦖';
     document.getElementById('dash-dino-name').innerText = savedProfile.dinoName;
 
+    if (elDashCoins) elDashCoins.innerText = savedProfile.coins ?? 0;
+
     // Growth Dashboard
     elGrowthDinoName.innerText = `${savedProfile.name} 공룡 친구 (${savedProfile.dinoName})`;
-    elValAge.innerText = savedProfile.age;
-    elValWeight.innerText = savedProfile.weight;
+    elValCourage.innerText = savedProfile.courage ?? 1;
+    elValBattlePower.innerText = savedProfile.battlePower ?? 10;
     elMyCode.innerText = savedProfile.code;
 
     renderRanking();
@@ -788,8 +809,8 @@ async function handleCodeSubmit() {
             earnedCoins = savedCoinReward ? 1 : 0;
         }
 
-        elValAge.innerText = savedProfile.age;
-        elValWeight.innerText = savedProfile.weight;
+        elValCourage.innerText = savedProfile.courage ?? 1;
+        elValBattlePower.innerText = savedProfile.battlePower ?? 10;
 
         elCodeMsg.innerText = "\uC131\uACF5! \uB370\uC774\uD130\uBCA0\uC774\uC2A4\uC5D0 \uC131\uC7A5\uC774 \uBC18\uC601\uB410\uC5B4\uC694.";
         elCodeMsg.style.color = "#388e3c";
@@ -823,10 +844,11 @@ async function createProfileInCloud(profile) {
             dino_name: profile.dinoName,
             dino_emoji: profile.dinoEmoji,
             dino_desc: profile.dinoDesc,
-            age: profile.age,
-            weight: profile.weight,
             score: profile.score
         };
+
+        payload.courage = profile.courage ?? 1;
+        payload.battle_power = profile.battlePower ?? 10;
 
         if (hasCoinsColumn) payload.coins = profile.coins ?? 0;
         if (hasUsedCodesColumn) payload.used_codes = profile.usedCodes || [];
@@ -910,10 +932,11 @@ async function saveProfileToCloud(profile, options = {}) {
         dino_name: profile.dinoName,
         dino_emoji: profile.dinoEmoji,
         dino_desc: profile.dinoDesc,
-        age: profile.age,
-        weight: profile.weight,
         score: profile.score
     };
+
+    payload.courage = profile.courage ?? 1;
+    payload.battle_power = profile.battlePower ?? 10;
 
     if (hasCoinsColumn && Object.prototype.hasOwnProperty.call(profile, 'coins')) {
         payload.coins = profile.coins ?? 0;
@@ -996,8 +1019,7 @@ async function renderRanking() {
         const { data, error } = await supabaseClient
             .from('rankings')
             .select('*')
-            .order('score', { ascending: false })
-            .limit(20);
+            .order('score', { ascending: false });
 
         if (error) throw error;
         updateRankingUI(data || []);
@@ -1008,7 +1030,43 @@ async function renderRanking() {
 }
 function updateRankingUI(allPlayers) {
     tbodyRanking.innerHTML = "";
-    allPlayers.forEach((player, index) => {
+    const bossPlayer = allPlayers.find(player =>
+        player.code === BOSS_CODE ||
+        (player.name === BOSS_NAME && player.student_id === BOSS_STUDENT_ID) ||
+        String(player.dino_name || '').includes('홍주은')
+    );
+    const regularPlayers = allPlayers.filter(player => player !== bossPlayer);
+    const totalCourage = regularPlayers.reduce((sum, player) => sum + (player.courage ?? 1), 0);
+    const totalBattlePower = regularPlayers.reduce((sum, player) => sum + (player.battle_power ?? 10), 0);
+
+    if (elBossRankingHighlight) {
+        if (bossPlayer) {
+            const bossDinoName = bossPlayer.dino_name || bossPlayer.dinoName || '홍주은 사우루스';
+            const bossCourage = bossPlayer.courage ?? 1;
+            const bossBattlePower = bossPlayer.battle_power ?? 10;
+            elBossRankingHighlight.innerHTML = `
+                <div class="boss-rank-title">
+                    <span>홍주은 사우루스</span>
+                </div>
+                <div class="boss-rank-name">${bossPlayer.name} (${bossDinoName})</div>
+                <div class="boss-rank-stats">용기: ${bossCourage} / 전투력: ${bossBattlePower}</div>
+            `;
+            elBossRankingHighlight.classList.remove('hidden');
+        } else {
+            elBossRankingHighlight.innerHTML = '';
+            elBossRankingHighlight.classList.add('hidden');
+        }
+    }
+
+    if (elTotalPowerHighlight) {
+        elTotalPowerHighlight.innerHTML = `
+            <div class="total-power-title">전체 유저 합산 데이터</div>
+            <div class="total-power-stats">총 용기: ${totalCourage} / 총 전투력: ${totalBattlePower}</div>
+        `;
+        elTotalPowerHighlight.classList.remove('hidden');
+    }
+
+    regularPlayers.forEach((player, index) => {
         const isMe = (savedProfile && player.code === savedProfile.code);
         const tr = document.createElement('tr');
         if (isMe) tr.className = "my-row";
@@ -1016,13 +1074,13 @@ function updateRankingUI(allPlayers) {
         // Supabase 컬럼명에 맞춰 데이터 매핑 (snake_case 대응)
         const name = player.name;
         const dinoName = player.dino_name || player.dinoName;
-        const age = player.age;
-        const weight = player.weight;
+        const courage = player.courage ?? 1;
+        const battlePower = player.battle_power ?? 10;
 
         tr.innerHTML = `
             <td>${index + 1}위</td>
             <td>${name}<br><small style="color:#555">${dinoName}</small></td>
-            <td>용기: ${age}<br>무게: ${weight}kg</td>
+            <td>용기: ${courage}<br>전투력: ${battlePower}</td>
         `;
         tbodyRanking.appendChild(tr);
     });
@@ -1169,6 +1227,8 @@ btnSubmitCode.addEventListener('click', handleCodeSubmit);
 
 // Menu Navigations
 btnNavSchedule.addEventListener('click', () => showScreen(screenSchedule));
+btnScheduleNormal?.addEventListener('click', () => setScheduleMode('normal'));
+btnScheduleRain?.addEventListener('click', () => setScheduleMode('rain'));
 btnNavStorybook?.addEventListener('click', () => showScreen(screenStorybook));
 btnNavGrowth.addEventListener('click', () => showScreen(screenGrowth));
 btnBackSch.addEventListener('click', () => showScreen(screenDashboard));
@@ -1226,8 +1286,8 @@ if (btnBossSendMsg) {
                 student_id: BOSS_STUDENT_ID,
                 dino_name: '폭군 홍주은사우루스',
                 dino_desc: serializeBossControls(),
-                age: 99,
-                weight: 9999,
+                courage: 99,
+                battle_power: 9999,
                 score: 999999
             }, { onConflict: 'name,student_id' });
             alert("보스의 메시지가 온 마을에 울려 퍼졌습니다!");

@@ -7,13 +7,64 @@ add column if not exists coins integer not null default 0;
 alter table public.rankings
 add column if not exists code_exchange_count integer not null default 0;
 
+do $$
+begin
+    if exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'rankings'
+          and column_name = 'age'
+    ) and not exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'rankings'
+          and column_name = 'courage'
+    ) then
+        alter table public.rankings rename column age to courage;
+    end if;
+
+    if exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'rankings'
+          and column_name = 'weight'
+    ) and not exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'rankings'
+          and column_name = 'battle_power'
+    ) then
+        alter table public.rankings rename column weight to battle_power;
+    end if;
+end $$;
+
+alter table public.rankings
+drop column if exists age;
+
+alter table public.rankings
+drop column if exists weight;
+
+alter table public.rankings
+add column if not exists courage integer not null default 1;
+
+alter table public.rankings
+add column if not exists battle_power integer not null default 10;
+
+update public.rankings
+set courage = coalesce(nullif(courage, 0), 1),
+    battle_power = coalesce(nullif(battle_power, 0), 10);
+
 alter table public.rankings
 alter column used_codes set default '{}',
 alter column coins set default 0,
 alter column code_exchange_count set default 0,
 alter column score set default 0,
-alter column age set default 0,
-alter column weight set default 0;
+alter column courage set default 1,
+alter column battle_power set default 10;
 
 alter table public.rankings
 alter column used_codes set not null,
@@ -31,12 +82,12 @@ drop constraint if exists rankings_score_nonnegative,
 add constraint rankings_score_nonnegative check (score >= 0);
 
 alter table public.rankings
-drop constraint if exists rankings_age_nonnegative,
-add constraint rankings_age_nonnegative check (age >= 0);
+drop constraint if exists rankings_courage_nonnegative,
+add constraint rankings_courage_nonnegative check (courage >= 0);
 
 alter table public.rankings
-drop constraint if exists rankings_weight_nonnegative,
-add constraint rankings_weight_nonnegative check (weight >= 0);
+drop constraint if exists rankings_battle_power_nonnegative,
+add constraint rankings_battle_power_nonnegative check (battle_power >= 0);
 
 alter table public.rankings
 drop constraint if exists rankings_coins_nonnegative,
@@ -54,6 +105,12 @@ comment on column public.rankings.coins is
 
 comment on column public.rankings.code_exchange_count is
 'Number of other-user codes this user has redeemed. Stored only in Supabase and not shown in the site UI.';
+
+comment on column public.rankings.courage is
+'Courage value shown in the growth screen and ranking.';
+
+comment on column public.rankings.battle_power is
+'Battle power value shown in the growth screen and ranking.';
 
 create or replace function public.redeem_friend_code(
     p_name text,
@@ -111,8 +168,8 @@ begin
     set used_codes = array_append(current_user_row.used_codes, p_friend_code),
         code_exchange_count = next_exchange_count,
         coins = coalesce(coins, 0) + case when next_exchange_count % 5 = 0 then 1 else 0 end,
-        age = coalesce(age, 0) + 1,
-        weight = coalesce(weight, 0) + 50,
+        courage = coalesce(courage, 1) + 1,
+        battle_power = coalesce(battle_power, 10) + 10,
         score = coalesce(score, 0) + 100
     where name = p_name
       and student_id = p_student_id
