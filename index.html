@@ -303,7 +303,7 @@
                             <tr>
                                 <th>순위</th>
                                 <th>공룡 이름</th>
-                                <th>용기 점수</th>
+                                <th>능력치</th>
                             </tr>
                         </thead>
                         <tbody id="ranking-body">
@@ -410,8 +410,44 @@
                         </div>
                         <div class="stat-item"
                             style="background: #1a0b0b; border-color: #ff5252; padding: 15px; flex: 1; margin: 0 5px;">
-                            <span class="stat-label" style="color: #ffcdd2;">평균 용기 점수</span>
-                            <span class="stat-value" id="boss-avg-score" style="color: #ff5252;">0</span>
+                            <span class="stat-label" style="color: #ffcdd2;">평균 전투력</span>
+                            <span class="stat-value" id="boss-avg-battle-power" style="color: #ff5252;">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-section paper-bg boss-coin-manager">
+                    <h3>코드 상점 계산대</h3>
+                    <div class="boss-code-search">
+                        <input type="text" id="boss-user-code-input" placeholder="유저 코드를 입력하세요">
+                        <button id="btn-boss-find-user" class="btn-base btn-forward" type="button">조회</button>
+                    </div>
+                    <p id="boss-coin-manager-msg" class="boss-coin-manager-msg"></p>
+                    <div id="boss-selected-user" class="boss-selected-user hidden">
+                        <div class="boss-selected-name" id="boss-selected-user-name"></div>
+                        <div class="boss-selected-dino" id="boss-selected-user-dino"></div>
+                        <div class="boss-selected-coins">보유 코인: <strong id="boss-selected-user-coins">0</strong>개</div>
+                    </div>
+                    <div id="boss-shop-actions" class="boss-shop-actions hidden">
+                        <h4>저녁 식사 교환</h4>
+                        <div class="boss-shop-grid">
+                            <button type="button" data-cost="5" data-item="소시지 세트">소시지 세트 <span>-5</span></button>
+                            <button type="button" data-cost="5" data-item="새우 세트">새우 세트 <span>-5</span></button>
+                            <button type="button" data-cost="5" data-item="구워먹는 치즈">구워먹는 치즈 <span>-5</span></button>
+                            <button type="button" data-cost="4" data-item="된장 찌개">된장 찌개 <span>-4</span></button>
+                            <button type="button" data-cost="4" data-item="과일소주">과일소주 <span>-4</span></button>
+                        </div>
+                        <h4>야간 활동 교환</h4>
+                        <div class="boss-shop-grid">
+                            <button type="button" data-cost="4" data-item="과일 소주">과일 소주 <span>-4</span></button>
+                            <button type="button" data-cost="8" data-item="양주">양주 <span>-8</span></button>
+                            <button type="button" data-cost="4" data-item="탄산수">탄산수 <span>-4</span></button>
+                            <button type="button" data-cost="4" data-item="과자">과자 <span>-4</span></button>
+                            <button type="button" data-cost="5" data-item="치킨">치킨 <span>-5</span></button>
+                            <button type="button" data-cost="5" data-item="피자">피자 <span>-5</span></button>
+                            <button type="button" data-cost="5" data-item="마른 안주">마른 안주 <span>-5</span></button>
+                            <button type="button" data-cost="4" data-item="숙취 해소제">숙취 해소제 <span>-4</span></button>
+                            <button type="button" data-cost="4" data-item="밀키트">밀키트 <span>-4</span></button>
                         </div>
                     </div>
                 </div>
@@ -448,7 +484,7 @@
                                         공룡</th>
                                     <th
                                         style="background: transparent; color: white; border-bottom: 1px solid #ff5252; padding: 12px;">
-                                        점수</th>
+                                        전투력</th>
                                 </tr>
                             </thead>
                             <tbody id="boss-ranking-body">

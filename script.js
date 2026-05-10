@@ -193,7 +193,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentQuestionIndex = 0;
 let userName = "";
 let studentId = "";
-let scores = {
+let quizCounts = {
     type: { aggressive: 0, gentle: 0, weird: 0 }
 };
 
@@ -265,6 +265,7 @@ const elDetailDesc = document.getElementById('detail-desc');
 
 let savedProfile = null;
 let hasCoinsColumn = true;
+let hasInitialCoinsGrantedColumn = true;
 let hasUsedCodesColumn = true;
 let isPendingNewProfile = false;
 const BOSS_NAME = "\uD64D\uC8FC\uC740";
@@ -280,7 +281,7 @@ let appControls = {
 // --- Functions ---
 function isCompletedProfile(profile) {
     if (!profile) return false;
-    return (profile.score || 0) > 0 || Boolean(profile.dinoName && profile.dinoEmoji && profile.dinoDesc);
+    return Boolean(profile.dinoName && profile.dinoEmoji && profile.dinoDesc);
 }
 
 function applyDinoDetailsFromCatalog(profile) {
@@ -313,8 +314,8 @@ function buildProfileFromRanking(data) {
         code: data.code,
         courage,
         battlePower,
-        score: data.score,
         coins: data.coins ?? 0,
+        initialCoinsGranted: data.initial_coins_granted ?? false,
         codeExchangeCount: data.code_exchange_count ?? usedCodes.length,
         usedCodes,
         skills: [],
@@ -397,9 +398,8 @@ async function saveBossControls() {
         dino_name: "\uD3ED\uAD70 \uD64D\uC8FC\uC740\uC0AC\uC6B0\uB8E8\uC2A4",
         dino_emoji: "\uD83E\uDD96",
         dino_desc: serializeBossControls(),
-        courage: 99,
-        battle_power: 9999,
-        score: 999999
+        courage: 150,
+        battle_power: 15000,
     };
 
     const { error } = await supabaseClient
@@ -499,23 +499,44 @@ function showScreen(screenEl) {
     }, 20);
 }
 
-function generateCode() {
-    const adj3 = ["멍청한", "뜨거운", "차가운", "용감한", "귀여운", "날렵한", "커다란", "즐거운", "졸고있는", "배고픈", "배부른", "화가난", "신비로운", "어리숙한"];
-    const noun3 = ["비둘기", "도마뱀", "다람쥐", "개구리", "코끼리", "너구리", "독수리", "펭귄", "팬더", "기린", "하마", "거북이", "고양이", "강아지"];
+function generateCode(excludedCodes = new Set()) {
+    const adjectives = [
+        "뜨거운", "차가운", "용감한", "귀여운", "날렵한", "커다란", "즐거운", "배고픈", "배부른", "화난듯",
+        "신비한", "느긋한", "재빠른", "씩씩한", "멋있는", "조용한", "활발한", "엉뚱한", "든든한", "수줍은"
+    ];
+    const nouns = [
+        "비둘기", "도마뱀", "다람쥐", "개구리", "코끼리", "너구리", "독수리", "고양이", "강아지", "토끼들",
+        "여우들", "악어들", "공룡들", "거북이", "펭귄들", "기린들", "하마들", "판다들", "사자들", "호랑이"
+    ];
 
-    const adj2 = ["멋진", "빠른", "착한", "기쁜", "슬픈", "힘센", "밝은", "푸른", "검은", "맑은", "깊은", "작은"];
-    const noun4 = ["사슴벌레", "스테고사우", "프테라노돈", "아기공룡", "작은새들", "산토끼들", "시골쥐들", "들고양이"];
-
-    // 50% 확률로 3+3 또는 2+4 조합 생성
-    if (Math.random() > 0.5) {
-        const a = adj3[Math.floor(Math.random() * adj3.length)];
-        const n = noun3[Math.floor(Math.random() * noun3.length)];
-        return (a + n).substring(0, 6); // 확실히 6자리 보장
-    } else {
-        const a = adj2[Math.floor(Math.random() * adj2.length)];
-        const n = noun4[Math.floor(Math.random() * noun4.length)];
-        return (a + n).substring(0, 6);
+    for (let attempt = 0; attempt < 200; attempt++) {
+        const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+        const noun = nouns[Math.floor(Math.random() * nouns.length)];
+        const code = adjective + noun;
+        if (!excludedCodes.has(code)) return code;
     }
+
+    for (const adjective of adjectives) {
+        for (const noun of nouns) {
+            const code = adjective + noun;
+            if (!excludedCodes.has(code)) return code;
+        }
+    }
+
+    throw new Error("사용 가능한 코드 조합이 부족해요.");
+}
+
+async function fetchUsedCodesFromDB() {
+    const { data, error } = await supabaseClient
+        .from('rankings')
+        .select('code');
+
+    if (error) throw error;
+    return new Set((data || []).map(row => row.code).filter(Boolean));
+}
+
+async function generateUniqueCodeFromDB() {
+    return generateCode(await fetchUsedCodesFromDB());
 }
 
 async function startQuiz() {
@@ -542,10 +563,10 @@ async function startQuiz() {
                     dinoEmoji: "\uD83E\uDD96",
                     dinoDesc: "",
                     code: BOSS_CODE,
-                    courage: 99,
-                    battlePower: 9999,
-                    score: 999999,
-                    coins: 0
+                    courage: 150,
+                    battlePower: 15000,
+                    coins: 0,
+                    initialCoinsGranted: false
                 };
                 const saved = await saveProfileToCloud(savedProfile, { verify: true });
                 if (!saved) throw new Error('Boss profile save failed');
@@ -571,11 +592,11 @@ async function startQuiz() {
                 dinoName: "",
                 dinoEmoji: "",
                 dinoDesc: "",
-                code: generateCode(),
+                code: await generateUniqueCodeFromDB(),
                 courage: 0,
                 battlePower: 0,
-                score: 0,
                 coins: 0,
+                initialCoinsGranted: false,
                 usedCodes: [],
                 skills: [],
                 role: "",
@@ -585,7 +606,7 @@ async function startQuiz() {
         }
 
         currentQuestionIndex = 0;
-        scores = { type: { aggressive: 0, gentle: 0, weird: 0 } };
+        quizCounts = { type: { aggressive: 0, gentle: 0, weird: 0 } };
 
         document.getElementById('loading-spinner').innerText = '';
         document.getElementById('loading-title').innerText = '?? ?? ???? ???? ?...';
@@ -617,11 +638,11 @@ function renderQuestion() {
 function handleOptionClick(optNum) {
     const q = questions[currentQuestionIndex];
     if (optNum === 1) {
-        scores.type[q.type1]++;
+        quizCounts.type[q.type1]++;
     } else if (optNum === 2) {
-        scores.type[q.type2]++;
+        quizCounts.type[q.type2]++;
     } else {
-        scores.type[q.type3]++;
+        quizCounts.type[q.type3]++;
     }
 
     currentQuestionIndex++;
@@ -673,7 +694,7 @@ function setResultBackground() {
 async function generateResult() {
     try {
         const existingProfile = savedProfile || {};
-        const topType = getHighestKey(scores.type);
+        const topType = getHighestKey(quizCounts.type);
 
         setResultBackground();
 
@@ -693,11 +714,11 @@ async function generateResult() {
             dinoName: randomAdjective + ' ' + matchedDino.name,
             dinoEmoji: matchedDino.emoji,
             dinoDesc: matchedDino.desc,
-            code: existingProfile.code || generateCode(),
+            code: existingProfile.code || await generateUniqueCodeFromDB(),
             courage: 1,
             battlePower: 10,
-            score: 1000,
             coins: existingProfile.coins ?? 0,
+            initialCoinsGranted: existingProfile.initialCoinsGranted ?? false,
             usedCodes: existingProfile.usedCodes || [],
             skills: matchedDino.skills,
             role: matchedDino.role,
@@ -844,13 +865,13 @@ async function createProfileInCloud(profile) {
             dino_name: profile.dinoName,
             dino_emoji: profile.dinoEmoji,
             dino_desc: profile.dinoDesc,
-            score: profile.score
+            battle_power: profile.battlePower ?? 10
         };
 
         payload.courage = profile.courage ?? 1;
-        payload.battle_power = profile.battlePower ?? 10;
 
         if (hasCoinsColumn) payload.coins = profile.coins ?? 0;
+        if (hasInitialCoinsGrantedColumn) payload.initial_coins_granted = profile.initialCoinsGranted ?? false;
         if (hasUsedCodesColumn) payload.used_codes = profile.usedCodes || [];
         if (Object.prototype.hasOwnProperty.call(profile, 'codeExchangeCount')) {
             payload.code_exchange_count = profile.codeExchangeCount ?? 0;
@@ -887,6 +908,18 @@ async function createProfileInCloud(profile) {
                 error = retry.error;
             }
 
+            if (error && error.code === 'PGRST204' && String(error.message || '').includes('initial_coins_granted')) {
+                hasInitialCoinsGrantedColumn = false;
+                delete payload.initial_coins_granted;
+                const retry = await supabaseClient
+                    .from('rankings')
+                    .insert(payload)
+                    .select('*')
+                    .maybeSingle();
+                data = retry.data;
+                error = retry.error;
+            }
+
             if (error && error.code === 'PGRST204' && String(error.message || '').includes('code_exchange_count')) {
                 delete payload.code_exchange_count;
                 const retry = await supabaseClient
@@ -899,7 +932,7 @@ async function createProfileInCloud(profile) {
             }
 
             if (error && error.code === '23505' && String(error.message || '').includes('code')) {
-                profile.code = generateCode();
+                profile.code = await generateUniqueCodeFromDB();
                 continue;
             }
 
@@ -932,14 +965,16 @@ async function saveProfileToCloud(profile, options = {}) {
         dino_name: profile.dinoName,
         dino_emoji: profile.dinoEmoji,
         dino_desc: profile.dinoDesc,
-        score: profile.score
+        battle_power: profile.battlePower ?? 10
     };
 
     payload.courage = profile.courage ?? 1;
-    payload.battle_power = profile.battlePower ?? 10;
 
     if (hasCoinsColumn && Object.prototype.hasOwnProperty.call(profile, 'coins')) {
         payload.coins = profile.coins ?? 0;
+    }
+    if (hasInitialCoinsGrantedColumn && Object.prototype.hasOwnProperty.call(profile, 'initialCoinsGranted')) {
+        payload.initial_coins_granted = profile.initialCoinsGranted ?? false;
     }
     if (hasUsedCodesColumn && Object.prototype.hasOwnProperty.call(profile, 'usedCodes')) {
         payload.used_codes = profile.usedCodes || [];
@@ -985,6 +1020,21 @@ async function saveProfileToCloud(profile, options = {}) {
             error = retry.error;
         }
 
+        if (error && error.code === 'PGRST204' && String(error.message || '').includes('initial_coins_granted')) {
+            if (options.requireInitialCoinsGranted) {
+                throw error;
+            }
+            hasInitialCoinsGrantedColumn = false;
+            delete payload.initial_coins_granted;
+            const retry = await supabaseClient
+                .from('rankings')
+                .upsert(payload, { onConflict: 'name,student_id' })
+                .select('*')
+                .maybeSingle();
+            data = retry.data;
+            error = retry.error;
+        }
+
         if (error && error.code === 'PGRST204' && String(error.message || '').includes('code_exchange_count')) {
             delete payload.code_exchange_count;
             const retry = await supabaseClient
@@ -1019,7 +1069,7 @@ async function renderRanking() {
         const { data, error } = await supabaseClient
             .from('rankings')
             .select('*')
-            .order('score', { ascending: false });
+            .order('battle_power', { ascending: false });
 
         if (error) throw error;
         updateRankingUI(data || []);
@@ -1041,7 +1091,7 @@ function updateRankingUI(allPlayers) {
 
     if (elBossRankingHighlight) {
         if (bossPlayer) {
-            const bossDinoName = bossPlayer.dino_name || bossPlayer.dinoName || '홍주은 사우루스';
+            const bossDinoName = bossPlayer.dino_name || bossPlayer.dinoName || '폭군 홍주은사우루스';
             const bossCourage = bossPlayer.courage ?? 1;
             const bossBattlePower = bossPlayer.battle_power ?? 10;
             elBossRankingHighlight.innerHTML = `
@@ -1071,7 +1121,6 @@ function updateRankingUI(allPlayers) {
         const tr = document.createElement('tr');
         if (isMe) tr.className = "my-row";
 
-        // Supabase 컬럼명에 맞춰 데이터 매핑 (snake_case 대응)
         const name = player.name;
         const dinoName = player.dino_name || player.dinoName;
         const courage = player.courage ?? 1;
@@ -1085,7 +1134,6 @@ function updateRankingUI(allPlayers) {
         tbodyRanking.appendChild(tr);
     });
 }
-
 function showDinoDetail() {
     if (!savedProfile) return;
 
@@ -1115,18 +1163,18 @@ async function showBossPersonalPage() {
         const { data, error } = await supabaseClient
             .from('rankings')
             .select('*')
-            .order('score', { ascending: false });
+            .order('battle_power', { ascending: false });
 
         if (error) throw error;
 
         // 통계 계산
         const totalUsers = data.length;
         const avgScore = totalUsers > 0
-            ? Math.round(data.reduce((acc, cur) => acc + (cur.score || 0), 0) / totalUsers)
+            ? Math.round(data.reduce((acc, cur) => acc + (cur.battle_power ?? 10), 0) / totalUsers)
             : 0;
 
         document.getElementById('boss-total-users').innerText = totalUsers;
-        document.getElementById('boss-avg-score').innerText = avgScore;
+        document.getElementById('boss-avg-battle-power').innerText = avgScore;
 
         // 랭킹 테이블 채우기
         const bossRankingBody = document.getElementById('boss-ranking-body');
@@ -1136,7 +1184,7 @@ async function showBossPersonalPage() {
             tr.innerHTML = `
                 <td>${user.name}</td>
                 <td><small>${user.dino_name || '진화 중'}</small></td>
-                <td>${user.score || 0}</td>
+                <td>${user.battle_power ?? 10}</td>
             `;
             bossRankingBody.appendChild(tr);
         });
@@ -1152,13 +1200,14 @@ async function grantSurveyCompletionCoins() {
     if (!latestProfile) return false;
     savedProfile = latestProfile;
 
-    const hasCompletedSurvey = (savedProfile.score || 0) > 0;
-    const hasNoCoinsYet = (savedProfile.coins ?? 0) === 0;
+    const hasCompletedSurvey = isCompletedProfile(savedProfile);
+    const hasAlreadyGrantedInitialCoins = savedProfile.initialCoinsGranted === true;
 
-    if (!hasCompletedSurvey || !hasNoCoinsYet) return false;
+    if (!hasCompletedSurvey || hasAlreadyGrantedInitialCoins) return false;
 
-    savedProfile.coins = 3;
-    return saveProfileToCloud(savedProfile, { verify: true, requireCoins: true });
+    savedProfile.coins = (savedProfile.coins ?? 0) + 3;
+    savedProfile.initialCoinsGranted = true;
+    return saveProfileToCloud(savedProfile, { verify: true, requireCoins: true, requireInitialCoinsGranted: true });
 }
 // --- Event Listeners ---
 btnStart.addEventListener('click', startQuiz);
@@ -1243,6 +1292,109 @@ const btnBossSendMsg = document.getElementById('btn-boss-send-msg');
 const bossMessageInput = document.getElementById('boss-message-input');
 const btnToggleGrowth = document.getElementById('btn-toggle-growth');
 const btnToggleReset = document.getElementById('btn-toggle-reset');
+const bossUserCodeInput = document.getElementById('boss-user-code-input');
+const btnBossFindUser = document.getElementById('btn-boss-find-user');
+const bossCoinManagerMsg = document.getElementById('boss-coin-manager-msg');
+const bossSelectedUser = document.getElementById('boss-selected-user');
+const bossSelectedUserName = document.getElementById('boss-selected-user-name');
+const bossSelectedUserDino = document.getElementById('boss-selected-user-dino');
+const bossSelectedUserCoins = document.getElementById('boss-selected-user-coins');
+const bossShopActions = document.getElementById('boss-shop-actions');
+let bossManagedUser = null;
+
+function setBossCoinManagerMessage(message, isError = false) {
+    if (!bossCoinManagerMsg) return;
+    bossCoinManagerMsg.innerText = message;
+    bossCoinManagerMsg.style.color = isError ? '#ff8a80' : '#ffcdd2';
+}
+
+function renderBossManagedUser(user) {
+    bossManagedUser = user;
+    if (!user) {
+        bossSelectedUser?.classList.add('hidden');
+        bossShopActions?.classList.add('hidden');
+        return;
+    }
+
+    if (bossSelectedUserName) bossSelectedUserName.innerText = `${user.name} (${user.student_id})`;
+    if (bossSelectedUserDino) bossSelectedUserDino.innerText = user.dino_name || '공룡 정보 없음';
+    if (bossSelectedUserCoins) bossSelectedUserCoins.innerText = user.coins ?? 0;
+    bossSelectedUser?.classList.remove('hidden');
+    bossShopActions?.classList.remove('hidden');
+}
+
+async function findBossManagedUserByCode() {
+    const code = bossUserCodeInput?.value.trim().normalize('NFC');
+    if (!code) {
+        setBossCoinManagerMessage('코드를 입력해주세요.', true);
+        return;
+    }
+
+    btnBossFindUser.disabled = true;
+    setBossCoinManagerMessage('조회 중...');
+    try {
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .select('*')
+            .eq('code', code)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data) {
+            renderBossManagedUser(null);
+            setBossCoinManagerMessage('해당 코드의 유저를 찾지 못했어요.', true);
+            return;
+        }
+        if (data.code === BOSS_CODE) {
+            renderBossManagedUser(null);
+            setBossCoinManagerMessage('보스 계정은 상점 계산 대상에서 제외돼요.', true);
+            return;
+        }
+
+        renderBossManagedUser(data);
+        setBossCoinManagerMessage('유저를 찾았어요. 교환할 메뉴를 눌러주세요.');
+    } catch (e) {
+        console.error('Boss user lookup failed', e);
+        setBossCoinManagerMessage('유저 조회에 실패했어요.', true);
+    } finally {
+        btnBossFindUser.disabled = false;
+    }
+}
+
+async function spendBossManagedUserCoins(itemName, cost, button) {
+    if (!bossManagedUser) {
+        setBossCoinManagerMessage('먼저 유저 코드를 조회해주세요.', true);
+        return;
+    }
+
+    const currentCoins = bossManagedUser.coins ?? 0;
+    if (currentCoins < cost) {
+        setBossCoinManagerMessage(`${bossManagedUser.name}님의 코인이 부족해요. 현재 ${currentCoins}개`, true);
+        return;
+    }
+
+    button.disabled = true;
+    setBossCoinManagerMessage(`${itemName} 처리 중...`);
+    try {
+        const nextCoins = currentCoins - cost;
+        const { data, error } = await supabaseClient
+            .from('rankings')
+            .update({ coins: nextCoins })
+            .eq('code', bossManagedUser.code)
+            .select('*')
+            .maybeSingle();
+
+        if (error) throw error;
+        bossManagedUser = data || { ...bossManagedUser, coins: nextCoins };
+        renderBossManagedUser(bossManagedUser);
+        setBossCoinManagerMessage(`${itemName} 교환 완료: ${cost}코인 차감`);
+    } catch (e) {
+        console.error('Boss coin spend failed', e);
+        setBossCoinManagerMessage('코인 차감에 실패했어요.', true);
+    } finally {
+        button.disabled = false;
+    }
+}
 
 async function handleBossControlToggle(controlKey, button) {
     if (!button) return;
@@ -1263,6 +1415,15 @@ async function handleBossControlToggle(controlKey, button) {
 
 btnToggleGrowth?.addEventListener('click', () => handleBossControlToggle('growthEnabled', btnToggleGrowth));
 btnToggleReset?.addEventListener('click', () => handleBossControlToggle('resetEnabled', btnToggleReset));
+btnBossFindUser?.addEventListener('click', findBossManagedUserByCode);
+bossUserCodeInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') findBossManagedUserByCode();
+});
+bossShopActions?.addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-cost]');
+    if (!button) return;
+    spendBossManagedUserCoins(button.dataset.item || '상점 물품', Number(button.dataset.cost || 0), button);
+});
 
 if (btnBossSendMsg) {
     btnBossSendMsg.addEventListener('click', async () => {
@@ -1286,9 +1447,8 @@ if (btnBossSendMsg) {
                 student_id: BOSS_STUDENT_ID,
                 dino_name: '폭군 홍주은사우루스',
                 dino_desc: serializeBossControls(),
-                courage: 99,
-                battle_power: 9999,
-                score: 999999
+                courage: 150,
+                battle_power: 15000,
             }, { onConflict: 'name,student_id' });
             alert("보스의 메시지가 온 마을에 울려 퍼졌습니다!");
             bossMessageInput.value = "";

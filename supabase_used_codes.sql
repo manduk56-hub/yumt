@@ -5,6 +5,9 @@ alter table public.rankings
 add column if not exists coins integer not null default 0;
 
 alter table public.rankings
+add column if not exists initial_coins_granted boolean not null default false;
+
+alter table public.rankings
 add column if not exists code_exchange_count integer not null default 0;
 
 do $$
@@ -58,17 +61,23 @@ update public.rankings
 set courage = coalesce(nullif(courage, 0), 1),
     battle_power = coalesce(nullif(battle_power, 0), 10);
 
+update public.rankings
+set initial_coins_granted = true
+where coalesce(dino_name, '') <> ''
+  and initial_coins_granted = false;
+
 alter table public.rankings
 alter column used_codes set default '{}',
 alter column coins set default 0,
+alter column initial_coins_granted set default false,
 alter column code_exchange_count set default 0,
-alter column score set default 0,
 alter column courage set default 1,
 alter column battle_power set default 10;
 
 alter table public.rankings
 alter column used_codes set not null,
 alter column coins set not null,
+alter column initial_coins_granted set not null,
 alter column code_exchange_count set not null;
 
 create unique index if not exists rankings_name_student_unique
@@ -78,8 +87,10 @@ create unique index if not exists rankings_code_unique
 on public.rankings (code);
 
 alter table public.rankings
-drop constraint if exists rankings_score_nonnegative,
-add constraint rankings_score_nonnegative check (score >= 0);
+drop constraint if exists rankings_score_nonnegative;
+
+alter table public.rankings
+drop column if exists score;
 
 alter table public.rankings
 drop constraint if exists rankings_courage_nonnegative,
@@ -102,6 +113,9 @@ comment on column public.rankings.used_codes is
 
 comment on column public.rankings.coins is
 'Coins earned by the user. Stored in Supabase as the source of truth.';
+
+comment on column public.rankings.initial_coins_granted is
+'Whether the one-time survey completion coin reward has already been granted.';
 
 comment on column public.rankings.code_exchange_count is
 'Number of other-user codes this user has redeemed. Stored only in Supabase and not shown in the site UI.';
@@ -169,8 +183,7 @@ begin
         code_exchange_count = next_exchange_count,
         coins = coalesce(coins, 0) + case when next_exchange_count % 5 = 0 then 1 else 0 end,
         courage = coalesce(courage, 1) + 1,
-        battle_power = coalesce(battle_power, 10) + 10,
-        score = coalesce(score, 0) + 100
+        battle_power = coalesce(battle_power, 10) + 10
     where name = p_name
       and student_id = p_student_id
     returning *

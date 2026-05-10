@@ -489,12 +489,16 @@ body.theme-jurassic {
     border-radius: 24px;
     padding: 22px 26px;
     margin-bottom: 26px;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr;
     align-items: center;
     gap: 16px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.05);
     transition: transform 0.3s ease;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    min-height: 128px;
 }
 
 .dash-profile-card:hover {
@@ -503,20 +507,30 @@ body.theme-jurassic {
 }
 
 .profile-emoji {
-    font-size: 3.2rem;
-    background: #fff9c4;
-    width: 74px;
-    height: 74px;
+    font-size: 8.2rem;
+    background: transparent;
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 50%;
-    border: 4px solid var(--wooden-border);
+    border-radius: 0;
+    border: none;
+    opacity: 0.12;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) scale(1.25);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .profile-info {
-    text-align: left;
+    text-align: center;
+    grid-column: 1;
     flex: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .profile-info h3 {
@@ -537,15 +551,19 @@ body.theme-jurassic {
 
 .profile-coins {
     color: #5d4037;
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     line-height: 1.4;
-    margin: 8px 0 0;
+    margin: -8px 0 0;
     font-weight: 900;
+    grid-column: 1;
+    position: relative;
+    z-index: 1;
+    text-align: center;
 }
 
 .profile-coins strong {
     color: #e65100;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
 }
 
 .map-desc {
@@ -998,6 +1016,99 @@ body.theme-jurassic {
     font-weight: 900;
     padding: 5px 9px;
     white-space: nowrap;
+}
+
+.boss-coin-manager {
+    background: #2c1414 !important;
+    padding: 20px !important;
+    border-radius: 12px !important;
+    border: 1px solid #ff5252 !important;
+    margin-bottom: 20px !important;
+}
+
+.boss-coin-manager h3,
+.boss-coin-manager h4 {
+    color: #ff8a80;
+    border-bottom: 1px solid #ff5252;
+    padding-bottom: 5px;
+    margin-bottom: 12px;
+}
+
+.boss-code-search {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+}
+
+.boss-code-search input {
+    background: #1a0b0b;
+    border: 1px solid #ff5252;
+    border-radius: 8px;
+    color: #ffcdd2;
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 10px;
+}
+
+.boss-selected-user {
+    background: #1a0b0b;
+    border: 1px solid #ff5252;
+    border-radius: 8px;
+    color: #ffcdd2;
+    margin: 12px 0;
+    padding: 12px;
+}
+
+.boss-selected-name {
+    color: #fff;
+    font-weight: 900;
+    font-size: 1.1rem;
+}
+
+.boss-selected-dino {
+    margin-top: 4px;
+}
+
+.boss-selected-coins {
+    color: #ffeb3b;
+    font-weight: 900;
+    margin-top: 8px;
+}
+
+.boss-coin-manager-msg {
+    color: #ffcdd2;
+    font-weight: 900;
+    margin: 10px 0 0;
+    min-height: 1.4em;
+}
+
+.boss-shop-grid {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    margin-bottom: 14px;
+}
+
+.boss-shop-grid button {
+    background: #1a0b0b;
+    border: 1px solid #ff5252;
+    border-radius: 8px;
+    color: #ffcdd2;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 900;
+    padding: 10px;
+    text-align: left;
+}
+
+.boss-shop-grid button span {
+    color: #ffeb3b;
+    float: right;
+}
+
+.boss-shop-grid button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
 }
 
 @media (max-width: 600px) {
