@@ -184,10 +184,8 @@ const adjectivesPool = {
     weird: ["예측불허", "자유로운 영혼", "4차원 매력의", "독보적 마이웨이", "어디로 튈지 모르는"]
 };
 
-// --- Supabase 설정 ---
-const SUPABASE_URL = "https://xtymdgdnbeukkgwfmgzu.supabase.co";
-const SUPABASE_KEY = "sb_publishable_ixzG850Es4Amfs_32MZSlg_xwx5XKja"; // Anon Key
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// --- Local PostgreSQL API ---
+// window.supabaseClient is provided by public/local-db-client.js.
 
 // --- State ---
 let currentQuestionIndex = 0;

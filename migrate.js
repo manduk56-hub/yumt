@@ -1,8 +1,10 @@
-const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
 
-const SUPABASE_URL = 'https://xtymdgdnbeukkgwfmgzu.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_ixzG850Es4Amfs_32MZSlg_xwx5XKja';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const { Pool } = require('pg');
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/free_website'
+});
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const CODE_LENGTH = 6;
@@ -23,76 +25,67 @@ function generateCode(usedCodes) {
     throw new Error('Could not generate a unique code after 100 attempts.');
 }
 
-async function migrate() {
-    console.log('Fetching users from Supabase...');
-    const { data, error } = await supabase
-        .from('rankings')
-        .select('name,student_id,code');
+async function migrateDuplicateCodes() {
+    const client = await pool.connect();
+    try {
+        console.log('Checking local PostgreSQL rankings data...');
+        const { rows } = await client.query('select id, name, student_id, code from public.rankings order by id');
 
-    if (error) {
-        console.error('Error fetching users:', error);
-        process.exitCode = 1;
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        console.log('No users found to migrate.');
-        return;
-    }
-
-    const seenStudents = new Set();
-    const duplicateStudents = [];
-    for (const user of data) {
-        const key = `${user.name}::${user.student_id}`;
-        if (seenStudents.has(key)) duplicateStudents.push(key);
-        seenStudents.add(key);
-    }
-
-    if (duplicateStudents.length > 0) {
-        console.error('Duplicate name/student_id rows exist. Clean these before running code migration:');
-        console.error([...new Set(duplicateStudents)].join('\n'));
-        process.exitCode = 1;
-        return;
-    }
-
-    const usedCodes = new Set(data.map(user => user.code).filter(Boolean));
-    const duplicateCodes = data
-        .map(user => user.code)
-        .filter((code, index, codes) => code && codes.indexOf(code) !== index);
-
-    if (duplicateCodes.length === 0) {
-        console.log('No duplicate codes found. Nothing to migrate.');
-        return;
-    }
-
-    console.log(`Found ${new Set(duplicateCodes).size} duplicate code value(s). Reassigning only duplicate rows...`);
-
-    const seenCodes = new Set();
-    for (const user of data) {
-        if (!user.code || !seenCodes.has(user.code)) {
-            if (user.code) seenCodes.add(user.code);
-            continue;
+        if (rows.length === 0) {
+            console.log('No users found to migrate.');
+            return;
         }
 
-        const newCode = generateCode(usedCodes);
-        console.log(`Updating ${user.name} (${user.student_id}): ${user.code} -> ${newCode}`);
+        const seenStudents = new Set();
+        const duplicateStudents = [];
+        for (const user of rows) {
+            const key = `${user.name}::${user.student_id}`;
+            if (seenStudents.has(key)) duplicateStudents.push(key);
+            seenStudents.add(key);
+        }
 
-        const { error: updateError } = await supabase
-            .from('rankings')
-            .update({ code: newCode })
-            .eq('name', user.name)
-            .eq('student_id', user.student_id);
-
-        if (updateError) {
-            console.error(`Failed to update ${user.name} (${user.student_id}):`, updateError);
+        if (duplicateStudents.length > 0) {
+            console.error('Duplicate name/student_id rows exist. Clean these before running code migration:');
+            console.error([...new Set(duplicateStudents)].join('\n'));
             process.exitCode = 1;
+            return;
         }
-    }
 
-    console.log('Migration finished.');
+        const usedCodes = new Set(rows.map(user => user.code).filter(Boolean));
+        const duplicateCodes = rows
+            .map(user => user.code)
+            .filter((code, index, codes) => code && codes.indexOf(code) !== index);
+
+        if (duplicateCodes.length === 0) {
+            console.log('No duplicate codes found. Nothing to migrate.');
+            return;
+        }
+
+        console.log(`Found ${new Set(duplicateCodes).size} duplicate code value(s). Reassigning duplicate rows...`);
+        await client.query('begin');
+
+        const seenCodes = new Set();
+        for (const user of rows) {
+            if (!user.code || !seenCodes.has(user.code)) {
+                if (user.code) seenCodes.add(user.code);
+                continue;
+            }
+
+            const newCode = generateCode(usedCodes);
+            console.log(`Updating ${user.name} (${user.student_id}): ${user.code} -> ${newCode}`);
+            await client.query('update public.rankings set code = $1 where id = $2', [newCode, user.id]);
+        }
+
+        await client.query('commit');
+        console.log('Migration finished.');
+    } catch (error) {
+        await client.query('rollback').catch(() => {});
+        console.error('Migration failed:', error);
+        process.exitCode = 1;
+    } finally {
+        client.release();
+        await pool.end();
+    }
 }
 
-migrate().catch(error => {
-    console.error('Unexpected migration failure:', error);
-    process.exitCode = 1;
-});
+migrateDuplicateCodes();

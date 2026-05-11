@@ -1,0 +1,15 @@
+{
+  "name": "free-website-local-postgres",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "db:migrate": "powershell -ExecutionPolicy Bypass -File ./migrate.ps1"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}
