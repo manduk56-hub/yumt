@@ -272,6 +272,21 @@ let isPendingNewProfile = false;
 const BOSS_NAME = "\uD64D\uC8FC\uC740";
 const BOSS_STUDENT_ID = "22411923";
 const BOSS_CODE = "BOSS00";
+const BOSS_IMAGE_SRC = "pokgun.png";
+const DINO_IMAGE_BY_NAME = {
+    '안킬로사우루스': 'ankilo.png',
+    '벨로시랩터': 'belop.png',
+    '브라키오사우루스': 'bra.png',
+    '파키케팔로사우루스': 'fucking.png',
+    '모사사우루스': 'mosa.png',
+    '티라노사우루스': 'mtirano.png',
+    '파라사우롤로푸스': 'parapol.png',
+    '플레시오사우루스': 'ple.png',
+    '프테라노돈': 'pmtera.png',
+    '스테고사우루스': 'stego.png',
+    '스피노사우루스': 'spino2.png',
+    '트리케라톱스': 'tri.png'
+};
 let appControls = {
     growthEnabled: true,
     resetEnabled: true,
@@ -280,6 +295,40 @@ let appControls = {
 };
 
 // --- Functions ---
+function isBossProfile(profile) {
+    if (!profile) return false;
+    return profile.code === BOSS_CODE ||
+        (profile.name === BOSS_NAME && profile.studentId === BOSS_STUDENT_ID) ||
+        String(profile.dinoName || '').includes('홍주은');
+}
+
+function getDinoImageSrc(profile) {
+    if (isBossProfile(profile)) return BOSS_IMAGE_SRC;
+
+    const dinoName = String(profile?.dinoName || '');
+    const matchedName = Object.keys(DINO_IMAGE_BY_NAME).find(name => dinoName.includes(name));
+    return matchedName ? DINO_IMAGE_BY_NAME[matchedName] : '';
+}
+
+function renderDinoVisual(element, profile, fallbackEmoji = '🦖') {
+    if (!element) return;
+    element.innerHTML = '';
+
+    const imageSrc = getDinoImageSrc(profile);
+    if (imageSrc) {
+        const img = document.createElement('img');
+        img.src = imageSrc;
+        img.alt = profile?.dinoName || '공룡 이미지';
+        img.className = 'dino-visual-image';
+        element.appendChild(img);
+        element.classList.add('image-visual');
+        return;
+    }
+
+    element.classList.remove('image-visual');
+    element.innerText = profile?.dinoEmoji || fallbackEmoji;
+}
+
 function isCompletedProfile(profile) {
     if (!profile) return false;
     return Boolean(profile.dinoName && profile.dinoEmoji && profile.dinoDesc);
@@ -738,16 +787,20 @@ async function generateResult() {
         const matchedDino = dinoList[Math.floor(Math.random() * dinoList.length)];
         const adjPool = adjectivesPool[topType];
         const randomAdjective = adjPool[Math.floor(Math.random() * adjPool.length)];
+        const dinoName = randomAdjective + ' ' + matchedDino.name;
 
         document.getElementById('result-name').innerText = '나는 ' + matchedDino.name + ' 였어!';
-        document.getElementById('dino-emoji').innerText = matchedDino.emoji;
-        document.getElementById('dino-name').innerText = randomAdjective + ' ' + matchedDino.name;
+        renderDinoVisual(document.getElementById('dino-emoji'), {
+            dinoName,
+            dinoEmoji: matchedDino.emoji
+        }, matchedDino.emoji);
+        document.getElementById('dino-name').innerText = dinoName;
         document.getElementById('dino-description').innerText = matchedDino.desc;
 
         savedProfile = {
             name: userName,
             studentId: studentId,
-            dinoName: randomAdjective + ' ' + matchedDino.name,
+            dinoName,
             dinoEmoji: matchedDino.emoji,
             dinoDesc: matchedDino.desc,
             code: existingProfile.code || await generateUniqueCodeFromDB(),
@@ -771,7 +824,7 @@ function populateDashboard() {
     if (!savedProfile) return;
     // Main Dashboard
     document.getElementById('dash-user-info').innerText = `와줘서 고마워요! ${savedProfile.dinoName}! 우리 엠티를 꼭 지켜주세요!`;
-    document.getElementById('dash-emoji').innerText = savedProfile.dinoEmoji || '🦖';
+    renderDinoVisual(document.getElementById('dash-emoji'), savedProfile);
     document.getElementById('dash-dino-name').innerText = savedProfile.dinoName;
 
     if (elDashCoins) elDashCoins.innerText = savedProfile.coins ?? 0;
@@ -1173,7 +1226,7 @@ function updateRankingUI(allPlayers) {
 function showDinoDetail() {
     if (!savedProfile) return;
 
-    elDetailEmoji.innerText = savedProfile.dinoEmoji || '🦖';
+    renderDinoVisual(elDetailEmoji, savedProfile);
     elDetailDinoName.innerText = savedProfile.dinoName;
     elDetailMtTip.innerText = '공룡친구들과 코드를 교환하면 강해질 수 있어요!';
 
