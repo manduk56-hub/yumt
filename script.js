@@ -199,6 +199,7 @@ let quizCounts = {
 
 // --- DOM Elements ---
 const screenIntro = document.getElementById('screen-intro');
+const screenRosterWelcome = document.getElementById('screen-roster-welcome');
 const screenQuiz = document.getElementById('screen-quiz');
 const screenYouAre = document.getElementById('screen-you-are');
 const screenFusion = document.getElementById('screen-fusion');
@@ -216,6 +217,8 @@ const screenBossPersonal = document.getElementById('screen-boss-personal');
 const inputName = document.getElementById('user-name');
 const inputId = document.getElementById('user-id');
 const btnStart = document.getElementById('btn-start');
+const btnRosterWelcomeNext = document.getElementById('btn-roster-welcome-next');
+const elRosterWelcomeName = document.getElementById('roster-welcome-name');
 
 const elQuestionNum = document.getElementById('question-number');
 const elQuestionText = document.getElementById('question-text');
@@ -464,6 +467,48 @@ async function fetchProfileFromDB(name, id) {
     return data ? buildProfileFromRanking(data) : null;
 }
 
+async function fetchRosterStudent(name, id) {
+    const { data, error } = await supabaseClient
+        .from('student_roster')
+        .select('name,department,student_id')
+        .eq('name', name)
+        .eq('student_id', id)
+        .maybeSingle();
+
+    if (error) throw error;
+    return data;
+}
+
+function continueToFirstSurvey() {
+    currentQuestionIndex = 0;
+    quizCounts = { type: { aggressive: 0, gentle: 0, weird: 0 } };
+
+    document.getElementById('loading-spinner').innerText = '';
+    document.getElementById('loading-title').innerText = '?? ?? ???? ???? ?...';
+    document.getElementById('loading-desc').innerText = 'Supabase? ??? ???? ?????.';
+
+    showScreen(screenQuiz);
+    renderQuestion();
+}
+
+async function showRosterWelcomeIfRegistered() {
+    try {
+        const rosterStudent = await fetchRosterStudent(userName, studentId);
+        if (!rosterStudent) return false;
+
+        if (elRosterWelcomeName) {
+            const department = rosterStudent.department || '소속 미등록';
+            elRosterWelcomeName.innerText = `${department} / ${rosterStudent.name}`;
+        }
+
+        showScreen(screenRosterWelcome);
+        return true;
+    } catch (e) {
+        console.warn('Student roster check failed:', e);
+        return false;
+    }
+}
+
 function showScreen(screenEl) {
     if (!screenEl) return;
 
@@ -603,15 +648,8 @@ async function startQuiz() {
             isPendingNewProfile = true;
         }
 
-        currentQuestionIndex = 0;
-        quizCounts = { type: { aggressive: 0, gentle: 0, weird: 0 } };
-
-        document.getElementById('loading-spinner').innerText = '';
-        document.getElementById('loading-title').innerText = '?? ?? ???? ???? ?...';
-        document.getElementById('loading-desc').innerText = 'Supabase? ??? ???? ?????.';
-
-        showScreen(screenQuiz);
-        renderQuestion();
+        const didShowRosterWelcome = await showRosterWelcomeIfRegistered();
+        if (!didShowRosterWelcome) continueToFirstSurvey();
     } catch (e) {
         console.error('Supabase profile check failed:', e);
         alert('?????? ?? ?? ??? ?????. ?? ? ?? ??????.');
@@ -1207,6 +1245,7 @@ async function grantSurveyCompletionCoins() {
 }
 // --- Event Listeners ---
 btnStart.addEventListener('click', startQuiz);
+btnRosterWelcomeNext?.addEventListener('click', continueToFirstSurvey);
 inputId.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') startQuiz();
 });
@@ -1288,109 +1327,6 @@ const btnBossSendMsg = document.getElementById('btn-boss-send-msg');
 const bossMessageInput = document.getElementById('boss-message-input');
 const btnToggleGrowth = document.getElementById('btn-toggle-growth');
 const btnToggleReset = document.getElementById('btn-toggle-reset');
-const bossUserCodeInput = document.getElementById('boss-user-code-input');
-const btnBossFindUser = document.getElementById('btn-boss-find-user');
-const bossCoinManagerMsg = document.getElementById('boss-coin-manager-msg');
-const bossSelectedUser = document.getElementById('boss-selected-user');
-const bossSelectedUserName = document.getElementById('boss-selected-user-name');
-const bossSelectedUserDino = document.getElementById('boss-selected-user-dino');
-const bossSelectedUserCoins = document.getElementById('boss-selected-user-coins');
-const bossShopActions = document.getElementById('boss-shop-actions');
-let bossManagedUser = null;
-
-function setBossCoinManagerMessage(message, isError = false) {
-    if (!bossCoinManagerMsg) return;
-    bossCoinManagerMsg.innerText = message;
-    bossCoinManagerMsg.style.color = isError ? '#ff8a80' : '#ffcdd2';
-}
-
-function renderBossManagedUser(user) {
-    bossManagedUser = user;
-    if (!user) {
-        bossSelectedUser?.classList.add('hidden');
-        bossShopActions?.classList.add('hidden');
-        return;
-    }
-
-    if (bossSelectedUserName) bossSelectedUserName.innerText = `${user.name} (${user.student_id})`;
-    if (bossSelectedUserDino) bossSelectedUserDino.innerText = user.dino_name || '공룡 정보 없음';
-    if (bossSelectedUserCoins) bossSelectedUserCoins.innerText = user.coins ?? 0;
-    bossSelectedUser?.classList.remove('hidden');
-    bossShopActions?.classList.remove('hidden');
-}
-
-async function findBossManagedUserByCode() {
-    const code = bossUserCodeInput?.value.trim().normalize('NFC');
-    if (!code) {
-        setBossCoinManagerMessage('코드를 입력해주세요.', true);
-        return;
-    }
-
-    btnBossFindUser.disabled = true;
-    setBossCoinManagerMessage('조회 중...');
-    try {
-        const { data, error } = await supabaseClient
-            .from('rankings')
-            .select('*')
-            .eq('code', code)
-            .maybeSingle();
-
-        if (error) throw error;
-        if (!data) {
-            renderBossManagedUser(null);
-            setBossCoinManagerMessage('해당 코드의 유저를 찾지 못했어요.', true);
-            return;
-        }
-        if (data.code === BOSS_CODE) {
-            renderBossManagedUser(null);
-            setBossCoinManagerMessage('보스 계정은 상점 계산 대상에서 제외돼요.', true);
-            return;
-        }
-
-        renderBossManagedUser(data);
-        setBossCoinManagerMessage('유저를 찾았어요. 교환할 메뉴를 눌러주세요.');
-    } catch (e) {
-        console.error('Boss user lookup failed', e);
-        setBossCoinManagerMessage('유저 조회에 실패했어요.', true);
-    } finally {
-        btnBossFindUser.disabled = false;
-    }
-}
-
-async function spendBossManagedUserCoins(itemName, cost, button) {
-    if (!bossManagedUser) {
-        setBossCoinManagerMessage('먼저 유저 코드를 조회해주세요.', true);
-        return;
-    }
-
-    const currentCoins = bossManagedUser.coins ?? 0;
-    if (currentCoins < cost) {
-        setBossCoinManagerMessage(`${bossManagedUser.name}님의 코인이 부족해요. 현재 ${currentCoins}개`, true);
-        return;
-    }
-
-    button.disabled = true;
-    setBossCoinManagerMessage(`${itemName} 처리 중...`);
-    try {
-        const nextCoins = currentCoins - cost;
-        const { data, error } = await supabaseClient
-            .from('rankings')
-            .update({ coins: nextCoins })
-            .eq('code', bossManagedUser.code)
-            .select('*')
-            .maybeSingle();
-
-        if (error) throw error;
-        bossManagedUser = data || { ...bossManagedUser, coins: nextCoins };
-        renderBossManagedUser(bossManagedUser);
-        setBossCoinManagerMessage(`${itemName} 교환 완료: ${cost}코인 차감`);
-    } catch (e) {
-        console.error('Boss coin spend failed', e);
-        setBossCoinManagerMessage('코인 차감에 실패했어요.', true);
-    } finally {
-        button.disabled = false;
-    }
-}
 
 async function handleBossControlToggle(controlKey, button) {
     if (!button) return;
@@ -1411,15 +1347,6 @@ async function handleBossControlToggle(controlKey, button) {
 
 btnToggleGrowth?.addEventListener('click', () => handleBossControlToggle('growthEnabled', btnToggleGrowth));
 btnToggleReset?.addEventListener('click', () => handleBossControlToggle('resetEnabled', btnToggleReset));
-btnBossFindUser?.addEventListener('click', findBossManagedUserByCode);
-bossUserCodeInput?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') findBossManagedUserByCode();
-});
-bossShopActions?.addEventListener('click', (e) => {
-    const button = e.target.closest('button[data-cost]');
-    if (!button) return;
-    spendBossManagedUserCoins(button.dataset.item || '상점 물품', Number(button.dataset.cost || 0), button);
-});
 
 if (btnBossSendMsg) {
     btnBossSendMsg.addEventListener('click', async () => {

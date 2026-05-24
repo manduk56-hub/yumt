@@ -134,6 +134,37 @@ body.theme-valley {
     align-items: center;
 }
 
+.roster-welcome-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.roster-welcome-kicker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(3, 105, 161, 0.12);
+    color: #075985;
+    font-size: 0.9rem;
+    font-weight: 900;
+}
+
+#roster-welcome-title {
+    margin-bottom: 0;
+}
+
+#roster-welcome-name {
+    margin-bottom: 0.35rem;
+    color: #164e63;
+    font-size: 1.25rem;
+    font-weight: 900;
+    word-break: keep-all;
+}
+
 input[type="text"], input[type="number"] {
     padding: 15px;
     border-radius: 30px;
@@ -947,12 +978,12 @@ body.theme-jurassic {
 }
 
 .detail-header {
-    margin-bottom: 25px;
+    margin-bottom: 12px;
 }
 
 .detail-emoji {
-    font-size: 6rem;
-    margin-bottom: 10px;
+    font-size: 4.25rem;
+    margin-bottom: 4px;
     animation: floatBg 3s ease-in-out infinite;
 }
 
@@ -996,186 +1027,179 @@ body.theme-jurassic {
     font-weight: 700;
     color: #d84315;
     background: rgba(255, 243, 224, 0.5);
-    padding: 10px;
+    padding: 8px 10px;
     border-radius: 8px;
     border-left: 5px solid #ff7043;
 }
 
+#screen-dino-detail .dashboard-container {
+    max-width: 820px;
+    padding: 12px 16px 88px;
+}
+
+#screen-dino-detail .paper-bg {
+    padding: 8px 0;
+    margin-bottom: 10px;
+}
+
+#screen-dino-detail .paper-bg h3 {
+    margin-bottom: 8px;
+}
+
+#screen-dino-detail #detail-dino-name {
+    font-size: 1.55rem;
+    line-height: 1.2;
+    margin-bottom: 6px;
+}
+
+#screen-dino-detail .coin-display {
+    font-size: 1rem !important;
+    margin-top: 4px !important;
+    padding: 4px 12px !important;
+}
+
 .coin-shop-section .map-desc {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
 }
 
 .coin-shop-title {
     color: #1b5e20;
-    font-size: 1.05rem;
-    margin: 18px 0 10px;
+    font-size: 1rem;
+    margin: 12px 0 7px;
 }
 
 .coin-shop-grid {
     display: grid;
-    gap: 8px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
 }
 
 .coin-shop-item {
     display: grid;
-    gap: 6px;
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "name price"
+        "detail price";
+    column-gap: 8px;
+    row-gap: 2px;
+    align-items: center;
     background: rgba(255, 249, 196, 0.45);
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 8px 10px;
     color: #3e2723;
     min-width: 0;
+    min-height: 52px;
 }
 
 .coin-shop-item strong {
+    grid-area: name;
     color: #1b5e20;
+    font-size: 0.95rem;
+    line-height: 1.15;
 }
 
 .coin-shop-item span {
+    grid-area: detail;
     color: #5d4037;
+    font-size: 0.86rem;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .coin-shop-item em {
+    grid-area: price;
     background: #ffb74d;
     border-radius: 6px;
     color: #111;
     font-style: normal;
     font-weight: 900;
-    padding: 5px 9px;
+    padding: 5px 8px;
     white-space: nowrap;
-    justify-self: start;
-}
-
-.boss-coin-manager {
-    background: #2c1414 !important;
-    padding: 20px !important;
-    border-radius: 12px !important;
-    border: 1px solid #ff5252 !important;
-    margin-bottom: 20px !important;
-}
-
-.boss-coin-manager h3,
-.boss-coin-manager h4 {
-    color: #ff8a80;
-    border-bottom: 1px solid #ff5252;
-    padding-bottom: 5px;
-    margin-bottom: 12px;
-}
-
-.boss-code-search {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 10px;
-}
-
-.boss-code-search input {
-    background: #1a0b0b;
-    border: 1px solid #ff5252;
-    border-radius: 8px;
-    color: #ffcdd2;
-    font-family: inherit;
-    font-size: 1rem;
-    min-width: 0;
-    padding: 10px;
-    width: 100%;
-}
-
-#btn-boss-find-user {
-    border-radius: 10px;
-    min-width: 68px;
-    padding: 10px 14px;
-    white-space: nowrap;
-}
-
-.boss-selected-user {
-    background: #1a0b0b;
-    border: 1px solid #ff5252;
-    border-radius: 8px;
-    color: #ffcdd2;
-    margin: 12px 0;
-    padding: 12px;
-}
-
-.boss-selected-name {
-    color: #fff;
-    font-weight: 900;
-    font-size: 1.1rem;
-}
-
-.boss-selected-dino {
-    margin-top: 4px;
-}
-
-.boss-selected-coins {
-    color: #ffeb3b;
-    font-weight: 900;
-    margin-top: 8px;
-}
-
-.boss-coin-manager-msg {
-    color: #ffcdd2;
-    font-weight: 900;
-    margin: 10px 0 0;
-    min-height: 1.4em;
-}
-
-.boss-shop-grid {
-    display: grid;
-    gap: 8px;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    margin-bottom: 14px;
-}
-
-.boss-shop-grid button {
-    background: #1a0b0b;
-    border: 1px solid #ff5252;
-    border-radius: 8px;
-    color: #ffcdd2;
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 900;
-    padding: 10px;
-    text-align: left;
-}
-
-.boss-shop-grid button span {
-    color: #ffeb3b;
-    float: right;
-}
-
-.boss-shop-grid button:disabled {
-    cursor: not-allowed;
-    opacity: 0.45;
+    justify-self: end;
+    font-size: 0.88rem;
 }
 
 @media (max-width: 600px) {
-    .boss-coin-manager {
-        padding: 16px !important;
+    #screen-dino-detail .dashboard-container {
+        width: 100%;
+        max-height: 100dvh;
+        padding: 8px 10px 78px;
     }
 
-    .boss-code-search {
-        gap: 8px;
-        grid-template-columns: minmax(0, 1fr) 58px;
+    #screen-dino-detail .paper-bg {
+        padding: 5px 0;
+        margin-bottom: 6px;
     }
 
-    .boss-code-search input {
-        font-size: 0.95rem;
-        padding: 10px 8px;
+    #screen-dino-detail .paper-bg h3 {
+        font-size: 1rem;
+        margin-bottom: 5px;
+        padding-bottom: 3px;
     }
 
-    #btn-boss-find-user {
-        min-width: 0;
-        padding: 10px 6px;
-        width: 58px;
+    #screen-dino-detail .detail-header {
+        margin-bottom: 6px;
+    }
+
+    #screen-dino-detail #detail-dino-name {
+        font-size: 1.2rem;
+        margin-bottom: 3px;
+    }
+
+    #screen-dino-detail .coin-display {
+        font-size: 0.9rem !important;
+        padding: 3px 10px !important;
+    }
+
+    #detail-mt-tip {
+        font-size: 0.86rem;
+        line-height: 1.25;
+        padding: 6px 8px;
+    }
+
+    .coin-shop-section .map-desc {
+        display: none;
+    }
+
+    .coin-shop-title {
+        font-size: 0.9rem;
+        margin: 7px 0 5px;
     }
 
     .coin-shop-grid {
-        gap: 7px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
     }
 
     .coin-shop-item {
-        padding: 9px 10px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "name price"
+            "detail price";
+        align-items: center;
+        column-gap: 5px;
+        min-height: 48px;
+        padding: 6px 7px;
+    }
+
+    .coin-shop-item strong {
+        font-size: 0.82rem;
+        line-height: 1.15;
+    }
+
+    .coin-shop-item span {
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .coin-shop-item em {
+        align-self: center;
+        font-size: 0.74rem;
+        justify-self: end;
+        padding: 4px 5px;
     }
 }
 
@@ -1196,8 +1220,8 @@ body.theme-jurassic {
 
 /* Responsive detail screen */
 @media (max-width: 600px) {
-    .detail-emoji { font-size: 4.5rem; }
-    #detail-dino-name { font-size: 1.6rem; }
+    .detail-emoji { font-size: 2.8rem; }
+    #detail-dino-name { font-size: 1.2rem; }
 }
 
 @keyframes slideInDown {
