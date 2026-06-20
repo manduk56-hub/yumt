@@ -777,15 +777,20 @@ body.theme-jurassic {
     color: #172033;
     justify-content: flex-start;
     align-items: stretch;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scroll-padding-bottom: calc(210px + env(safe-area-inset-bottom));
+    overflow: hidden;
 }
 
 .tournament-shell {
     width: 100%;
-    min-height: 100dvh;
-    padding: 0 0 calc(220px + env(safe-area-inset-bottom));
+    height: 100dvh;
+    min-height: 0;
+    flex: 0 0 100dvh;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-bottom: calc(180px + env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
 }
 
 .tournament-header {
@@ -941,6 +946,13 @@ body.theme-jurassic {
     margin: 0 clamp(16px, 4vw, 56px) 32px;
     padding-top: 16px;
     border-top: 1px solid #d5d9dd;
+}
+
+.tournament-bottom-spacer {
+    width: 100%;
+    height: calc(220px + env(safe-area-inset-bottom));
+    min-height: calc(220px + env(safe-area-inset-bottom));
+    pointer-events: none;
 }
 
 .tournament-participants h2 { margin: 0; font-size: 1.05rem; }
