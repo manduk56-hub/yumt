@@ -201,8 +201,43 @@
         <!-- 6. 영토 통치 일정표 화면 -->
         <section id="screen-storybook" class="screen hidden">
             <div class="dashboard-container wooden-board storybook-container">
-                <img class="storybook-page" src="storybook-page.png" alt="공룡마을 스토리북 만화">
+                <div class="storybook-stage">
+                    <img class="storybook-page" src="storybook-page.png" alt="공룡마을 스토리북 만화">
+                    <button type="button" id="btn-open-tournament" class="storybook-tournament-button"
+                        aria-label="토너먼트 대진표 열기">
+                        <span aria-hidden="true">🏆</span>
+                        <strong>토너먼트</strong>
+                    </button>
+                </div>
                 <button id="btn-back-storybook" class="btn-base btn-back mt-20">돌아가기</button>
+            </div>
+        </section>
+
+        <section id="screen-tournament" class="screen hidden">
+            <div class="tournament-shell">
+                <header class="tournament-header">
+                    <div>
+                        <p class="tournament-kicker">공룡마을 체육대회</p>
+                        <h1>토너먼트 브라켓 <small>더블 엘리미네이션 (8팀)</small></h1>
+                    </div>
+                    <div class="tournament-actions">
+                        <button type="button" id="btn-tournament-import">가져오기</button>
+                        <button type="button" id="btn-tournament-export">내보내기</button>
+                        <button type="button" id="btn-tournament-reset" class="danger">초기화</button>
+                        <input type="file" id="tournament-file-input" accept="application/json,.json" hidden>
+                    </div>
+                </header>
+
+                <p class="tournament-help">경기 카드에서 이긴 팀을 누르면 다음 대진이 자동으로 완성됩니다.</p>
+                <div id="tournament-bracket" class="tournament-bracket" aria-live="polite"></div>
+
+                <section class="tournament-participants">
+                    <h2>참여 팀</h2>
+                    <p>팀 이름을 눌러 바로 수정할 수 있습니다.</p>
+                    <div id="tournament-team-list" class="tournament-team-list"></div>
+                </section>
+
+                <button type="button" id="btn-back-tournament" class="btn-base btn-back">스토리북으로 돌아가기</button>
             </div>
         </section>
 

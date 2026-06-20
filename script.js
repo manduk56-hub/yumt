@@ -208,6 +208,7 @@ const screenResult = document.getElementById('screen-result');
 const screenDashboard = document.getElementById('screen-dashboard');
 const screenSchedule = document.getElementById('screen-schedule');
 const screenStorybook = document.getElementById('screen-storybook');
+const screenTournament = document.getElementById('screen-tournament');
 const screenGrowth = document.getElementById('screen-growth');
 const screenBossInfo = document.getElementById('screen-boss-info');
 const screenBossWarning = document.getElementById('screen-boss-warning');
@@ -237,6 +238,8 @@ const btnNavBoss = document.getElementById('btn-nav-boss');
 const btnNavStorybook = document.getElementById('btn-nav-storybook');
 const btnBackSch = document.getElementById('btn-back-sch');
 const btnBackStorybook = document.getElementById('btn-back-storybook');
+const btnOpenTournament = document.getElementById('btn-open-tournament');
+const btnBackTournament = document.getElementById('btn-back-tournament');
 const btnBackGrowth = document.getElementById('btn-back-growth');
 const btnBackDetail = document.getElementById('btn-back-detail');
 const btnToDashboard = document.getElementById('btn-to-dashboard');
@@ -1296,6 +1299,201 @@ async function grantSurveyCompletionCoins() {
     savedProfile.initialCoinsGranted = true;
     return saveProfileToCloud(savedProfile, { verify: true, requireCoins: true, requireInitialCoinsGranted: true });
 }
+
+// --- Storybook tournament ---
+const TOURNAMENT_STORAGE_KEY = 'dinoVillageTournamentV1';
+const DEFAULT_TOURNAMENT_TEAMS = [
+    '티라노 팀', '트리케라 팀', '브라키오 팀', '벨로시랩터 팀',
+    '스테고 팀', '안킬로 팀', '스피노 팀', '프테라 팀'
+].map((name, index) => ({ id: `team-${index + 1}`, name }));
+
+const TOURNAMENT_MATCHES = [
+    { id: 'qf-1', round: 'uqf', sources: [['team', 0], ['team', 1]] },
+    { id: 'qf-2', round: 'uqf', sources: [['team', 2], ['team', 3]] },
+    { id: 'qf-3', round: 'uqf', sources: [['team', 4], ['team', 5]] },
+    { id: 'qf-4', round: 'uqf', sources: [['team', 6], ['team', 7]] },
+    { id: 'sf-1', round: 'usf', sources: [['winner', 'qf-1'], ['winner', 'qf-2']] },
+    { id: 'sf-2', round: 'usf', sources: [['winner', 'qf-3'], ['winner', 'qf-4']] },
+    { id: 'uf', round: 'uf', sources: [['winner', 'sf-1'], ['winner', 'sf-2']] },
+    { id: 'lr1-1', round: 'lr1', sources: [['loser', 'qf-1'], ['loser', 'qf-2']] },
+    { id: 'lr1-2', round: 'lr1', sources: [['loser', 'qf-3'], ['loser', 'qf-4']] },
+    { id: 'lqf-1', round: 'lqf', sources: [['winner', 'lr1-1'], ['loser', 'sf-1']] },
+    { id: 'lqf-2', round: 'lqf', sources: [['winner', 'lr1-2'], ['loser', 'sf-2']] },
+    { id: 'lsf', round: 'lsf', sources: [['winner', 'lqf-1'], ['winner', 'lqf-2']] },
+    { id: 'lf', round: 'lf', sources: [['winner', 'lsf'], ['loser', 'uf']] },
+    { id: 'gf', round: 'gf', sources: [['winner', 'uf'], ['winner', 'lf']] }
+];
+
+const TOURNAMENT_ROUNDS = [
+    ['uqf', '승자조 8강'], ['usf', '승자조 준결승'], ['uf', '승자조 결승'], ['gf', '최종 결승'],
+    ['lr1', '패자조 1라운드'], ['lqf', '패자조 8강'], ['lsf', '패자조 준결승'], ['lf', '패자조 결승']
+];
+
+let tournamentState = loadTournamentState();
+
+function freshTournamentState() {
+    return {
+        teams: DEFAULT_TOURNAMENT_TEAMS.map(team => ({ ...team })),
+        winners: {}
+    };
+}
+
+function loadTournamentState() {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(TOURNAMENT_STORAGE_KEY));
+        if (Array.isArray(parsed?.teams) && parsed.teams.length === 8 && parsed.winners) {
+            return {
+                teams: parsed.teams.map((team, index) => ({
+                    id: `team-${index + 1}`,
+                    name: String(team.name || `팀 ${index + 1}`).slice(0, 30)
+                })),
+                winners: { ...parsed.winners }
+            };
+        }
+    } catch (error) {
+        console.warn('Tournament data could not be loaded.', error);
+    }
+    return freshTournamentState();
+}
+
+function saveTournamentState() {
+    localStorage.setItem(TOURNAMENT_STORAGE_KEY, JSON.stringify(tournamentState));
+}
+
+function resolveTournament() {
+    const resolved = {};
+    const getSourceTeam = ([type, value]) => {
+        if (type === 'team') return tournamentState.teams[value]?.id || null;
+        return resolved[value]?.[type] || null;
+    };
+
+    TOURNAMENT_MATCHES.forEach(match => {
+        const teams = match.sources.map(getSourceTeam);
+        const selected = teams.includes(tournamentState.winners[match.id])
+            ? tournamentState.winners[match.id]
+            : null;
+        resolved[match.id] = {
+            teams,
+            winner: selected,
+            loser: selected ? teams.find(teamId => teamId && teamId !== selected) || null : null
+        };
+        if (!selected) delete tournamentState.winners[match.id];
+    });
+
+    return resolved;
+}
+
+function getTournamentTeamName(teamId) {
+    return tournamentState.teams.find(team => team.id === teamId)?.name || 'TBD';
+}
+
+function createTournamentMatch(match, result) {
+    const card = document.createElement('div');
+    card.className = 'bracket-match';
+    card.dataset.match = match.id;
+
+    result.teams.forEach(teamId => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'bracket-team';
+        button.textContent = getTournamentTeamName(teamId);
+        button.disabled = !teamId || result.teams.some(team => !team);
+        if (teamId && teamId === result.winner) button.classList.add('winner');
+        if (teamId) {
+            button.addEventListener('click', () => {
+                tournamentState.winners[match.id] = teamId;
+                saveTournamentState();
+                renderTournament();
+            });
+        }
+        card.appendChild(button);
+    });
+    return card;
+}
+
+function renderTournament() {
+    const bracket = document.getElementById('tournament-bracket');
+    const teamList = document.getElementById('tournament-team-list');
+    if (!bracket || !teamList) return;
+
+    const results = resolveTournament();
+    saveTournamentState();
+    bracket.replaceChildren();
+
+    TOURNAMENT_ROUNDS.forEach(([roundId, title]) => {
+        const round = document.createElement('section');
+        round.className = 'bracket-round';
+        round.dataset.round = roundId;
+        const heading = document.createElement('h3');
+        heading.textContent = title;
+        round.appendChild(heading);
+        TOURNAMENT_MATCHES.filter(match => match.round === roundId).forEach(match => {
+            round.appendChild(createTournamentMatch(match, results[match.id]));
+        });
+        bracket.appendChild(round);
+    });
+
+    if (results.gf.winner) {
+        const champion = document.createElement('div');
+        champion.className = 'tournament-champion';
+        champion.textContent = `🏆 우승: ${getTournamentTeamName(results.gf.winner)}`;
+        bracket.appendChild(champion);
+    }
+
+    teamList.replaceChildren();
+    tournamentState.teams.forEach((team, index) => {
+        const card = document.createElement('label');
+        card.className = 'tournament-team-card';
+        const number = document.createElement('span');
+        number.textContent = `#${index + 1}`;
+        const input = document.createElement('input');
+        input.value = team.name;
+        input.maxLength = 30;
+        input.setAttribute('aria-label', `${index + 1}번 팀 이름`);
+        input.addEventListener('change', () => {
+            team.name = input.value.trim() || `팀 ${index + 1}`;
+            saveTournamentState();
+            renderTournament();
+        });
+        card.append(number, input);
+        teamList.appendChild(card);
+    });
+}
+
+function exportTournament() {
+    const payload = JSON.stringify({
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        teams: tournamentState.teams,
+        winners: tournamentState.winners
+    }, null, 2);
+    const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'dino-tournament.json';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+async function importTournament(file) {
+    try {
+        const parsed = JSON.parse(await file.text());
+        if (!Array.isArray(parsed.teams) || parsed.teams.length !== 8 || typeof parsed.winners !== 'object') {
+            throw new Error('Invalid tournament format');
+        }
+        tournamentState = {
+            teams: parsed.teams.map((team, index) => ({
+                id: `team-${index + 1}`,
+                name: String(team.name || `팀 ${index + 1}`).slice(0, 30)
+            })),
+            winners: { ...parsed.winners }
+        };
+        saveTournamentState();
+        renderTournament();
+    } catch (error) {
+        alert('올바른 토너먼트 JSON 파일이 아닙니다.');
+    }
+}
 // --- Event Listeners ---
 btnStart.addEventListener('click', startQuiz);
 btnRosterWelcomeNext?.addEventListener('click', continueToFirstSurvey);
@@ -1367,6 +1565,26 @@ btnNavSchedule.addEventListener('click', () => showScreen(screenSchedule));
 btnScheduleNormal?.addEventListener('click', () => setScheduleMode('normal'));
 btnScheduleRain?.addEventListener('click', () => setScheduleMode('rain'));
 btnNavStorybook?.addEventListener('click', () => showScreen(screenStorybook));
+btnOpenTournament?.addEventListener('click', () => {
+    renderTournament();
+    showScreen(screenTournament);
+});
+btnBackTournament?.addEventListener('click', () => showScreen(screenStorybook));
+document.getElementById('btn-tournament-import')?.addEventListener('click', () => {
+    document.getElementById('tournament-file-input')?.click();
+});
+document.getElementById('tournament-file-input')?.addEventListener('change', event => {
+    const file = event.target.files?.[0];
+    if (file) importTournament(file);
+    event.target.value = '';
+});
+document.getElementById('btn-tournament-export')?.addEventListener('click', exportTournament);
+document.getElementById('btn-tournament-reset')?.addEventListener('click', () => {
+    if (!window.confirm('팀 이름과 모든 경기 결과를 초기화할까요?')) return;
+    tournamentState = freshTournamentState();
+    saveTournamentState();
+    renderTournament();
+});
 btnNavGrowth.addEventListener('click', () => showScreen(screenGrowth));
 btnBackSch.addEventListener('click', () => showScreen(screenDashboard));
 btnBackStorybook?.addEventListener('click', () => showScreen(screenDashboard));
