@@ -294,7 +294,8 @@ let appControls = {
     growthEnabled: true,
     resetEnabled: true,
     message: "",
-    messageTs: ""
+    messageTs: "",
+    tournament: null
 };
 
 // --- Functions ---
@@ -395,7 +396,8 @@ function parseBossControls(rawValue) {
         growthEnabled: true,
         resetEnabled: true,
         message: "",
-        messageTs: ""
+        messageTs: "",
+        tournament: null
     };
 
     if (!rawValue) return defaults;
@@ -408,7 +410,8 @@ function parseBossControls(rawValue) {
             growthEnabled: parsed.growthEnabled !== false,
             resetEnabled: parsed.resetEnabled !== false,
             message: parsed.message || "",
-            messageTs: String(parsed.messageTs || "")
+            messageTs: String(parsed.messageTs || ""),
+            tournament: parsed.tournament || null
         };
     } catch (e) {
         const [message, messageTs] = String(rawValue).split("||");
@@ -425,7 +428,8 @@ function serializeBossControls(controls = appControls) {
         growthEnabled: controls.growthEnabled !== false,
         resetEnabled: controls.resetEnabled !== false,
         message: controls.message || "",
-        messageTs: String(controls.messageTs || "")
+        messageTs: String(controls.messageTs || ""),
+        tournament: controls.tournament || null
     });
 }
 
@@ -438,6 +442,10 @@ async function fetchBossControls() {
 
     if (error) throw error;
     appControls = parseBossControls(data?.dino_desc);
+    if (appControls.tournament) {
+        tournamentState = normalizeTournamentState(appControls.tournament);
+        saveTournamentState();
+    }
     applyAppControls();
     updateBossControlUI();
     return appControls;
@@ -1330,6 +1338,10 @@ const TOURNAMENT_ROUNDS = [
 ];
 
 let tournamentState = loadTournamentState();
+let isTournamentAdminMode = false;
+let tournamentReturnScreen = screenStorybook;
+let tournamentSaveQueue = Promise.resolve();
+let tournamentSaving = false;
 
 function freshTournamentState() {
     return {
@@ -1338,17 +1350,24 @@ function freshTournamentState() {
     };
 }
 
+function normalizeTournamentState(value) {
+    if (!Array.isArray(value?.teams) || value.teams.length !== 8 || typeof value?.winners !== 'object') {
+        return freshTournamentState();
+    }
+    return {
+        teams: value.teams.map((team, index) => ({
+            id: `team-${index + 1}`,
+            name: String(team.name || `팀 ${index + 1}`).slice(0, 30)
+        })),
+        winners: { ...value.winners }
+    };
+}
+
 function loadTournamentState() {
     try {
         const parsed = JSON.parse(localStorage.getItem(TOURNAMENT_STORAGE_KEY));
         if (Array.isArray(parsed?.teams) && parsed.teams.length === 8 && parsed.winners) {
-            return {
-                teams: parsed.teams.map((team, index) => ({
-                    id: `team-${index + 1}`,
-                    name: String(team.name || `팀 ${index + 1}`).slice(0, 30)
-                })),
-                winners: { ...parsed.winners }
-            };
+            return normalizeTournamentState(parsed);
         }
     } catch (error) {
         console.warn('Tournament data could not be loaded.', error);
@@ -1358,6 +1377,30 @@ function loadTournamentState() {
 
 function saveTournamentState() {
     localStorage.setItem(TOURNAMENT_STORAGE_KEY, JSON.stringify(tournamentState));
+}
+
+function canManageTournament() {
+    return isTournamentAdminMode && isBossProfile(savedProfile);
+}
+
+function setBossTournamentStatus(message, isError = false) {
+    const status = document.getElementById('boss-tournament-status');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = isError ? '#ff8a80' : '#a5d6a7';
+}
+
+async function persistTournamentState() {
+    if (!canManageTournament()) throw new Error('Tournament admin access required');
+    const snapshot = normalizeTournamentState(tournamentState);
+    saveTournamentState();
+    tournamentSaveQueue = tournamentSaveQueue
+        .catch(() => undefined)
+        .then(async () => {
+            appControls.tournament = snapshot;
+            await saveBossControls();
+        });
+    await tournamentSaveQueue;
 }
 
 function resolveTournament() {
@@ -1397,13 +1440,30 @@ function createTournamentMatch(match, result) {
         button.type = 'button';
         button.className = 'bracket-team';
         button.textContent = getTournamentTeamName(teamId);
-        button.disabled = !teamId || result.teams.some(team => !team);
+        const matchReady = Boolean(teamId) && result.teams.every(Boolean);
+        button.disabled = !matchReady || !canManageTournament() || tournamentSaving;
+        if (matchReady && !canManageTournament()) button.classList.add('readonly');
         if (teamId && teamId === result.winner) button.classList.add('winner');
         if (teamId) {
-            button.addEventListener('click', () => {
+            button.addEventListener('click', async () => {
+                if (!canManageTournament() || tournamentSaving) return;
+                const previousWinners = { ...tournamentState.winners };
                 tournamentState.winners[match.id] = teamId;
+                tournamentSaving = true;
                 saveTournamentState();
                 renderTournament();
+                try {
+                    await persistTournamentState();
+                    setBossTournamentStatus('경기 선택이 즉시 저장되었습니다.');
+                } catch (error) {
+                    tournamentState.winners = previousWinners;
+                    saveTournamentState();
+                    renderTournament();
+                    alert('경기 선택 저장에 실패했습니다. 다시 시도해 주세요.');
+                } finally {
+                    tournamentSaving = false;
+                    renderTournament();
+                }
             });
         }
         card.appendChild(button);
@@ -1419,6 +1479,25 @@ function renderTournament() {
     const results = resolveTournament();
     saveTournamentState();
     bracket.replaceChildren();
+
+    const modeBadge = document.getElementById('tournament-mode-badge');
+    if (modeBadge) {
+        const isAdmin = canManageTournament();
+        modeBadge.textContent = isAdmin ? '관리 모드' : '관전 모드';
+        modeBadge.classList.toggle('admin', isAdmin);
+        const help = document.getElementById('tournament-help');
+        const teamHelp = document.getElementById('tournament-team-help');
+        if (help) {
+            help.textContent = isAdmin
+                ? '이긴 팀을 누르면 결과가 즉시 저장되고 다음 대진이 자동으로 완성됩니다.'
+                : '관리자가 선택한 경기 결과를 확인할 수 있습니다.';
+        }
+        if (teamHelp) {
+            teamHelp.textContent = isAdmin
+                ? '팀 이름을 수정하면 즉시 저장됩니다.'
+                : '관리자가 등록한 팀 목록입니다.';
+        }
+    }
 
     TOURNAMENT_ROUNDS.forEach(([roundId, title]) => {
         const round = document.createElement('section');
@@ -1449,11 +1528,27 @@ function renderTournament() {
         const input = document.createElement('input');
         input.value = team.name;
         input.maxLength = 30;
+        input.disabled = !canManageTournament() || tournamentSaving;
         input.setAttribute('aria-label', `${index + 1}번 팀 이름`);
-        input.addEventListener('change', () => {
+        input.addEventListener('change', async () => {
+            if (!canManageTournament() || tournamentSaving) return;
+            const previousName = team.name;
             team.name = input.value.trim() || `팀 ${index + 1}`;
+            tournamentSaving = true;
             saveTournamentState();
             renderTournament();
+            try {
+                await persistTournamentState();
+                setBossTournamentStatus('팀 이름이 즉시 저장되었습니다.');
+            } catch (error) {
+                team.name = previousName;
+                saveTournamentState();
+                renderTournament();
+                alert('팀 이름 저장에 실패했습니다. 다시 시도해 주세요.');
+            } finally {
+                tournamentSaving = false;
+                renderTournament();
+            }
         });
         card.append(number, input);
         teamList.appendChild(card);
@@ -1461,6 +1556,7 @@ function renderTournament() {
 }
 
 function exportTournament() {
+    if (!canManageTournament()) return;
     const payload = JSON.stringify({
         version: 1,
         exportedAt: new Date().toISOString(),
@@ -1476,6 +1572,7 @@ function exportTournament() {
 }
 
 async function importTournament(file) {
+    if (!canManageTournament()) return;
     try {
         const parsed = JSON.parse(await file.text());
         if (!Array.isArray(parsed.teams) || parsed.teams.length !== 8 || typeof parsed.winners !== 'object') {
@@ -1490,6 +1587,8 @@ async function importTournament(file) {
         };
         saveTournamentState();
         renderTournament();
+        await persistTournamentState();
+        setBossTournamentStatus('가져온 대진표가 저장되었습니다.');
     } catch (error) {
         alert('올바른 토너먼트 JSON 파일이 아닙니다.');
     }
@@ -1565,12 +1664,30 @@ btnNavSchedule.addEventListener('click', () => showScreen(screenSchedule));
 btnScheduleNormal?.addEventListener('click', () => setScheduleMode('normal'));
 btnScheduleRain?.addEventListener('click', () => setScheduleMode('rain'));
 btnNavStorybook?.addEventListener('click', () => showScreen(screenStorybook));
-btnOpenTournament?.addEventListener('click', () => {
+btnOpenTournament?.addEventListener('click', async () => {
+    isTournamentAdminMode = false;
+    tournamentReturnScreen = screenStorybook;
+    await fetchBossControls().catch(error => console.error('Tournament refresh failed', error));
+    if (!appControls.tournament) {
+        tournamentState = freshTournamentState();
+        saveTournamentState();
+    }
     renderTournament();
     showScreen(screenTournament);
 });
-btnBackTournament?.addEventListener('click', () => showScreen(screenStorybook));
-document.getElementById('btn-tournament-import')?.addEventListener('click', () => {
+btnBackTournament?.addEventListener('click', () => showScreen(tournamentReturnScreen || screenStorybook));
+document.getElementById('btn-boss-open-tournament')?.addEventListener('click', async () => {
+    if (!isBossProfile(savedProfile)) return;
+    isTournamentAdminMode = true;
+    tournamentReturnScreen = screenBossPersonal;
+    await fetchBossControls().catch(error => console.error('Tournament refresh failed', error));
+    renderTournament();
+    showScreen(screenTournament);
+});
+document.getElementById('btn-boss-tournament-import')?.addEventListener('click', () => {
+    if (!isBossProfile(savedProfile)) return;
+    isTournamentAdminMode = true;
+    tournamentReturnScreen = screenBossPersonal;
     document.getElementById('tournament-file-input')?.click();
 });
 document.getElementById('tournament-file-input')?.addEventListener('change', event => {
@@ -1578,12 +1695,25 @@ document.getElementById('tournament-file-input')?.addEventListener('change', eve
     if (file) importTournament(file);
     event.target.value = '';
 });
-document.getElementById('btn-tournament-export')?.addEventListener('click', exportTournament);
-document.getElementById('btn-tournament-reset')?.addEventListener('click', () => {
-    if (!window.confirm('팀 이름과 모든 경기 결과를 초기화할까요?')) return;
-    tournamentState = freshTournamentState();
-    saveTournamentState();
-    renderTournament();
+document.getElementById('btn-boss-tournament-export')?.addEventListener('click', () => {
+    if (!isBossProfile(savedProfile)) return;
+    isTournamentAdminMode = true;
+    exportTournament();
+});
+document.getElementById('btn-boss-tournament-reset')?.addEventListener('click', async () => {
+    if (!isBossProfile(savedProfile)) return;
+    if (!window.confirm('모든 경기 선택 결과를 초기화할까요? 팀 이름은 유지됩니다.')) return;
+    const previousWinners = { ...tournamentState.winners };
+    isTournamentAdminMode = true;
+    tournamentState.winners = {};
+    try {
+        await persistTournamentState();
+        setBossTournamentStatus('모든 경기 선택이 초기화되었습니다.');
+    } catch (error) {
+        tournamentState.winners = previousWinners;
+        saveTournamentState();
+        setBossTournamentStatus('초기화 저장에 실패했습니다.', true);
+    }
 });
 btnNavGrowth.addEventListener('click', () => showScreen(screenGrowth));
 btnBackSch.addEventListener('click', () => showScreen(screenDashboard));
@@ -1708,6 +1838,14 @@ async function checkBossMessage() {
             const controls = parseBossControls(data.dino_desc);
             appControls = controls;
             applyAppControls();
+            if (controls.tournament && !isTournamentAdminMode) {
+                const nextTournamentState = normalizeTournamentState(controls.tournament);
+                if (JSON.stringify(nextTournamentState) !== JSON.stringify(tournamentState)) {
+                    tournamentState = nextTournamentState;
+                    saveTournamentState();
+                    if (screenTournament?.classList.contains('active')) renderTournament();
+                }
+            }
             if (controls.message && lastBossMessageTimestamp !== controls.messageTs) {
                 if (lastBossMessageTimestamp !== "") {
                     showGlobalNotification(controls.message);
@@ -1786,6 +1924,11 @@ function showGlobalNotification(msg) {
 }
 
 setInterval(checkBossMessage, 10000); // 10초마다 확인
+setInterval(() => {
+    if (screenTournament?.classList.contains('active') && !isTournamentAdminMode) {
+        checkBossMessage();
+    }
+}, 2000);
 
 // Initialize app
 init();

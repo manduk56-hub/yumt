@@ -204,10 +204,7 @@
                 <div class="storybook-stage">
                     <img class="storybook-page" src="storybook-page.png" alt="공룡마을 스토리북 만화">
                     <button type="button" id="btn-open-tournament" class="storybook-tournament-button"
-                        aria-label="토너먼트 대진표 열기">
-                        <span aria-hidden="true">🏆</span>
-                        <strong>토너먼트</strong>
-                    </button>
+                        aria-label="토너먼트 대진표 열기"></button>
                 </div>
                 <button id="btn-back-storybook" class="btn-base btn-back mt-20">돌아가기</button>
             </div>
@@ -220,20 +217,15 @@
                         <p class="tournament-kicker">공룡마을 체육대회</p>
                         <h1>토너먼트 브라켓 <small>더블 엘리미네이션 (8팀)</small></h1>
                     </div>
-                    <div class="tournament-actions">
-                        <button type="button" id="btn-tournament-import">가져오기</button>
-                        <button type="button" id="btn-tournament-export">내보내기</button>
-                        <button type="button" id="btn-tournament-reset" class="danger">초기화</button>
-                        <input type="file" id="tournament-file-input" accept="application/json,.json" hidden>
-                    </div>
+                    <span id="tournament-mode-badge" class="tournament-mode-badge">관전 모드</span>
                 </header>
 
-                <p class="tournament-help">경기 카드에서 이긴 팀을 누르면 다음 대진이 자동으로 완성됩니다.</p>
+                <p id="tournament-help" class="tournament-help">관리자가 선택한 경기 결과를 확인할 수 있습니다.</p>
                 <div id="tournament-bracket" class="tournament-bracket" aria-live="polite"></div>
 
                 <section class="tournament-participants">
                     <h2>참여 팀</h2>
-                    <p>팀 이름을 눌러 바로 수정할 수 있습니다.</p>
+                    <p id="tournament-team-help">관리자가 등록한 팀 목록입니다.</p>
                     <div id="tournament-team-list" class="tournament-team-list"></div>
                 </section>
 
@@ -281,8 +273,6 @@
                             <li><span class="time">20:00</span><span class="event">야간활동</span></li>
                         </ul>
                     </div>
-                    <p class="schedule-note">16:00~18:00까지 코인 교환을 계속해준다.</p>
-                    <p class="schedule-note">22:00 코인상점 재오픈 남은 안주 떨이 판매</p>
                 </div>
 
                 <div class="dash-section paper-bg schedule-updated">
@@ -440,6 +430,19 @@
                         <p id="boss-control-status"
                             style="margin: 4px 0 0; color: #ffcdd2; text-align: center; font-weight: bold;"></p>
                     </div>
+                </div>
+
+                <div class="dash-section paper-bg boss-tournament-admin">
+                    <h3>토너먼트 관리</h3>
+                    <p>관리자만 경기 결과와 팀 이름을 변경할 수 있습니다.</p>
+                    <div class="boss-tournament-actions">
+                        <button type="button" id="btn-boss-open-tournament" class="btn-base btn-forward">대진표 관리하기</button>
+                        <button type="button" id="btn-boss-tournament-import" class="btn-base btn-forward">가져오기</button>
+                        <button type="button" id="btn-boss-tournament-export" class="btn-base btn-forward">내보내기</button>
+                        <button type="button" id="btn-boss-tournament-reset" class="btn-base btn-back">경기 선택 초기화</button>
+                        <input type="file" id="tournament-file-input" accept="application/json,.json" hidden>
+                    </div>
+                    <p id="boss-tournament-status" class="boss-tournament-status" aria-live="polite"></p>
                 </div>
 
                 <div class="dash-section paper-bg"
