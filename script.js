@@ -1571,28 +1571,6 @@ function exportTournament() {
     URL.revokeObjectURL(url);
 }
 
-async function importTournament(file) {
-    if (!canManageTournament()) return;
-    try {
-        const parsed = JSON.parse(await file.text());
-        if (!Array.isArray(parsed.teams) || parsed.teams.length !== 8 || typeof parsed.winners !== 'object') {
-            throw new Error('Invalid tournament format');
-        }
-        tournamentState = {
-            teams: parsed.teams.map((team, index) => ({
-                id: `team-${index + 1}`,
-                name: String(team.name || `팀 ${index + 1}`).slice(0, 30)
-            })),
-            winners: { ...parsed.winners }
-        };
-        saveTournamentState();
-        renderTournament();
-        await persistTournamentState();
-        setBossTournamentStatus('가져온 대진표가 저장되었습니다.');
-    } catch (error) {
-        alert('올바른 토너먼트 JSON 파일이 아닙니다.');
-    }
-}
 // --- Event Listeners ---
 btnStart.addEventListener('click', startQuiz);
 btnRosterWelcomeNext?.addEventListener('click', continueToFirstSurvey);
@@ -1683,17 +1661,6 @@ document.getElementById('btn-boss-open-tournament')?.addEventListener('click', a
     await fetchBossControls().catch(error => console.error('Tournament refresh failed', error));
     renderTournament();
     showScreen(screenTournament);
-});
-document.getElementById('btn-boss-tournament-import')?.addEventListener('click', () => {
-    if (!isBossProfile(savedProfile)) return;
-    isTournamentAdminMode = true;
-    tournamentReturnScreen = screenBossPersonal;
-    document.getElementById('tournament-file-input')?.click();
-});
-document.getElementById('tournament-file-input')?.addEventListener('change', event => {
-    const file = event.target.files?.[0];
-    if (file) importTournament(file);
-    event.target.value = '';
 });
 document.getElementById('btn-boss-tournament-export')?.addEventListener('click', () => {
     if (!isBossProfile(savedProfile)) return;
