@@ -208,7 +208,6 @@ const screenResult = document.getElementById('screen-result');
 const screenDashboard = document.getElementById('screen-dashboard');
 const screenSchedule = document.getElementById('screen-schedule');
 const screenStorybook = document.getElementById('screen-storybook');
-const screenTournament = document.getElementById('screen-tournament');
 const screenGrowth = document.getElementById('screen-growth');
 const screenBossInfo = document.getElementById('screen-boss-info');
 const screenBossWarning = document.getElementById('screen-boss-warning');
@@ -238,8 +237,6 @@ const btnNavBoss = document.getElementById('btn-nav-boss');
 const btnNavStorybook = document.getElementById('btn-nav-storybook');
 const btnBackSch = document.getElementById('btn-back-sch');
 const btnBackStorybook = document.getElementById('btn-back-storybook');
-const btnOpenTournament = document.getElementById('btn-open-tournament');
-const btnBackTournament = document.getElementById('btn-back-tournament');
 const btnBackGrowth = document.getElementById('btn-back-growth');
 const btnBackDetail = document.getElementById('btn-back-detail');
 const btnToDashboard = document.getElementById('btn-to-dashboard');
@@ -275,27 +272,27 @@ let isPendingNewProfile = false;
 const BOSS_NAME = "\uD64D\uC8FC\uC740";
 const BOSS_STUDENT_ID = "22411923";
 const BOSS_CODE = "BOSS00";
-const BOSS_IMAGE_SRC = "pokgun.png";
+const BOSS_IMAGE_SRC = "assets/img/pokgun.png";
 const DINO_IMAGE_BY_NAME = {
-    '안킬로사우루스': 'ankilo.png',
-    '벨로시랩터': 'belop.png',
-    '브라키오사우루스': 'bra.png',
-    '파키케팔로사우루스': 'fucking.png',
-    '모사사우루스': 'mosa.png',
-    '티라노사우루스': 'mtirano.png',
-    '파라사우롤로푸스': 'parapol.png',
-    '플레시오사우루스': 'ple.png',
-    '프테라노돈': 'pmtera.png',
-    '스테고사우루스': 'stego.png',
-    '스피노사우루스': 'spino2.png',
-    '트리케라톱스': 'tri.png'
+    '안킬로사우루스': 'assets/img/ankilo.png',
+    '벨로시랩터': 'assets/img/belop.png',
+    '브라키오사우루스': 'assets/img/bra.png',
+    '파키케팔로사우루스': 'assets/img/fucking.png',
+    '모사사우루스': 'assets/img/mosa.png',
+    '티라노사우루스': 'assets/img/mtirano.png',
+    '파라사우롤로푸스': 'assets/img/parapol.png',
+    '플레시오사우루스': 'assets/img/ple.png',
+    '프테라노돈': 'assets/img/pmtera.png',
+    '스테고사우루스': 'assets/img/stego.png',
+    '스피노사우루스': 'assets/img/spino2.png',
+    '트리케라톱스': 'assets/img/tri.png'
 };
 let appControls = {
     growthEnabled: true,
     resetEnabled: true,
     message: "",
     messageTs: "",
-    tournament: null
+    tournament: null,
 };
 
 // --- Functions ---
@@ -397,7 +394,7 @@ function parseBossControls(rawValue) {
         resetEnabled: true,
         message: "",
         messageTs: "",
-        tournament: null
+        tournament: null,
     };
 
     if (!rawValue) return defaults;
@@ -411,7 +408,7 @@ function parseBossControls(rawValue) {
             resetEnabled: parsed.resetEnabled !== false,
             message: parsed.message || "",
             messageTs: String(parsed.messageTs || ""),
-            tournament: parsed.tournament || null
+            tournament: parsed.tournament || null,
         };
     } catch (e) {
         const [message, messageTs] = String(rawValue).split("||");
@@ -429,7 +426,7 @@ function serializeBossControls(controls = appControls) {
         resetEnabled: controls.resetEnabled !== false,
         message: controls.message || "",
         messageTs: String(controls.messageTs || ""),
-        tournament: controls.tournament || null
+        tournament: controls.tournament || null,
     });
 }
 
@@ -442,10 +439,6 @@ async function fetchBossControls() {
 
     if (error) throw error;
     appControls = parseBossControls(data?.dino_desc);
-    if (appControls.tournament) {
-        tournamentState = normalizeTournamentState(appControls.tournament);
-        saveTournamentState();
-    }
     applyAppControls();
     updateBossControlUI();
     return appControls;
@@ -509,9 +502,77 @@ function updateBossControlUI() {
     }
 }
 
+const SESSION_STORAGE_KEY = 'mtSessionV1';
+
+function saveSession(profile) {
+    if (!profile || !profile.name || !profile.studentId) return;
+    try {
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+            name: profile.name,
+            studentId: profile.studentId
+        }));
+    } catch (e) {
+        console.warn('Session save failed', e);
+    }
+}
+
+function loadSession() {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY));
+        if (parsed && parsed.name && parsed.studentId) {
+            return { name: String(parsed.name), studentId: String(parsed.studentId) };
+        }
+    } catch (e) {
+        console.warn('Session load failed', e);
+    }
+    return null;
+}
+
+function clearSession() {
+    try {
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+    } catch (e) {
+        console.warn('Session clear failed', e);
+    }
+}
+
+async function restoreSession(session) {
+    const profile = await fetchProfileFromDB(session.name, session.studentId);
+    if (!profile) return false;
+
+    userName = session.name;
+    studentId = session.studentId;
+    savedProfile = profile;
+
+    // 보스 계정: 완료 여부와 무관하게 보스 페이지로 복원
+    if (isBossProfile(profile)) {
+        showBossPersonalPage();
+        return true;
+    }
+
+    // 일반 계정: 설문을 끝낸(완료된) 프로필만 대시보드로 복원
+    if (!isCompletedProfile(profile)) return false;
+
+    document.body.className = 'theme-jurassic';
+    populateDashboard();
+    showScreen(screenDashboard);
+    return true;
+}
+
 async function init() {
     savedProfile = null;
     isPendingNewProfile = false;
+
+    const session = loadSession();
+    if (session) {
+        try {
+            if (await restoreSession(session)) return;
+        } catch (e) {
+            console.warn('Session restore failed', e);
+        }
+        clearSession();
+    }
+
     showScreen(screenIntro);
 }
 
@@ -674,6 +735,7 @@ async function startQuiz() {
                 const saved = await saveProfileToCloud(savedProfile, { verify: true });
                 if (!saved) throw new Error('Boss profile save failed');
             }
+            saveSession(savedProfile);
             showBossPersonalPage();
             return;
         }
@@ -682,6 +744,7 @@ async function startQuiz() {
         isPendingNewProfile = false;
 
         if (savedProfile) {
+            saveSession(savedProfile);
             document.body.className = 'theme-jurassic';
             populateDashboard();
             showScreen(screenDashboard);
@@ -1308,269 +1371,6 @@ async function grantSurveyCompletionCoins() {
     return saveProfileToCloud(savedProfile, { verify: true, requireCoins: true, requireInitialCoinsGranted: true });
 }
 
-// --- Storybook tournament ---
-const TOURNAMENT_STORAGE_KEY = 'dinoVillageTournamentV1';
-const DEFAULT_TOURNAMENT_TEAMS = [
-    '티라노 팀', '트리케라 팀', '브라키오 팀', '벨로시랩터 팀',
-    '스테고 팀', '안킬로 팀', '스피노 팀', '프테라 팀'
-].map((name, index) => ({ id: `team-${index + 1}`, name }));
-
-const TOURNAMENT_MATCHES = [
-    { id: 'qf-1', round: 'uqf', sources: [['team', 0], ['team', 1]] },
-    { id: 'qf-2', round: 'uqf', sources: [['team', 2], ['team', 3]] },
-    { id: 'qf-3', round: 'uqf', sources: [['team', 4], ['team', 5]] },
-    { id: 'qf-4', round: 'uqf', sources: [['team', 6], ['team', 7]] },
-    { id: 'sf-1', round: 'usf', sources: [['winner', 'qf-1'], ['winner', 'qf-2']] },
-    { id: 'sf-2', round: 'usf', sources: [['winner', 'qf-3'], ['winner', 'qf-4']] },
-    { id: 'uf', round: 'uf', sources: [['winner', 'sf-1'], ['winner', 'sf-2']] },
-    { id: 'lr1-1', round: 'lr1', sources: [['loser', 'qf-1'], ['loser', 'qf-2']] },
-    { id: 'lr1-2', round: 'lr1', sources: [['loser', 'qf-3'], ['loser', 'qf-4']] },
-    { id: 'lqf-1', round: 'lqf', sources: [['winner', 'lr1-1'], ['loser', 'sf-1']] },
-    { id: 'lqf-2', round: 'lqf', sources: [['winner', 'lr1-2'], ['loser', 'sf-2']] },
-    { id: 'lsf', round: 'lsf', sources: [['winner', 'lqf-1'], ['winner', 'lqf-2']] },
-    { id: 'lf', round: 'lf', sources: [['winner', 'lsf'], ['loser', 'uf']] },
-    { id: 'gf', round: 'gf', sources: [['winner', 'uf'], ['winner', 'lf']] }
-];
-
-const TOURNAMENT_ROUNDS = [
-    ['uqf', '승자조 8강'], ['usf', '승자조 준결승'], ['uf', '승자조 결승'], ['gf', '최종 결승'],
-    ['lr1', '패자조 1라운드'], ['lqf', '패자조 8강'], ['lsf', '패자조 준결승'], ['lf', '패자조 결승']
-];
-
-let tournamentState = loadTournamentState();
-let isTournamentAdminMode = false;
-let tournamentReturnScreen = screenStorybook;
-let tournamentSaveQueue = Promise.resolve();
-let tournamentSaving = false;
-
-function freshTournamentState() {
-    return {
-        teams: DEFAULT_TOURNAMENT_TEAMS.map(team => ({ ...team })),
-        winners: {}
-    };
-}
-
-function normalizeTournamentState(value) {
-    if (!Array.isArray(value?.teams) || value.teams.length !== 8 || typeof value?.winners !== 'object') {
-        return freshTournamentState();
-    }
-    return {
-        teams: value.teams.map((team, index) => ({
-            id: `team-${index + 1}`,
-            name: String(team.name || `팀 ${index + 1}`).slice(0, 30)
-        })),
-        winners: { ...value.winners }
-    };
-}
-
-function loadTournamentState() {
-    try {
-        const parsed = JSON.parse(localStorage.getItem(TOURNAMENT_STORAGE_KEY));
-        if (Array.isArray(parsed?.teams) && parsed.teams.length === 8 && parsed.winners) {
-            return normalizeTournamentState(parsed);
-        }
-    } catch (error) {
-        console.warn('Tournament data could not be loaded.', error);
-    }
-    return freshTournamentState();
-}
-
-function saveTournamentState() {
-    localStorage.setItem(TOURNAMENT_STORAGE_KEY, JSON.stringify(tournamentState));
-}
-
-function canManageTournament() {
-    return isTournamentAdminMode && isBossProfile(savedProfile);
-}
-
-function setBossTournamentStatus(message, isError = false) {
-    const status = document.getElementById('boss-tournament-status');
-    if (!status) return;
-    status.textContent = message;
-    status.style.color = isError ? '#ff8a80' : '#a5d6a7';
-}
-
-async function persistTournamentState() {
-    if (!canManageTournament()) throw new Error('Tournament admin access required');
-    const snapshot = normalizeTournamentState(tournamentState);
-    saveTournamentState();
-    tournamentSaveQueue = tournamentSaveQueue
-        .catch(() => undefined)
-        .then(async () => {
-            appControls.tournament = snapshot;
-            await saveBossControls();
-        });
-    await tournamentSaveQueue;
-}
-
-function resolveTournament() {
-    const resolved = {};
-    const getSourceTeam = ([type, value]) => {
-        if (type === 'team') return tournamentState.teams[value]?.id || null;
-        return resolved[value]?.[type] || null;
-    };
-
-    TOURNAMENT_MATCHES.forEach(match => {
-        const teams = match.sources.map(getSourceTeam);
-        const selected = teams.includes(tournamentState.winners[match.id])
-            ? tournamentState.winners[match.id]
-            : null;
-        resolved[match.id] = {
-            teams,
-            winner: selected,
-            loser: selected ? teams.find(teamId => teamId && teamId !== selected) || null : null
-        };
-        if (!selected) delete tournamentState.winners[match.id];
-    });
-
-    return resolved;
-}
-
-function getTournamentTeamName(teamId) {
-    return tournamentState.teams.find(team => team.id === teamId)?.name || 'TBD';
-}
-
-function createTournamentMatch(match, result) {
-    const card = document.createElement('div');
-    card.className = 'bracket-match';
-    card.dataset.match = match.id;
-
-    result.teams.forEach(teamId => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'bracket-team';
-        button.textContent = getTournamentTeamName(teamId);
-        const matchReady = Boolean(teamId) && result.teams.every(Boolean);
-        button.disabled = !matchReady || !canManageTournament() || tournamentSaving;
-        if (matchReady && !canManageTournament()) button.classList.add('readonly');
-        if (teamId && teamId === result.winner) button.classList.add('winner');
-        if (teamId) {
-            button.addEventListener('click', async () => {
-                if (!canManageTournament() || tournamentSaving) return;
-                const previousWinners = { ...tournamentState.winners };
-                tournamentState.winners[match.id] = teamId;
-                tournamentSaving = true;
-                saveTournamentState();
-                renderTournament();
-                try {
-                    await persistTournamentState();
-                    setBossTournamentStatus('경기 선택이 즉시 저장되었습니다.');
-                } catch (error) {
-                    tournamentState.winners = previousWinners;
-                    saveTournamentState();
-                    renderTournament();
-                    alert('경기 선택 저장에 실패했습니다. 다시 시도해 주세요.');
-                } finally {
-                    tournamentSaving = false;
-                    renderTournament();
-                }
-            });
-        }
-        card.appendChild(button);
-    });
-    return card;
-}
-
-function renderTournament() {
-    const bracket = document.getElementById('tournament-bracket');
-    const teamList = document.getElementById('tournament-team-list');
-    if (!bracket || !teamList) return;
-
-    const results = resolveTournament();
-    saveTournamentState();
-    bracket.replaceChildren();
-
-    const modeBadge = document.getElementById('tournament-mode-badge');
-    if (modeBadge) {
-        const isAdmin = canManageTournament();
-        modeBadge.textContent = isAdmin ? '관리 모드' : '관전 모드';
-        modeBadge.classList.toggle('admin', isAdmin);
-        const help = document.getElementById('tournament-help');
-        const teamHelp = document.getElementById('tournament-team-help');
-        if (help) {
-            help.textContent = isAdmin
-                ? '이긴 팀을 누르면 결과가 즉시 저장되고 다음 대진이 자동으로 완성됩니다.'
-                : '관리자가 선택한 경기 결과를 확인할 수 있습니다.';
-        }
-        if (teamHelp) {
-            teamHelp.textContent = isAdmin
-                ? '팀 이름을 수정하면 즉시 저장됩니다.'
-                : '관리자가 등록한 팀 목록입니다.';
-        }
-    }
-
-    TOURNAMENT_ROUNDS.forEach(([roundId, title]) => {
-        const round = document.createElement('section');
-        round.className = 'bracket-round';
-        round.dataset.round = roundId;
-        const heading = document.createElement('h3');
-        heading.textContent = title;
-        round.appendChild(heading);
-        TOURNAMENT_MATCHES.filter(match => match.round === roundId).forEach(match => {
-            round.appendChild(createTournamentMatch(match, results[match.id]));
-        });
-        bracket.appendChild(round);
-    });
-
-    if (results.gf.winner) {
-        const champion = document.createElement('div');
-        champion.className = 'tournament-champion';
-        champion.textContent = `🏆 우승: ${getTournamentTeamName(results.gf.winner)}`;
-        bracket.appendChild(champion);
-    }
-
-    teamList.replaceChildren();
-    tournamentState.teams.forEach((team, index) => {
-        const card = document.createElement('label');
-        card.className = 'tournament-team-card';
-        const number = document.createElement('span');
-        number.textContent = `#${index + 1}`;
-        const input = document.createElement('input');
-        input.value = team.name;
-        input.maxLength = 30;
-        input.disabled = !canManageTournament() || tournamentSaving;
-        input.setAttribute('aria-label', `${index + 1}번 팀 이름`);
-        input.addEventListener('change', async () => {
-            if (!canManageTournament() || tournamentSaving) return;
-            const previousName = team.name;
-            team.name = input.value.trim() || `팀 ${index + 1}`;
-            tournamentSaving = true;
-            saveTournamentState();
-            renderTournament();
-            try {
-                await persistTournamentState();
-                setBossTournamentStatus('팀 이름이 즉시 저장되었습니다.');
-            } catch (error) {
-                team.name = previousName;
-                saveTournamentState();
-                renderTournament();
-                alert('팀 이름 저장에 실패했습니다. 다시 시도해 주세요.');
-            } finally {
-                tournamentSaving = false;
-                renderTournament();
-            }
-        });
-        card.append(number, input);
-        teamList.appendChild(card);
-    });
-}
-
-function exportTournament() {
-    if (!canManageTournament()) return;
-    const payload = JSON.stringify({
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        teams: tournamentState.teams,
-        winners: tournamentState.winners
-    }, null, 2);
-    const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'dino-tournament.json';
-    link.click();
-    URL.revokeObjectURL(url);
-}
-
 // --- Event Listeners ---
 btnStart.addEventListener('click', startQuiz);
 btnRosterWelcomeNext?.addEventListener('click', continueToFirstSurvey);
@@ -1588,6 +1388,7 @@ btnRestart.addEventListener('click', () => {
     inputId.value = '';
     savedProfile = null;
     isPendingNewProfile = false;
+    clearSession();
     showScreen(screenIntro);
     document.querySelectorAll('.stat-fill').forEach(el => el.style.width = '0%');
 });
@@ -1627,6 +1428,7 @@ btnToDashboard.addEventListener('click', async () => {
     }
     populateDashboard();
     showScreen(screenDashboard);
+    saveSession(savedProfile);
 });
 
 
@@ -1642,46 +1444,6 @@ btnNavSchedule.addEventListener('click', () => showScreen(screenSchedule));
 btnScheduleNormal?.addEventListener('click', () => setScheduleMode('normal'));
 btnScheduleRain?.addEventListener('click', () => setScheduleMode('rain'));
 btnNavStorybook?.addEventListener('click', () => showScreen(screenStorybook));
-btnOpenTournament?.addEventListener('click', async () => {
-    isTournamentAdminMode = false;
-    tournamentReturnScreen = screenStorybook;
-    await fetchBossControls().catch(error => console.error('Tournament refresh failed', error));
-    if (!appControls.tournament) {
-        tournamentState = freshTournamentState();
-        saveTournamentState();
-    }
-    renderTournament();
-    showScreen(screenTournament);
-});
-btnBackTournament?.addEventListener('click', () => showScreen(tournamentReturnScreen || screenStorybook));
-document.getElementById('btn-boss-open-tournament')?.addEventListener('click', async () => {
-    if (!isBossProfile(savedProfile)) return;
-    isTournamentAdminMode = true;
-    tournamentReturnScreen = screenBossPersonal;
-    await fetchBossControls().catch(error => console.error('Tournament refresh failed', error));
-    renderTournament();
-    showScreen(screenTournament);
-});
-document.getElementById('btn-boss-tournament-export')?.addEventListener('click', () => {
-    if (!isBossProfile(savedProfile)) return;
-    isTournamentAdminMode = true;
-    exportTournament();
-});
-document.getElementById('btn-boss-tournament-reset')?.addEventListener('click', async () => {
-    if (!isBossProfile(savedProfile)) return;
-    if (!window.confirm('모든 경기 선택 결과를 초기화할까요? 팀 이름은 유지됩니다.')) return;
-    const previousWinners = { ...tournamentState.winners };
-    isTournamentAdminMode = true;
-    tournamentState.winners = {};
-    try {
-        await persistTournamentState();
-        setBossTournamentStatus('모든 경기 선택이 초기화되었습니다.');
-    } catch (error) {
-        tournamentState.winners = previousWinners;
-        saveTournamentState();
-        setBossTournamentStatus('초기화 저장에 실패했습니다.', true);
-    }
-});
 btnNavGrowth.addEventListener('click', () => showScreen(screenGrowth));
 btnBackSch.addEventListener('click', () => showScreen(screenDashboard));
 btnBackStorybook?.addEventListener('click', () => showScreen(screenDashboard));
@@ -1759,6 +1521,7 @@ document.getElementById('btn-boss-reincarnate')?.addEventListener('click', async
 
         savedProfile = null;
         isPendingNewProfile = false;
+        clearSession();
         showScreen(screenIntro);
     }
 });
@@ -1780,6 +1543,7 @@ btnResetAll.addEventListener('click', async () => {
         }
         savedProfile = null;
         isPendingNewProfile = false;
+        clearSession();
         document.body.className = 'theme-valley';
         inputName.value = '';
         inputId.value = '';
@@ -1787,6 +1551,20 @@ btnResetAll.addEventListener('click', async () => {
         document.querySelectorAll('.stat-fill').forEach(el => el.style.width = '0%');
     }
 });
+
+// 로그아웃: 데이터 초기화/삭제 없이 로그인 화면으로만 이동
+function handleLogout() {
+    savedProfile = null;
+    isPendingNewProfile = false;
+    clearSession();
+    document.body.className = 'theme-valley';
+    inputName.value = '';
+    inputId.value = '';
+    showScreen(screenIntro);
+}
+
+document.getElementById('btn-logout')?.addEventListener('click', handleLogout);
+document.getElementById('btn-boss-logout')?.addEventListener('click', handleLogout);
 
 // Boss Global Notification Polling
 let lastBossMessageTimestamp = "";
@@ -1803,16 +1581,10 @@ async function checkBossMessage() {
 
         if (data && data.dino_desc) {
             const controls = parseBossControls(data.dino_desc);
+            if (bracketAdmin) controls.tournament = appControls.tournament; // 관리자 편집 중에는 폴링이 덮어쓰지 않도록 보호
             appControls = controls;
             applyAppControls();
-            if (controls.tournament && !isTournamentAdminMode) {
-                const nextTournamentState = normalizeTournamentState(controls.tournament);
-                if (JSON.stringify(nextTournamentState) !== JSON.stringify(tournamentState)) {
-                    tournamentState = nextTournamentState;
-                    saveTournamentState();
-                    if (screenTournament?.classList.contains('active')) renderTournament();
-                }
-            }
+            if (!bracketAdmin && screenTournament?.classList.contains('active')) renderBracketScreen();
             if (controls.message && lastBossMessageTimestamp !== controls.messageTs) {
                 if (lastBossMessageTimestamp !== "") {
                     showGlobalNotification(controls.message);
@@ -1890,12 +1662,130 @@ function showGlobalNotification(msg) {
     }, 8000); // 8초 후 사라짐
 }
 
+// --- Tournament bracket (DinoBracket 모듈 연동) ---
+const screenTournament = document.getElementById('screen-tournament');
+const btnBackTournament = document.getElementById('btn-back-tournament');
+const btnOpenTournament = document.getElementById('btn-open-tournament');
+const bkBracketEl = document.getElementById('bk-bracket');
+const bkTeamListEl = document.getElementById('bk-team-list');
+const bkModeBadge = document.getElementById('bk-mode-badge');
+const bkHelp = document.getElementById('bk-help');
+const bkAdminActions = document.getElementById('bk-admin-actions');
+const bkResetBtn = document.getElementById('bk-reset');
+const bkStatus = document.getElementById('bk-status');
+
+let bracketAdmin = false;
+let tournamentReturnScreen = screenStorybook;
+let bracketRoster = []; // student_roster 명단(어드민 팀원 선택용)
+
+function getBracketState() {
+    return window.DinoBracket ? window.DinoBracket.normalize(appControls.tournament) : null;
+}
+
+async function fetchRosterNames() {
+    const { data, error } = await supabaseClient
+        .from('student_roster')
+        .select('name')
+        .order('name');
+    if (error) throw error;
+    return (data || []).map((r) => r.name).filter(Boolean);
+}
+
+function setBracketStatus(msg, isError = false) {
+    if (!bkStatus) return;
+    bkStatus.textContent = msg;
+    bkStatus.style.color = isError ? '#c62828' : '#2e7d32';
+}
+
+function renderBracketScreen() {
+    const DB = window.DinoBracket;
+    if (!DB || !bkBracketEl) return;
+    if (bkModeBadge) {
+        bkModeBadge.textContent = bracketAdmin ? '관리 모드' : '관전 모드';
+        bkModeBadge.classList.toggle('admin', bracketAdmin);
+    }
+    if (bkHelp) {
+        bkHelp.textContent = bracketAdmin
+            ? '경기 박스를 눌러 승자를 정하고, 팀 카드에서 이름·팀원을 수정하세요. 변경 즉시 저장됩니다.'
+            : '관리자가 입력한 경기 결과를 확인할 수 있어요.';
+    }
+    if (bkAdminActions) bkAdminActions.hidden = !bracketAdmin;
+    DB.render({
+        bracketEl: bkBracketEl,
+        teamListEl: bkTeamListEl,
+        state: getBracketState(),
+        admin: bracketAdmin,
+        onChange: bracketAdmin ? handleBracketChange : null,
+        roster: bracketRoster,
+    });
+}
+
+async function handleBracketChange(nextState) {
+    if (!bracketAdmin || !isBossProfile(savedProfile)) return;
+    const previous = appControls.tournament;
+    appControls.tournament = nextState; // 낙관적 반영
+    renderBracketScreen();
+    setBracketStatus('저장 중...');
+    try {
+        await saveBossControls();
+        setBracketStatus('저장되었습니다.');
+    } catch (e) {
+        console.error('Tournament save failed', e);
+        appControls.tournament = previous; // 롤백
+        renderBracketScreen();
+        setBracketStatus('저장 실패. 다시 시도해 주세요.', true);
+    }
+}
+
+async function openTournament(admin) {
+    bracketAdmin = Boolean(admin) && isBossProfile(savedProfile);
+    try {
+        await fetchBossControls();
+    } catch (e) {
+        console.warn('Tournament refresh failed', e);
+    }
+    if (bracketAdmin && bracketRoster.length === 0) {
+        try {
+            bracketRoster = await fetchRosterNames();
+        } catch (e) {
+            console.warn('Roster fetch failed', e);
+        }
+    }
+    if (!appControls.tournament && window.DinoBracket) {
+        appControls.tournament = window.DinoBracket.defaultState();
+    }
+    setBracketStatus('');
+    renderBracketScreen();
+    showScreen(screenTournament);
+}
+
+btnOpenTournament?.addEventListener('click', () => {
+    tournamentReturnScreen = screenStorybook;
+    openTournament(false);
+});
+document.getElementById('btn-boss-open-tournament')?.addEventListener('click', () => {
+    if (!isBossProfile(savedProfile)) return;
+    tournamentReturnScreen = screenBossPersonal;
+    openTournament(true);
+});
+btnBackTournament?.addEventListener('click', () => {
+    window.DinoBracket?.closeModal();
+    showScreen(tournamentReturnScreen || screenStorybook);
+});
+bkResetBtn?.addEventListener('click', () => {
+    if (!bracketAdmin || !isBossProfile(savedProfile)) return;
+    if (!window.confirm('대진표의 모든 경기 결과를 초기화할까요? 팀 정보는 유지됩니다.')) return;
+    const state = getBracketState();
+    if (state) handleBracketChange({ results: {}, teams: state.teams });
+});
+
 setInterval(checkBossMessage, 10000); // 10초마다 확인
+// 관전 중에는 더 자주 동기화(3초). 관리자/비활성 화면에서는 동작 안 함.
 setInterval(() => {
-    if (screenTournament?.classList.contains('active') && !isTournamentAdminMode) {
+    if (!bracketAdmin && screenTournament?.classList.contains('active')) {
         checkBossMessage();
     }
-}, 2000);
+}, 3000);
 
 // Initialize app
 init();
