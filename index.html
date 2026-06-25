@@ -23,7 +23,7 @@
     <!-- Supabase SDK 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
         rel="stylesheet">
 </head>
@@ -88,7 +88,7 @@
 
         <!-- 2.6. 어라? 화면 -->
         <section id="screen-fusion" class="screen hidden"
-            style="background: url('plus.png') no-repeat center center / cover; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 101;">
+            style="background: url('assets/img/plus.png') no-repeat center center / cover; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 101;">
             <div style="position: relative; z-index: 1; text-align: center; color: white;">
                 <h1
                     style="font-size: 5rem; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 20px #ff0000; margin-bottom: 20px;">
@@ -144,7 +144,7 @@
         <section id="screen-boss-info" class="screen hidden">
             <div class="dashboard-container wooden-board" style="max-height: 100vh; overflow: hidden;">
                 <div class="dash-section paper-bg text-center" style="padding: 10px 0; margin-bottom: 5px;">
-                    <img src="pokgun.png" alt="폭군 홍주은사우루스" class="boss-dino-image">
+                    <img src="assets/img/pokgun.png" alt="폭군 홍주은사우루스" class="boss-dino-image">
                     <h3 style="color: #d32f2f; border: none; font-size: 1.8rem; margin-bottom: 10px;">폭군 홍주은사우루스</h3>
                     <p class="map-desc" style="font-weight: bold; color: #333; font-size: 1.1rem; line-height: 1.4;">
                         이 엠티의 모든 고기와 간식은 다 내 거다! <br>마라탕 갖고와!!
@@ -187,13 +187,15 @@
                 <div class="menu-grid">
                     <button id="btn-nav-schedule" class="btn-base btn-menu btn-forward">일정은?</button>
                     <button id="btn-nav-growth" class="btn-base btn-menu btn-forward">파워업!</button>
+                    <button id="btn-nav-boss" class="btn-base btn-menu btn-forward"
+                        style="background: #f44336 !important; margin: 0; width: 100%;">홍주은사우루스가 뭐였더라?</button>
                 </div>
 
-                <div class="btn-group mt-20">
-                    <button id="btn-nav-boss" class="btn-base btn-menu btn-forward"
-                        style="background: #f44336 !important; margin: 0; flex: 1;">홍주은사우루스가 뭐였더라?</button>
+                <div class="menu-grid" style="margin-top: 40px;">
+                    <button id="btn-logout" class="btn-base btn-menu btn-forward"
+                        style="background: #c62828 !important; margin: 0; width: 100%;">로그아웃</button>
                     <button id="btn-reset-all" class="btn-base btn-back"
-                        style="background: #c62828 !important; margin: 0; flex: 1;">환생하기</button>
+                        style="background: #c62828 !important; margin: 0; width: 100%;">환생하기</button>
                 </div>
             </div>
         </section>
@@ -202,7 +204,7 @@
         <section id="screen-storybook" class="screen hidden">
             <div class="dashboard-container wooden-board storybook-container">
                 <div class="storybook-stage">
-                    <img class="storybook-page" src="storybook-page.png" alt="공룡마을 스토리북 만화">
+                    <img class="storybook-page" src="assets/img/storybook-page.png" alt="공룡마을 스토리북 만화">
                     <button type="button" id="btn-open-tournament" class="storybook-tournament-button"
                         aria-label="토너먼트 대진표 열기"></button>
                 </div>
@@ -211,26 +213,27 @@
         </section>
 
         <section id="screen-tournament" class="screen hidden">
-            <div class="tournament-shell">
-                <header class="tournament-header">
+            <div class="dashboard-container wooden-board bk-shell">
+                <div class="bk-header">
                     <div>
-                        <p class="tournament-kicker">공룡마을 체육대회</p>
-                        <h1>토너먼트 브라켓 <small>더블 엘리미네이션 (8팀)</small></h1>
+                        <p class="bk-kicker">공룡마을 체육대회</p>
+                        <h2>토너먼트 브라켓 <small>더블 엘리미네이션 · 8팀</small></h2>
                     </div>
-                    <span id="tournament-mode-badge" class="tournament-mode-badge">관전 모드</span>
-                </header>
-
-                <p id="tournament-help" class="tournament-help">관리자가 선택한 경기 결과를 확인할 수 있습니다.</p>
-                <div id="tournament-bracket" class="tournament-bracket" aria-live="polite"></div>
-
-                <section class="tournament-participants">
-                    <h2>참여 팀</h2>
-                    <p id="tournament-team-help">관리자가 등록한 팀 목록입니다.</p>
-                    <div id="tournament-team-list" class="tournament-team-list"></div>
+                    <span id="bk-mode-badge" class="bk-mode-badge">관전 모드</span>
+                </div>
+                <p id="bk-help" class="bk-help">관리자가 입력한 경기 결과를 확인할 수 있어요.</p>
+                <div id="bk-admin-actions" class="bk-admin-actions" hidden>
+                    <button type="button" id="bk-reset" class="btn-base btn-back">전체 초기화</button>
+                    <span id="bk-status" class="bk-status" aria-live="polite"></span>
+                </div>
+                <section class="bracket-viewport" aria-label="대진표">
+                    <div id="bk-bracket" class="bracket-canvas"></div>
                 </section>
-
-                <div class="tournament-bottom-spacer" aria-hidden="true"></div>
-                <button type="button" id="btn-back-tournament" class="btn-base btn-back">스토리북으로 돌아가기</button>
+                <section class="bk-team-section">
+                    <h3>참여 팀</h3>
+                    <div id="bk-team-list" class="team-list-grid"></div>
+                </section>
+                <button id="btn-back-tournament" class="btn-base btn-back mt-20">돌아가기</button>
             </div>
         </section>
 
@@ -433,17 +436,6 @@
                     </div>
                 </div>
 
-                <div class="dash-section paper-bg boss-tournament-admin">
-                    <h3>토너먼트 관리</h3>
-                    <p>관리자만 경기 결과와 팀 이름을 변경할 수 있습니다.</p>
-                    <div class="boss-tournament-actions">
-                        <button type="button" id="btn-boss-open-tournament" class="btn-base btn-forward">대진표 관리하기</button>
-                        <button type="button" id="btn-boss-tournament-export" class="btn-base btn-forward">내보내기</button>
-                        <button type="button" id="btn-boss-tournament-reset" class="btn-base btn-back">경기 선택 초기화</button>
-                    </div>
-                    <p id="boss-tournament-status" class="boss-tournament-status" aria-live="polite"></p>
-                </div>
-
                 <div class="dash-section paper-bg"
                     style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
                     <h3
@@ -477,6 +469,16 @@
                     </div>
                 </div>
 
+                <div class="dash-section paper-bg boss-tournament-admin"
+                    style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
+                    <h3
+                        style="color: #ff8a80; border-bottom: 1px solid #ff5252; padding-bottom: 5px; margin-bottom: 15px;">
+                        토너먼트 관리</h3>
+                    <p style="color: #ffcdd2; margin: 0 0 12px;">대진표 결과·팀 정보를 수정하면 유저 화면에 동기화됩니다.</p>
+                    <button type="button" id="btn-boss-open-tournament" class="btn-base btn-forward"
+                        style="background: #ff5252 !important; color: #fff !important; width: 100%; margin: 0;">대진표 관리하기</button>
+                </div>
+
                 <div class="dash-section paper-bg"
                     style="background: #2c1414; padding: 20px; border-radius: 12px; border: 1px solid #ff5252; margin-bottom: 20px;">
                     <h3
@@ -508,13 +510,16 @@
                 <div class="btn-group">
                     <button id="btn-boss-refresh" class="btn-base btn-forward"
                         style="background: #ff5252 !important;">감시 데이터 갱신</button>
+                    <button id="btn-boss-logout" class="btn-base btn-forward"
+                        style="background: #ff5252 !important;">로그아웃</button>
                     <button id="btn-boss-reincarnate" class="btn-base btn-back">일코하러 가기 (환생)</button>
                 </div>
             </div>
         </section>
     </div>
 
-    <script src="script.js"></script>
+    <script src="assets/js/script.js"></script>
+    <script type="module" src="assets/js/bracket/index.js"></script>
 </body>
 
 </html>
