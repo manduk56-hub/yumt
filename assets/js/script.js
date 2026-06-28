@@ -567,7 +567,7 @@ function updateBossControlUI() {
                 btnSecretDisableCompletion.id = 'btn-secret-disable-completion';
                 btnSecretDisableCompletion.className = 'btn-base btn-back';
                 btnSecretDisableCompletion.type = 'button';
-                btnSecretDisableCompletion.style.cssText = 'background: #263238 !important; color: white !important; padding: 10px 20px; font-size: 1rem; border: none;';
+                btnSecretDisableCompletion.style.cssText = 'color: white !important; padding: 10px 20px; font-size: 1rem; border: none;';
                 btnSecretDisableCompletion.addEventListener('click', handleSecretDisableCompletion);
                 secretCompleteActions.prepend(btnSecretDisableCompletion);
             }
@@ -1463,6 +1463,7 @@ function showDinoDetail() {
 
 async function showBossPersonalPage() {
     document.body.className = 'theme-jurassic';
+    screenBossPersonal?.classList.toggle('secret-manager-theme', isSecretManagerProfile(savedProfile));
     showScreen(screenBossPersonal);
     await fetchBossControls().catch(e => console.error("Failed to fetch boss controls", e));
 

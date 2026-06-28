@@ -1132,6 +1132,67 @@ body.theme-jurassic {
     box-shadow: 0 12px 26px rgba(0, 0, 0, 0.3);
 }
 
+#screen-boss-personal.secret-manager-theme {
+    background: #071827 !important;
+}
+
+#screen-boss-personal.secret-manager-theme .dashboard-container {
+    border-color: #42a5f5 !important;
+    box-shadow: 0 0 30px rgba(66, 165, 245, 0.35) !important;
+}
+
+#screen-boss-personal.secret-manager-theme .dash-header {
+    background: linear-gradient(135deg, #1976d2, #0d47a1) !important;
+}
+
+#screen-boss-personal.secret-manager-theme .dash-section {
+    background: #0b2540 !important;
+    border-color: #42a5f5 !important;
+}
+
+#screen-boss-personal.secret-manager-theme .dash-section h3 {
+    color: #90caf9 !important;
+    border-bottom-color: #42a5f5 !important;
+}
+
+#screen-boss-personal.secret-manager-theme p,
+#screen-boss-personal.secret-manager-theme .stat-label,
+#screen-boss-personal.secret-manager-theme #boss-control-status,
+#screen-boss-personal.secret-manager-theme #secret-complete-status {
+    color: #bbdefb !important;
+}
+
+#screen-boss-personal.secret-manager-theme .stat-item,
+#screen-boss-personal.secret-manager-theme textarea,
+#screen-boss-personal.secret-manager-theme input,
+#screen-boss-personal.secret-manager-theme .ranking-table {
+    background: #061526 !important;
+    border-color: #42a5f5 !important;
+    color: #bbdefb !important;
+}
+
+#screen-boss-personal.secret-manager-theme .stat-value {
+    color: #64b5f6 !important;
+}
+
+#screen-boss-personal.secret-manager-theme .ranking-table thead,
+#screen-boss-personal.secret-manager-theme .ranking-table th {
+    background: #0d47a1 !important;
+    border-bottom-color: #42a5f5 !important;
+    color: #fff !important;
+}
+
+#screen-boss-personal.secret-manager-theme .btn-forward {
+    background: #1976d2 !important;
+    color: #fff !important;
+    box-shadow: 0 4px 10px rgba(25, 118, 210, 0.35) !important;
+}
+
+#screen-boss-personal.secret-manager-theme .btn-back {
+    background: #1565c0 !important;
+    color: #fff !important;
+}
+
 .tag-role {
     display: inline-block;
     background: #ff7043;
