@@ -526,7 +526,8 @@ function updateBossControlUI() {
     const bossControlStatus = document.getElementById('boss-control-status');
     const secretSolverInput = document.getElementById('secret-solver-input');
     const secretCompleteStatus = document.getElementById('secret-complete-status');
-    const btnSecretDisableCompletion = document.getElementById('btn-secret-disable-completion');
+    const secretCompleteActions = document.getElementById('secret-complete-actions');
+    let btnSecretDisableCompletion = document.getElementById('btn-secret-disable-completion');
 
     if (btnToggleGrowth) {
         btnToggleGrowth.innerText = appControls.growthEnabled ? "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uD65C\uC131" : "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uBE44\uD65C\uC131";
@@ -543,8 +544,21 @@ function updateBossControlUI() {
     if (secretCompleteStatus) {
         secretCompleteStatus.innerText = appControls.secretSolvedBy ? `맞춘사람: ${appControls.secretSolvedBy}` : '';
     }
-    if (btnSecretDisableCompletion) {
-        btnSecretDisableCompletion.classList.toggle('hidden', !isSecretManagerProfile(savedProfile));
+    if (secretCompleteActions) {
+        if (isSecretManagerProfile(savedProfile)) {
+            if (!btnSecretDisableCompletion) {
+                btnSecretDisableCompletion = document.createElement('button');
+                btnSecretDisableCompletion.id = 'btn-secret-disable-completion';
+                btnSecretDisableCompletion.className = 'btn-base btn-back';
+                btnSecretDisableCompletion.type = 'button';
+                btnSecretDisableCompletion.style.cssText = 'background: #263238 !important; color: white !important; padding: 10px 20px; font-size: 1rem; border: none;';
+                btnSecretDisableCompletion.innerText = '숨겨진 문장 완성 비활성화하기';
+                btnSecretDisableCompletion.addEventListener('click', handleSecretDisableCompletion);
+                secretCompleteActions.prepend(btnSecretDisableCompletion);
+            }
+        } else if (btnSecretDisableCompletion) {
+            btnSecretDisableCompletion.remove();
+        }
     }
 }
 
@@ -1573,7 +1587,6 @@ const btnToggleReset = document.getElementById('btn-toggle-reset');
 const secretSolverInput = document.getElementById('secret-solver-input');
 const btnSecretComplete = document.getElementById('btn-secret-complete');
 const btnSecretCancel = document.getElementById('btn-secret-cancel');
-const btnSecretDisableCompletion = document.getElementById('btn-secret-disable-completion');
 
 async function handleBossControlToggle(controlKey, button) {
     if (!button) return;
@@ -1638,8 +1651,11 @@ btnSecretCancel?.addEventListener('click', async () => {
     }
 });
 
-btnSecretDisableCompletion?.addEventListener('click', async () => {
+async function handleSecretDisableCompletion(event) {
     if (!isSecretManagerProfile(savedProfile)) return;
+
+    const btnSecretDisableCompletion = event?.currentTarget || document.getElementById('btn-secret-disable-completion');
+    if (!btnSecretDisableCompletion) return;
 
     btnSecretDisableCompletion.disabled = true;
     btnSecretDisableCompletion.innerText = '비활성화 중...';
@@ -1657,7 +1673,7 @@ btnSecretDisableCompletion?.addEventListener('click', async () => {
         btnSecretDisableCompletion.disabled = false;
         btnSecretDisableCompletion.innerText = '숨겨진 문장 완성 비활성화하기';
     }
-});
+}
 
 if (btnBossSendMsg) {
     btnBossSendMsg.addEventListener('click', async () => {
