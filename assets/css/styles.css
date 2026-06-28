@@ -952,6 +952,55 @@ body.theme-jurassic {
     font-weight: 900;
 }
 
+.secret-courage-message {
+    margin: 16px auto 0;
+    padding: 12px 14px;
+    max-width: 420px;
+    background: #fff8e1;
+    border: 2px solid #ffb300;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(255, 179, 0, 0.18);
+}
+
+.secret-courage-title {
+    color: #bf360c;
+    font-weight: 900;
+    font-size: 0.95rem;
+    margin-bottom: 9px;
+}
+
+.secret-courage-slots {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 5px;
+}
+
+.secret-courage-slot {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    min-width: 0;
+    border: 1px dashed #ffcc80;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.75);
+    color: #bf360c;
+    font-weight: 900;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.secret-courage-slot.revealed {
+    border-style: solid;
+    background: #ffcc80;
+}
+
+.secret-courage-progress {
+    margin-top: 8px;
+    color: #5d4037;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
 .code-box {
     background: #e8f5e9;
     padding: 15px;

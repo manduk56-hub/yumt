@@ -258,6 +258,7 @@ const elCodeMsg = document.getElementById('code-msg');
 const tbodyRanking = document.getElementById('ranking-body');
 const elBossRankingHighlight = document.getElementById('boss-ranking-highlight');
 const elTotalPowerHighlight = document.getElementById('total-power-highlight');
+const elSecretCourageMessage = document.getElementById('secret-courage-message');
 
 const elDetailEmoji = document.getElementById('detail-emoji');
 const elDetailDinoName = document.getElementById('detail-dino-name');
@@ -269,6 +270,13 @@ let hasCoinsColumn = true;
 let hasInitialCoinsGrantedColumn = true;
 let hasUsedCodesColumn = true;
 let isPendingNewProfile = false;
+const SECRET_COURAGE_PHRASE = '폭군홍주은사우루스는2학기도회장을피할수없다';
+const SECRET_COURAGE_BASE = 45;
+const SECRET_COURAGE_STEP = 6;
+const SECRET_COURAGE_REVEAL_ORDER = [
+    3, 15, 7, 20, 0, 11, 18, 5, 13, 21, 2,
+    9, 16, 1, 12, 6, 19, 4, 14, 8, 17, 10
+];
 const BOSS_NAME = "\uD64D\uC8FC\uC740";
 const BOSS_STUDENT_ID = "22411923";
 const BOSS_CODE = "BOSS00";
@@ -1241,6 +1249,39 @@ async function renderRanking() {
         tbodyRanking.innerHTML = `<tr><td colspan="3">랭킹을 데이터베이스에서 불러오지 못했어요.</td></tr>`;
     }
 }
+
+function renderSecretCourageMessage(totalCourage) {
+    if (!elSecretCourageMessage) return;
+
+    const phraseChars = Array.from(SECRET_COURAGE_PHRASE);
+    const unlockedCount = Math.max(
+        0,
+        Math.min(
+            phraseChars.length,
+            Math.floor((totalCourage - SECRET_COURAGE_BASE) / SECRET_COURAGE_STEP)
+        )
+    );
+    const revealedIndexes = new Set(SECRET_COURAGE_REVEAL_ORDER.slice(0, unlockedCount));
+    const nextTarget = unlockedCount >= phraseChars.length
+        ? null
+        : SECRET_COURAGE_BASE + ((unlockedCount + 1) * SECRET_COURAGE_STEP);
+
+    const slots = phraseChars.map((char, index) => {
+        const isRevealed = revealedIndexes.has(index);
+        return `<span class="secret-courage-slot${isRevealed ? ' revealed' : ''}">${isRevealed ? char : ''}</span>`;
+    }).join('');
+
+    elSecretCourageMessage.innerHTML = `
+        <div class="secret-courage-title">숨겨진 문장</div>
+        <div class="secret-courage-slots" aria-label="숨겨진 문장 진행도">${slots}</div>
+        <div class="secret-courage-progress">
+            ${unlockedCount}/${phraseChars.length}
+            ${nextTarget ? ` · 다음 글자까지 총 용기 ${nextTarget}` : ' · 문장 완성'}
+        </div>
+    `;
+    elSecretCourageMessage.classList.remove('hidden');
+}
+
 function updateRankingUI(allPlayers) {
     tbodyRanking.innerHTML = "";
     const bossPlayer = allPlayers.find(player =>
@@ -1251,6 +1292,8 @@ function updateRankingUI(allPlayers) {
     const regularPlayers = allPlayers.filter(player => player !== bossPlayer);
     const totalCourage = regularPlayers.reduce((sum, player) => sum + (player.courage ?? 1), 0);
     const totalBattlePower = regularPlayers.reduce((sum, player) => sum + (player.battle_power ?? 10), 0);
+
+    renderSecretCourageMessage(totalCourage);
 
     if (elBossRankingHighlight) {
         if (bossPlayer) {
