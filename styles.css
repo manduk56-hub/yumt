@@ -1016,14 +1016,7 @@ body.theme-jurassic {
 }
 
 .coin-shop-item em {
-    background: #ffb74d;
-    border-radius: 6px;
-    color: #111;
-    font-style: normal;
-    font-weight: 900;
-    padding: 5px 9px;
-    white-space: nowrap;
-    justify-self: start;
+    display: none;
 }
 
 .boss-coin-manager {
