@@ -282,6 +282,8 @@ const BOSS_NAME = "\uD64D\uC8FC\uC740";
 const BOSS_STUDENT_ID = "22411923";
 const BOSS_CODE = "BOSS00";
 const BOSS_IMAGE_SRC = "assets/img/pokgun.png";
+const SECRET_MANAGER_NAME = "\uAE40\uACBD\uBBFC";
+const SECRET_MANAGER_STUDENT_ID = "22011090";
 const DINO_IMAGE_BY_NAME = {
     '안킬로사우루스': 'assets/img/ankilo.png',
     '벨로시랩터': 'assets/img/belop.png',
@@ -311,6 +313,15 @@ function isBossProfile(profile) {
     return profile.code === BOSS_CODE ||
         (profile.name === BOSS_NAME && profile.studentId === BOSS_STUDENT_ID) ||
         String(profile.dinoName || '').includes('홍주은');
+}
+
+function isSecretManagerProfile(profile) {
+    if (!profile) return false;
+    return profile.name === SECRET_MANAGER_NAME && profile.studentId === SECRET_MANAGER_STUDENT_ID;
+}
+
+function isControlAdminProfile(profile) {
+    return isBossProfile(profile) || isSecretManagerProfile(profile);
 }
 
 function escapeHtml(value) {
@@ -515,6 +526,7 @@ function updateBossControlUI() {
     const bossControlStatus = document.getElementById('boss-control-status');
     const secretSolverInput = document.getElementById('secret-solver-input');
     const secretCompleteStatus = document.getElementById('secret-complete-status');
+    const btnSecretDisableCompletion = document.getElementById('btn-secret-disable-completion');
 
     if (btnToggleGrowth) {
         btnToggleGrowth.innerText = appControls.growthEnabled ? "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uD65C\uC131" : "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uBE44\uD65C\uC131";
@@ -525,11 +537,14 @@ function updateBossControlUI() {
     if (bossControlStatus) {
         bossControlStatus.innerText = `파워업: ${appControls.growthEnabled ? '활성' : '비활성'} / 환생하기: ${appControls.resetEnabled ? '활성' : '비활성'}`;
     }
-    if (secretSolverInput && appControls.secretSolvedBy) {
-        secretSolverInput.value = appControls.secretSolvedBy;
+    if (secretSolverInput) {
+        secretSolverInput.value = appControls.secretSolvedBy || '';
     }
     if (secretCompleteStatus) {
         secretCompleteStatus.innerText = appControls.secretSolvedBy ? `맞춘사람: ${appControls.secretSolvedBy}` : '';
+    }
+    if (btnSecretDisableCompletion) {
+        btnSecretDisableCompletion.classList.toggle('hidden', !isSecretManagerProfile(savedProfile));
     }
 }
 
@@ -576,7 +591,7 @@ async function restoreSession(session) {
     savedProfile = profile;
 
     // 보스 계정: 완료 여부와 무관하게 보스 페이지로 복원
-    if (isBossProfile(profile)) {
+    if (isControlAdminProfile(profile)) {
         showBossPersonalPage();
         return true;
     }
@@ -773,6 +788,32 @@ async function startQuiz() {
 
         savedProfile = await fetchProfileFromDB(userName, studentId);
         isPendingNewProfile = false;
+
+        if (userName === SECRET_MANAGER_NAME && studentId === SECRET_MANAGER_STUDENT_ID) {
+            if (!savedProfile) {
+                savedProfile = {
+                    name: userName,
+                    studentId: studentId,
+                    dinoName: "숨겨진 문장 관리자",
+                    dinoEmoji: "\uD83E\uDD96",
+                    dinoDesc: "",
+                    code: await generateUniqueCodeFromDB(),
+                    courage: 1,
+                    battlePower: 10,
+                    coins: 0,
+                    initialCoinsGranted: false,
+                    usedCodes: [],
+                    skills: [],
+                    role: "",
+                    mtTip: ""
+                };
+                const saved = await createProfileInCloud(savedProfile);
+                if (!saved) throw new Error('Secret manager profile save failed');
+            }
+            saveSession(savedProfile);
+            showBossPersonalPage();
+            return;
+        }
 
         if (savedProfile) {
             saveSession(savedProfile);
@@ -1532,6 +1573,7 @@ const btnToggleReset = document.getElementById('btn-toggle-reset');
 const secretSolverInput = document.getElementById('secret-solver-input');
 const btnSecretComplete = document.getElementById('btn-secret-complete');
 const btnSecretCancel = document.getElementById('btn-secret-cancel');
+const btnSecretDisableCompletion = document.getElementById('btn-secret-disable-completion');
 
 async function handleBossControlToggle(controlKey, button) {
     if (!button) return;
@@ -1593,6 +1635,27 @@ btnSecretCancel?.addEventListener('click', async () => {
     } finally {
         btnSecretCancel.disabled = false;
         btnSecretCancel.innerText = '취소하기';
+    }
+});
+
+btnSecretDisableCompletion?.addEventListener('click', async () => {
+    if (!isSecretManagerProfile(savedProfile)) return;
+
+    btnSecretDisableCompletion.disabled = true;
+    btnSecretDisableCompletion.innerText = '비활성화 중...';
+    try {
+        appControls.secretSolvedBy = '';
+        if (secretSolverInput) secretSolverInput.value = '';
+        await saveBossControls();
+        updateBossControlUI();
+        renderSecretCourageMessage(lastTotalCourage);
+        alert('숨겨진 문장 완성 상태를 비활성화했습니다.');
+    } catch (e) {
+        console.error('Secret message completion disable failed', e);
+        alert('숨겨진 문장 완성 비활성화에 실패했어요.');
+    } finally {
+        btnSecretDisableCompletion.disabled = false;
+        btnSecretDisableCompletion.innerText = '숨겨진 문장 완성 비활성화하기';
     }
 });
 
@@ -1842,7 +1905,7 @@ function renderBracketScreen() {
 }
 
 async function handleBracketChange(nextState) {
-    if (!bracketAdmin || !isBossProfile(savedProfile)) return;
+    if (!bracketAdmin || !isControlAdminProfile(savedProfile)) return;
     const previous = appControls.tournament;
     appControls.tournament = nextState; // 낙관적 반영
     renderBracketScreen();
@@ -1859,7 +1922,7 @@ async function handleBracketChange(nextState) {
 }
 
 async function openTournament(admin) {
-    bracketAdmin = Boolean(admin) && isBossProfile(savedProfile);
+    bracketAdmin = Boolean(admin) && isControlAdminProfile(savedProfile);
     try {
         await fetchBossControls();
     } catch (e) {
@@ -1885,7 +1948,7 @@ btnOpenTournament?.addEventListener('click', () => {
     openTournament(false);
 });
 document.getElementById('btn-boss-open-tournament')?.addEventListener('click', () => {
-    if (!isBossProfile(savedProfile)) return;
+    if (!isControlAdminProfile(savedProfile)) return;
     tournamentReturnScreen = screenBossPersonal;
     openTournament(true);
 });
@@ -1894,7 +1957,7 @@ btnBackTournament?.addEventListener('click', () => {
     showScreen(tournamentReturnScreen || screenStorybook);
 });
 bkResetBtn?.addEventListener('click', () => {
-    if (!bracketAdmin || !isBossProfile(savedProfile)) return;
+    if (!bracketAdmin || !isControlAdminProfile(savedProfile)) return;
     if (!window.confirm('대진표의 모든 경기 결과를 초기화할까요? 팀 정보는 유지됩니다.')) return;
     const state = getBracketState();
     if (state) handleBracketChange({ results: {}, teams: state.teams });
