@@ -273,10 +273,6 @@ let isPendingNewProfile = false;
 const SECRET_COURAGE_PHRASE = '폭군홍주은사우루스는2학기도회장을피할수없다';
 const SECRET_COURAGE_BASE = 45;
 const SECRET_COURAGE_STEP = 6;
-const SECRET_COURAGE_REVEAL_ORDER = [
-    3, 15, 7, 20, 0, 11, 18, 5, 13, 21, 2,
-    9, 16, 1, 12, 6, 19, 4, 14, 8, 17, 10
-];
 const SECRET_COURAGE_DISPLAY_ORDER = [
     12, 4, 19, 1, 16, 8, 21, 6, 14, 0, 10,
     18, 3, 20, 7, 15, 2, 13, 5, 17, 9, 11
@@ -1265,14 +1261,13 @@ function renderSecretCourageMessage(totalCourage) {
             Math.floor((totalCourage - SECRET_COURAGE_BASE) / SECRET_COURAGE_STEP)
         )
     );
-    const revealedIndexes = new Set(SECRET_COURAGE_REVEAL_ORDER.slice(0, unlockedCount));
     const nextTarget = unlockedCount >= phraseChars.length
         ? null
         : SECRET_COURAGE_BASE + ((unlockedCount + 1) * SECRET_COURAGE_STEP);
 
-    const slots = SECRET_COURAGE_DISPLAY_ORDER.map((index) => {
+    const slots = SECRET_COURAGE_DISPLAY_ORDER.map((index, displayIndex) => {
         const char = phraseChars[index];
-        const isRevealed = revealedIndexes.has(index);
+        const isRevealed = displayIndex < unlockedCount;
         return `<span class="secret-courage-slot${isRevealed ? ' revealed' : ''}">${isRevealed ? char : ''}</span>`;
     }).join('');
 
