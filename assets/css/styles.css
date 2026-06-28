@@ -96,7 +96,7 @@ body {
    1 & 2. VALLEY THEME (Intro & Quiz)
 ========================================= */
 body.theme-valley {
-    background-image: url('bg.png');
+    background-image: url('../img/bg.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -771,272 +771,11 @@ body.theme-jurassic {
     outline-offset: -4px;
 }
 
-/* Tournament bracket */
-#screen-tournament {
-    background: #f3f5f6;
-    color: #172033;
-    justify-content: flex-start;
-    align-items: stretch;
-    overflow: hidden;
-}
-
-.tournament-shell {
-    width: 100%;
-    height: 100dvh;
-    min-height: 0;
-    flex: 0 0 100dvh;
-    padding: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scroll-padding-bottom: calc(180px + env(safe-area-inset-bottom));
-    -webkit-overflow-scrolling: touch;
-}
-
-.tournament-header {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    padding: 12px clamp(16px, 4vw, 56px);
-    border-bottom: 1px solid #ccd1d5;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(8px);
-}
-
-.tournament-kicker {
-    margin: 0 0 2px;
-    color: #ad6b28;
-    font-size: 0.75rem;
-    font-weight: 800;
-}
-
-.tournament-header h1 {
-    margin: 0;
-    font-size: clamp(1.05rem, 2.6vw, 1.45rem);
-}
-
-.tournament-header h1 small {
-    color: #77808c;
-    font-size: 0.72em;
-    font-weight: 500;
-}
-
-.tournament-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.tournament-actions button {
-    padding: 8px 14px;
-    border: 1px solid #c9cdd1;
-    border-radius: 7px;
-    background: white;
-    color: #202938;
-    font-family: inherit;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.tournament-actions button:hover { background: #f6f7f8; }
-.tournament-actions .danger { border-color: #efb5b2; color: #c62828; }
-
-.tournament-mode-badge {
-    flex: 0 0 auto;
-    padding: 7px 12px;
-    border: 1px solid #cbd1d6;
-    border-radius: 999px;
-    background: #f4f6f8;
-    color: #667181;
-    font-size: 0.78rem;
-    font-weight: 800;
-}
-
-.tournament-mode-badge.admin {
-    border-color: #e6a53b;
-    background: #fff4d6;
-    color: #8a5200;
-}
-
-.tournament-help {
-    margin: 14px clamp(16px, 4vw, 56px) 0;
-    color: #697382;
-    font-size: 0.86rem;
-}
-
-.tournament-bracket {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(178px, 1fr));
-    grid-template-areas:
-        "uqf usf uf gf"
-        "lr1 lqf lsf lf";
-    gap: 30px;
-    width: 100%;
-    min-width: 0;
-    padding: 20px clamp(20px, 4vw, 56px) 34px;
-    overflow-x: auto;
-}
-
-.bracket-round { display: flex; flex-direction: column; gap: 14px; }
-.bracket-round[data-round="uqf"] { grid-area: uqf; }
-.bracket-round[data-round="usf"] { grid-area: usf; padding-top: 42px; }
-.bracket-round[data-round="uf"] { grid-area: uf; padding-top: 92px; }
-.bracket-round[data-round="gf"] { grid-area: gf; padding-top: 146px; }
-.bracket-round[data-round="lr1"] { grid-area: lr1; }
-.bracket-round[data-round="lqf"] { grid-area: lqf; }
-.bracket-round[data-round="lsf"] { grid-area: lsf; padding-top: 28px; }
-.bracket-round[data-round="lf"] { grid-area: lf; padding-top: 28px; }
-
-.bracket-round h3 {
-    margin: 0 0 7px;
-    padding: 6px 10px;
-    border: 1px solid #c8cdd1;
-    border-radius: 5px;
-    background: #dfe2e4;
-    color: #334056;
-    font-size: 0.78rem;
-}
-
-.bracket-match {
-    overflow: hidden;
-    border: 1px solid #cdd2d6;
-    border-radius: 6px;
-    background: white;
-    box-shadow: 0 2px 5px rgba(30, 38, 48, 0.08);
-}
-
-.bracket-team {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 34px;
-    padding: 6px 10px;
-    border: 0;
-    border-bottom: 1px solid #e2e5e7;
-    background: white;
-    color: #263044;
-    font-family: inherit;
-    text-align: left;
-}
-
-.bracket-team:last-child { border-bottom: 0; }
-.bracket-team:not(:disabled) { cursor: pointer; }
-.bracket-team:not(:disabled):hover { background: #fff8df; }
-.bracket-team:disabled { color: #9ba2ac; }
-.bracket-team.readonly:disabled { color: #263044; background: white; opacity: 1; }
-.bracket-team.winner { background: #e9f8ed; color: #166534; font-weight: 800; }
-.bracket-team.winner::after { content: "승"; color: #16a34a; font-size: 0.7rem; }
-
-.tournament-champion {
-    grid-column: 1 / -1;
-    margin: -14px auto 0;
-    padding: 12px 26px;
-    border: 2px solid #dfaa28;
-    border-radius: 999px;
-    background: #fff5c4;
-    color: #754b00;
-    font-weight: 900;
-}
-
-.tournament-participants {
-    margin: 0 clamp(16px, 4vw, 56px) 32px;
-    padding-top: 16px;
-    border-top: 1px solid #d5d9dd;
-}
-
-.tournament-bottom-spacer {
-    width: 100%;
-    height: calc(220px + env(safe-area-inset-bottom));
-    min-height: calc(220px + env(safe-area-inset-bottom));
-    pointer-events: none;
-}
-
-.tournament-participants h2 { margin: 0; font-size: 1.05rem; }
-.tournament-participants > p { margin: 5px 0 14px; color: #737d8b; font-size: 0.82rem; }
-
-.tournament-team-list {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(150px, 1fr));
-    gap: 10px;
-}
-
-.tournament-team-card {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    border: 1px solid #d0d4d8;
-    border-radius: 8px;
-    background: white;
-}
-
-.tournament-team-card span { color: #2865d8; font-weight: 900; }
-.tournament-team-card input {
-    min-width: 0;
-    width: 100%;
-    border: 0;
-    border-bottom: 1px dashed transparent;
-    background: transparent;
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 700;
-}
-.tournament-team-card input:focus { border-bottom-color: #2865d8; outline: 0; }
-.tournament-team-card input:disabled { color: #253044; opacity: 1; cursor: default; }
-
-#btn-back-tournament {
-    position: fixed;
-    left: 50%;
-    bottom: calc(16px + env(safe-area-inset-bottom));
-    z-index: 30;
-    width: min(300px, calc(100vw - 40px));
-    margin: 0;
-    transform: translateX(-50%);
-}
-
-.boss-tournament-admin {
-    background: #2c1414 !important;
-    padding: 20px !important;
-    border: 1px solid #ff5252 !important;
-    border-radius: 12px !important;
-    margin-bottom: 20px !important;
-}
-
-.boss-tournament-admin h3 {
-    margin-bottom: 8px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #ff5252;
-    color: #ff8a80;
-}
-
-.boss-tournament-admin > p { margin-bottom: 14px; color: #ffcdd2; }
-
-.boss-tournament-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.boss-tournament-actions .btn-base { width: 100%; margin: 0; font-size: 0.92rem; }
-.boss-tournament-status { min-height: 1.4em; margin: 12px 0 0 !important; text-align: center; font-weight: 700; }
-
-@media (max-width: 720px) {
-    .tournament-header { align-items: flex-start; flex-direction: column; gap: 9px; }
-    .tournament-actions { width: 100%; }
-    .tournament-actions button { flex: 1; padding: 7px 6px; font-size: 0.8rem; }
-    .tournament-bracket { grid-template-columns: repeat(4, 170px); padding-left: 16px; }
-    .tournament-team-list { grid-template-columns: repeat(2, minmax(130px, 1fr)); }
-    .boss-tournament-actions { grid-template-columns: 1fr; }
-}
-
 #btn-back-storybook,
 #btn-back-sch,
 #btn-back-growth,
-#btn-back-detail {
+#btn-back-detail,
+#btn-back-tournament {
     position: fixed;
     left: 50%;
     bottom: calc(18px + env(safe-area-inset-bottom));
@@ -1595,3 +1334,92 @@ body.theme-jurassic {
     from { top: 20px; opacity: 1; }
     to { top: -100px; opacity: 0; }
 }
+
+/* ===== 토너먼트 브라켓 (bracket_editor 포팅 · #screen-tournament 스코프) ===== */
+#screen-tournament .bk-shell { max-width: 1120px; width: 100%; max-height: 92vh; overflow-y: auto; text-align: left; }
+#screen-tournament .bk-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+#screen-tournament .bk-header h2 { margin: 0; font-size: 1.3rem; }
+#screen-tournament .bk-header small { color: #888; font-weight: 400; font-size: 0.7em; }
+#screen-tournament .bk-kicker { margin: 0; color: #8a8a8a; font-size: 0.85rem; }
+#screen-tournament .bk-mode-badge { background: #d9dadc; color: #4a4a4a; border-radius: 999px; padding: 4px 12px; font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+#screen-tournament .bk-mode-badge.admin { background: #ff5252; color: #fff; }
+#screen-tournament .bk-help { color: #666; font-size: 0.9rem; margin: 4px 0 10px; }
+#screen-tournament .bk-admin-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+#screen-tournament .bk-admin-actions[hidden] { display: none; }
+#screen-tournament .bk-admin-actions .btn-base { margin: 0; width: auto; padding: 8px 16px; }
+#screen-tournament .bk-status { color: #2e7d32; font-weight: 700; font-size: 0.85rem; }
+
+#screen-tournament .bracket-viewport { overflow-x: auto; overflow-y: hidden; padding: 12px; -webkit-overflow-scrolling: touch; background: #f4f5f6; border: 1px solid #cfcfcf; border-radius: 8px; }
+#screen-tournament .bracket-canvas { position: relative; margin: 0 auto; }
+#screen-tournament .bracket-connectors { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 0; }
+#screen-tournament .connector { stroke: #b9b9b9; stroke-width: 1.5; }
+#screen-tournament .round-header { position: absolute; height: 26px; line-height: 26px; padding: 0 10px; background: #d9dadc; border: 1px solid #cfcfcf; border-radius: 4px; font-size: 12px; font-weight: 600; color: #4a4a4a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 1; }
+#screen-tournament .match-box { position: absolute; background: #ececec; border: 1px solid #cfcfcf; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,.08); cursor: pointer; z-index: 2; overflow: hidden; }
+#screen-tournament .match-box:hover { border-color: #3b7dd8; }
+#screen-tournament .match-box.is-pending { opacity: .75; }
+#screen-tournament .match-slot { display: flex; align-items: center; justify-content: space-between; height: 26px; padding: 0 10px 0 12px; font-size: 13px; background: #f0f0f0; }
+#screen-tournament .match-slot + .match-slot { border-top: 1px solid #cfcfcf; }
+#screen-tournament .match-slot.is-winner { background: #d7ecd9; font-weight: 600; }
+#screen-tournament .match-slot.is-winner .slot-name { color: #1f5d27; }
+#screen-tournament .match-slot.is-empty .slot-name { color: #8a8a8a; }
+#screen-tournament .slot-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#screen-tournament .slot-score { color: #8a8a8a; font-variant-numeric: tabular-nums; padding-left: 8px; }
+#screen-tournament .match-slot.is-winner .slot-score { color: #1f5d27; }
+#screen-tournament .match-info { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border: none; background: transparent; color: #777; cursor: pointer; font-size: 13px; line-height: 1; padding: 0; }
+
+#screen-tournament .bk-team-section { padding: 18px 0 88px; }
+#screen-tournament .bk-team-section h3 { margin: 0 0 10px; }
+#screen-tournament .team-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+#screen-tournament .team-list-card { background: #fff; border: 1px solid #cfcfcf; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+#screen-tournament .team-list-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+#screen-tournament .team-seed { color: #3b7dd8; font-weight: 700; font-size: 13px; }
+#screen-tournament .team-list-name { margin: 0; font-size: 15px; }
+#screen-tournament .team-name-input { flex: 1; min-width: 0; font-size: 14px; padding: 5px 8px; border: 1px solid #cfcfcf; border-radius: 6px; }
+#screen-tournament .team-list-members { margin: 0; padding-left: 18px; color: #555; font-size: 13px; line-height: 1.6; }
+#screen-tournament .team-members-input { width: 100%; font-size: 13px; padding: 6px 8px; border: 1px solid #cfcfcf; border-radius: 6px; font-family: inherit; resize: vertical; }
+
+/* 브라켓 모달 (전역 · bk- 접두사) */
+.bk-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10001; }
+.bk-modal-overlay[hidden] { display: none; }
+.bk-modal { background: #fff; color: #2c2c2c; border-radius: 10px; width: min(440px, 100%); max-height: 90vh; overflow: auto; box-shadow: 0 12px 40px rgba(0,0,0,.25); text-align: left; }
+.bk-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid #cfcfcf; }
+.bk-modal-head h2 { margin: 0; font-size: 15px; }
+.bk-modal-close { border: none; background: none; font-size: 16px; cursor: pointer; color: #777; }
+.bk-modal-body { padding: 16px 18px; }
+.bk-modal-note { margin: 0 0 12px; color: #8a8a8a; font-size: 13px; }
+.bk-team-cards { display: flex; flex-direction: column; gap: 10px; }
+.bk-team-card { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid #cfcfcf; border-radius: 8px; cursor: pointer; }
+.bk-team-card:has(input:checked), .bk-team-card.is-winner { border-color: #58a25e; background: #d7ecd9; }
+.bk-team-card input[type="radio"] { margin: 0; }
+.bk-team-card-main { flex: 1; min-width: 0; }
+.bk-team-card-name { font-weight: 600; font-size: 14px; }
+.bk-team-card-members { color: #666; font-size: 12px; margin-top: 2px; }
+.bk-score-input { width: 56px; padding: 6px 8px; border: 1px solid #cfcfcf; border-radius: 6px; font-size: 14px; text-align: center; }
+.bk-score-readonly { min-width: 24px; text-align: right; font-variant-numeric: tabular-nums; color: #555; font-weight: 700; }
+.bk-modal-actions { display: flex; justify-content: space-between; gap: 8px; padding: 14px 18px; border-top: 1px solid #cfcfcf; }
+.bk-modal-actions button { padding: 8px 16px; border-radius: 6px; border: 1px solid #cfcfcf; cursor: pointer; font-size: 13px; }
+.bk-btn-clear { color: #b3261e; background: #fff; }
+.bk-btn-save { background: #3b7dd8; color: #fff; border-color: #3b7dd8; }
+.bk-btn-save:disabled { opacity: .5; cursor: not-allowed; }
+
+/* 팀원 선택 (어드민) — 칩 + 버튼 */
+#screen-tournament .team-members-picker { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+#screen-tournament .team-members-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+#screen-tournament .team-member-chip { display: inline-block; padding: 3px 9px; background: #eef2f7; border: 1px solid #d3dae3; border-radius: 999px; font-size: 12px; color: #333; }
+#screen-tournament .team-members-empty { font-size: 12px; color: #999; }
+#screen-tournament .team-members-pick-btn { align-self: flex-start; padding: 6px 12px; font-size: 13px; border: 1px solid #3b7dd8; background: #fff; color: #3b7dd8; border-radius: 6px; cursor: pointer; }
+#screen-tournament .team-members-pick-btn:hover { background: #eef4fd; }
+
+/* 팀원 선택 모달 (전역 · bk- 접두사) */
+.bk-member-modal { width: min(380px, 100%); }
+.bk-member-search { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cfcfcf; border-radius: 6px; font-size: 14px; margin-bottom: 8px; }
+.bk-member-count { margin: 0 0 8px; }
+.bk-member-list { display: flex; flex-direction: column; gap: 2px; max-height: 46vh; overflow: auto; border: 1px solid #eee; border-radius: 8px; padding: 4px; }
+.bk-member-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.bk-member-item:hover { background: #f4f7fb; }
+.bk-member-item input[type="checkbox"] { margin: 0; }
+.bk-member-item:has(input:checked) { background: #e7f0fb; }
+.bk-member-name { flex: 1; min-width: 0; font-size: 14px; }
+.bk-member-item.is-taken { opacity: .55; cursor: not-allowed; }
+.bk-member-item.is-taken:hover { background: none; }
+.bk-member-badge { font-size: 11px; color: #b3261e; border: 1px solid #e6bcb8; border-radius: 999px; padding: 1px 7px; }
