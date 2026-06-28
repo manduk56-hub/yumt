@@ -270,6 +270,7 @@ let hasCoinsColumn = true;
 let hasInitialCoinsGrantedColumn = true;
 let hasUsedCodesColumn = true;
 let isPendingNewProfile = false;
+let lastTotalCourage = 0;
 const SECRET_COURAGE_PHRASE = '폭군홍주은사우루스는2학기도회장을피할수없다';
 const SECRET_COURAGE_BASE = 45;
 const SECRET_COURAGE_STEP = 6;
@@ -300,6 +301,7 @@ let appControls = {
     resetEnabled: true,
     message: "",
     messageTs: "",
+    secretSolvedBy: "",
     tournament: null,
 };
 
@@ -309,6 +311,16 @@ function isBossProfile(profile) {
     return profile.code === BOSS_CODE ||
         (profile.name === BOSS_NAME && profile.studentId === BOSS_STUDENT_ID) ||
         String(profile.dinoName || '').includes('홍주은');
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+    }[char]));
 }
 
 function getDinoImageSrc(profile) {
@@ -402,6 +414,7 @@ function parseBossControls(rawValue) {
         resetEnabled: true,
         message: "",
         messageTs: "",
+        secretSolvedBy: "",
         tournament: null,
     };
 
@@ -416,6 +429,7 @@ function parseBossControls(rawValue) {
             resetEnabled: parsed.resetEnabled !== false,
             message: parsed.message || "",
             messageTs: String(parsed.messageTs || ""),
+            secretSolvedBy: String(parsed.secretSolvedBy || ""),
             tournament: parsed.tournament || null,
         };
     } catch (e) {
@@ -434,6 +448,7 @@ function serializeBossControls(controls = appControls) {
         resetEnabled: controls.resetEnabled !== false,
         message: controls.message || "",
         messageTs: String(controls.messageTs || ""),
+        secretSolvedBy: String(controls.secretSolvedBy || ""),
         tournament: controls.tournament || null,
     });
 }
@@ -498,6 +513,8 @@ function updateBossControlUI() {
     const btnToggleGrowth = document.getElementById('btn-toggle-growth');
     const btnToggleReset = document.getElementById('btn-toggle-reset');
     const bossControlStatus = document.getElementById('boss-control-status');
+    const secretSolverInput = document.getElementById('secret-solver-input');
+    const secretCompleteStatus = document.getElementById('secret-complete-status');
 
     if (btnToggleGrowth) {
         btnToggleGrowth.innerText = appControls.growthEnabled ? "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uD65C\uC131" : "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uBE44\uD65C\uC131";
@@ -507,6 +524,12 @@ function updateBossControlUI() {
     }
     if (bossControlStatus) {
         bossControlStatus.innerText = `파워업: ${appControls.growthEnabled ? '활성' : '비활성'} / 환생하기: ${appControls.resetEnabled ? '활성' : '비활성'}`;
+    }
+    if (secretSolverInput && appControls.secretSolvedBy) {
+        secretSolverInput.value = appControls.secretSolvedBy;
+    }
+    if (secretCompleteStatus) {
+        secretCompleteStatus.innerText = appControls.secretSolvedBy ? `맞춘사람: ${appControls.secretSolvedBy}` : '';
     }
 }
 
@@ -1254,6 +1277,7 @@ function renderSecretCourageMessage(totalCourage) {
     if (!elSecretCourageMessage) return;
 
     const phraseChars = Array.from(SECRET_COURAGE_PHRASE);
+    const solvedBy = String(appControls.secretSolvedBy || '').trim();
     const unlockedCount = Math.max(
         0,
         Math.min(
@@ -1261,25 +1285,29 @@ function renderSecretCourageMessage(totalCourage) {
             Math.floor((totalCourage - SECRET_COURAGE_BASE) / SECRET_COURAGE_STEP)
         )
     );
+    const displayOrder = solvedBy
+        ? phraseChars.map((_, index) => index)
+        : SECRET_COURAGE_DISPLAY_ORDER;
+    const visibleCount = solvedBy ? phraseChars.length : unlockedCount;
     const nextTarget = unlockedCount >= phraseChars.length
         ? null
         : SECRET_COURAGE_BASE + ((unlockedCount + 1) * SECRET_COURAGE_STEP);
 
-    const slots = SECRET_COURAGE_DISPLAY_ORDER.map((index, displayIndex) => {
+    const slots = displayOrder.map((index, displayIndex) => {
         const char = phraseChars[index];
-        const isRevealed = displayIndex < unlockedCount;
+        const isRevealed = displayIndex < visibleCount;
         return `<span class="secret-courage-slot${isRevealed ? ' revealed' : ''}">${isRevealed ? char : ''}</span>`;
     }).join('');
 
     elSecretCourageMessage.innerHTML = `
-        <div class="secret-courage-title">숨겨진 문장</div>
+        <div class="secret-courage-title">${solvedBy ? `맞춘사람 : ${escapeHtml(solvedBy)}` : '숨겨진 문장'}</div>
         <div class="secret-courage-slots" aria-label="숨겨진 문장 진행도">${slots}</div>
         <div class="secret-courage-progress">
-            ${unlockedCount}/${phraseChars.length}
-            ${nextTarget ? ` · 다음 글자까지 총 용기 ${nextTarget}` : ' · 문장 완성'}
+            ${solvedBy ? '문장 완성' : `${unlockedCount}/${phraseChars.length}${nextTarget ? ` · 다음 글자까지 총 용기 ${nextTarget}` : ' · 문장 완성'}`}
         </div>
     `;
     elSecretCourageMessage.classList.remove('hidden');
+    elSecretCourageMessage.classList.toggle('completed', Boolean(solvedBy));
 }
 
 function updateRankingUI(allPlayers) {
@@ -1292,6 +1320,7 @@ function updateRankingUI(allPlayers) {
     const regularPlayers = allPlayers.filter(player => player !== bossPlayer);
     const totalCourage = regularPlayers.reduce((sum, player) => sum + (player.courage ?? 1), 0);
     const totalBattlePower = regularPlayers.reduce((sum, player) => sum + (player.battle_power ?? 10), 0);
+    lastTotalCourage = totalCourage;
 
     renderSecretCourageMessage(totalCourage);
 
@@ -1500,6 +1529,8 @@ const btnBossSendMsg = document.getElementById('btn-boss-send-msg');
 const bossMessageInput = document.getElementById('boss-message-input');
 const btnToggleGrowth = document.getElementById('btn-toggle-growth');
 const btnToggleReset = document.getElementById('btn-toggle-reset');
+const secretSolverInput = document.getElementById('secret-solver-input');
+const btnSecretComplete = document.getElementById('btn-secret-complete');
 
 async function handleBossControlToggle(controlKey, button) {
     if (!button) return;
@@ -1520,6 +1551,30 @@ async function handleBossControlToggle(controlKey, button) {
 
 btnToggleGrowth?.addEventListener('click', () => handleBossControlToggle('growthEnabled', btnToggleGrowth));
 btnToggleReset?.addEventListener('click', () => handleBossControlToggle('resetEnabled', btnToggleReset));
+
+btnSecretComplete?.addEventListener('click', async () => {
+    const solverName = secretSolverInput?.value.trim() || '';
+    if (!solverName) {
+        alert('맞춘 사람을 입력해 주세요.');
+        return;
+    }
+
+    btnSecretComplete.disabled = true;
+    btnSecretComplete.innerText = '완성 중...';
+    try {
+        appControls.secretSolvedBy = solverName;
+        await saveBossControls();
+        updateBossControlUI();
+        renderSecretCourageMessage(lastTotalCourage);
+        alert('숨겨진 문장이 완성되었습니다!');
+    } catch (e) {
+        console.error('Secret message completion failed', e);
+        alert('숨겨진 문장 저장에 실패했어요.');
+    } finally {
+        btnSecretComplete.disabled = false;
+        btnSecretComplete.innerText = '완성하기';
+    }
+});
 
 if (btnBossSendMsg) {
     btnBossSendMsg.addEventListener('click', async () => {
@@ -1627,6 +1682,9 @@ async function checkBossMessage() {
             if (bracketAdmin) controls.tournament = appControls.tournament; // 관리자 편집 중에는 폴링이 덮어쓰지 않도록 보호
             appControls = controls;
             applyAppControls();
+            if (screenGrowth?.classList.contains('active')) {
+                renderSecretCourageMessage(lastTotalCourage);
+            }
             if (!bracketAdmin && screenTournament?.classList.contains('active')) renderBracketScreen();
             if (controls.message && lastBossMessageTimestamp !== controls.messageTs) {
                 if (lastBossMessageTimestamp !== "") {

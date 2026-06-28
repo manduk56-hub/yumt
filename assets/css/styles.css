@@ -994,6 +994,10 @@ body.theme-jurassic {
     background: #ffcc80;
 }
 
+.secret-courage-message.completed .secret-courage-slots {
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+}
+
 .secret-courage-progress {
     margin-top: 8px;
     color: #5d4037;
