@@ -277,6 +277,10 @@ const SECRET_COURAGE_REVEAL_ORDER = [
     3, 15, 7, 20, 0, 11, 18, 5, 13, 21, 2,
     9, 16, 1, 12, 6, 19, 4, 14, 8, 17, 10
 ];
+const SECRET_COURAGE_DISPLAY_ORDER = [
+    12, 4, 19, 1, 16, 8, 21, 6, 14, 0, 10,
+    18, 3, 20, 7, 15, 2, 13, 5, 17, 9, 11
+];
 const BOSS_NAME = "\uD64D\uC8FC\uC740";
 const BOSS_STUDENT_ID = "22411923";
 const BOSS_CODE = "BOSS00";
@@ -1266,7 +1270,8 @@ function renderSecretCourageMessage(totalCourage) {
         ? null
         : SECRET_COURAGE_BASE + ((unlockedCount + 1) * SECRET_COURAGE_STEP);
 
-    const slots = phraseChars.map((char, index) => {
+    const slots = SECRET_COURAGE_DISPLAY_ORDER.map((index) => {
+        const char = phraseChars[index];
         const isRevealed = revealedIndexes.has(index);
         return `<span class="secret-courage-slot${isRevealed ? ' revealed' : ''}">${isRevealed ? char : ''}</span>`;
     }).join('');
