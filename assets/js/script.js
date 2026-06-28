@@ -1531,6 +1531,7 @@ const btnToggleGrowth = document.getElementById('btn-toggle-growth');
 const btnToggleReset = document.getElementById('btn-toggle-reset');
 const secretSolverInput = document.getElementById('secret-solver-input');
 const btnSecretComplete = document.getElementById('btn-secret-complete');
+const btnSecretCancel = document.getElementById('btn-secret-cancel');
 
 async function handleBossControlToggle(controlKey, button) {
     if (!button) return;
@@ -1573,6 +1574,25 @@ btnSecretComplete?.addEventListener('click', async () => {
     } finally {
         btnSecretComplete.disabled = false;
         btnSecretComplete.innerText = '완성하기';
+    }
+});
+
+btnSecretCancel?.addEventListener('click', async () => {
+    btnSecretCancel.disabled = true;
+    btnSecretCancel.innerText = '취소 중...';
+    try {
+        appControls.secretSolvedBy = '';
+        if (secretSolverInput) secretSolverInput.value = '';
+        await saveBossControls();
+        updateBossControlUI();
+        renderSecretCourageMessage(lastTotalCourage);
+        alert('숨겨진 문장 완성을 취소했습니다.');
+    } catch (e) {
+        console.error('Secret message cancel failed', e);
+        alert('숨겨진 문장 취소에 실패했어요.');
+    } finally {
+        btnSecretCancel.disabled = false;
+        btnSecretCancel.innerText = '취소하기';
     }
 });
 

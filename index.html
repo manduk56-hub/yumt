@@ -479,8 +479,12 @@
                     <div style="display: flex; gap: 10px; flex-direction: column;">
                         <input type="text" id="secret-solver-input" placeholder="맞춘 사람 이름을 입력하세요"
                             style="width: 100%; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 1rem; border: 1px solid #ff5252; background: #1a0b0b; color: #ffcdd2;">
-                        <button id="btn-secret-complete" class="btn-base btn-forward"
-                            style="background: #ff5252 !important; color: white !important; align-self: flex-end; padding: 10px 20px; font-size: 1rem; border: none; box-shadow: 0 4px 10px rgba(255, 82, 82, 0.4);">완성하기</button>
+                        <div style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+                            <button id="btn-secret-cancel" class="btn-base btn-back"
+                                style="background: #6d4c41 !important; color: white !important; padding: 10px 20px; font-size: 1rem; border: none;">취소하기</button>
+                            <button id="btn-secret-complete" class="btn-base btn-forward"
+                                style="background: #ff5252 !important; color: white !important; padding: 10px 20px; font-size: 1rem; border: none; box-shadow: 0 4px 10px rgba(255, 82, 82, 0.4);">완성하기</button>
+                        </div>
                         <p id="secret-complete-status"
                             style="margin: 0; color: #ffcdd2; font-weight: bold; text-align: right;"></p>
                     </div>
