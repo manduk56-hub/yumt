@@ -1169,10 +1169,10 @@ body.theme-jurassic {
 
 .coin-shop-item {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-        "name price"
-        "detail price";
+        "name"
+        "detail";
     column-gap: 8px;
     row-gap: 2px;
     align-items: center;
@@ -1202,16 +1202,7 @@ body.theme-jurassic {
 }
 
 .coin-shop-item em {
-    grid-area: price;
-    background: #ffb74d;
-    border-radius: 6px;
-    color: #111;
-    font-style: normal;
-    font-weight: 900;
-    padding: 5px 8px;
-    white-space: nowrap;
-    justify-self: end;
-    font-size: 0.88rem;
+    display: none;
 }
 
 @media (max-width: 600px) {
@@ -1277,10 +1268,10 @@ body.theme-jurassic {
     }
 
     .coin-shop-item {
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-areas:
-            "name price"
-            "detail price";
+            "name"
+            "detail";
         align-items: center;
         column-gap: 5px;
         min-height: 48px;
@@ -1298,10 +1289,7 @@ body.theme-jurassic {
     }
 
     .coin-shop-item em {
-        align-self: center;
-        font-size: 0.74rem;
-        justify-self: end;
-        padding: 4px 5px;
+        display: none;
     }
 }
 
