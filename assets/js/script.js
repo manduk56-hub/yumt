@@ -303,6 +303,7 @@ let appControls = {
     resetEnabled: true,
     message: "",
     messageTs: "",
+    secretCompletionEnabled: true,
     secretSolvedBy: "",
     tournament: null,
 };
@@ -425,6 +426,7 @@ function parseBossControls(rawValue) {
         resetEnabled: true,
         message: "",
         messageTs: "",
+        secretCompletionEnabled: true,
         secretSolvedBy: "",
         tournament: null,
     };
@@ -440,6 +442,7 @@ function parseBossControls(rawValue) {
             resetEnabled: parsed.resetEnabled !== false,
             message: parsed.message || "",
             messageTs: String(parsed.messageTs || ""),
+            secretCompletionEnabled: parsed.secretCompletionEnabled !== false,
             secretSolvedBy: String(parsed.secretSolvedBy || ""),
             tournament: parsed.tournament || null,
         };
@@ -459,6 +462,7 @@ function serializeBossControls(controls = appControls) {
         resetEnabled: controls.resetEnabled !== false,
         message: controls.message || "",
         messageTs: String(controls.messageTs || ""),
+        secretCompletionEnabled: controls.secretCompletionEnabled !== false,
         secretSolvedBy: String(controls.secretSolvedBy || ""),
         tournament: controls.tournament || null,
     });
@@ -528,6 +532,9 @@ function updateBossControlUI() {
     const secretCompleteStatus = document.getElementById('secret-complete-status');
     const secretCompleteActions = document.getElementById('secret-complete-actions');
     let btnSecretDisableCompletion = document.getElementById('btn-secret-disable-completion');
+    const btnSecretComplete = document.getElementById('btn-secret-complete');
+    const btnSecretCancel = document.getElementById('btn-secret-cancel');
+    const canCompleteSecret = appControls.secretCompletionEnabled !== false;
 
     if (btnToggleGrowth) {
         btnToggleGrowth.innerText = appControls.growthEnabled ? "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uD65C\uC131" : "\uD30C\uC6CC\uC5C5! \uBC84\uD2BC \uBE44\uD65C\uC131";
@@ -540,9 +547,18 @@ function updateBossControlUI() {
     }
     if (secretSolverInput) {
         secretSolverInput.value = appControls.secretSolvedBy || '';
+        secretSolverInput.disabled = !canCompleteSecret;
     }
     if (secretCompleteStatus) {
-        secretCompleteStatus.innerText = appControls.secretSolvedBy ? `맞춘사람: ${appControls.secretSolvedBy}` : '';
+        secretCompleteStatus.innerText = canCompleteSecret
+            ? (appControls.secretSolvedBy ? `맞춘사람: ${appControls.secretSolvedBy}` : '')
+            : '숨겨진 문장 완성 기능 비활성화됨';
+    }
+    if (btnSecretComplete) {
+        btnSecretComplete.disabled = !canCompleteSecret;
+    }
+    if (btnSecretCancel) {
+        btnSecretCancel.disabled = !canCompleteSecret;
     }
     if (secretCompleteActions) {
         if (isSecretManagerProfile(savedProfile)) {
@@ -552,10 +568,12 @@ function updateBossControlUI() {
                 btnSecretDisableCompletion.className = 'btn-base btn-back';
                 btnSecretDisableCompletion.type = 'button';
                 btnSecretDisableCompletion.style.cssText = 'background: #263238 !important; color: white !important; padding: 10px 20px; font-size: 1rem; border: none;';
-                btnSecretDisableCompletion.innerText = '숨겨진 문장 완성 비활성화하기';
                 btnSecretDisableCompletion.addEventListener('click', handleSecretDisableCompletion);
                 secretCompleteActions.prepend(btnSecretDisableCompletion);
             }
+            btnSecretDisableCompletion.innerText = canCompleteSecret
+                ? '숨겨진 문장 완성 비활성화하기'
+                : '숨겨진 문장 완성 활성화하기';
         } else if (btnSecretDisableCompletion) {
             btnSecretDisableCompletion.remove();
         }
@@ -1332,7 +1350,9 @@ function renderSecretCourageMessage(totalCourage) {
     if (!elSecretCourageMessage) return;
 
     const phraseChars = Array.from(SECRET_COURAGE_PHRASE);
-    const solvedBy = String(appControls.secretSolvedBy || '').trim();
+    const solvedBy = appControls.secretCompletionEnabled === false
+        ? ''
+        : String(appControls.secretSolvedBy || '').trim();
     const unlockedCount = Math.max(
         0,
         Math.min(
@@ -1609,6 +1629,11 @@ btnToggleGrowth?.addEventListener('click', () => handleBossControlToggle('growth
 btnToggleReset?.addEventListener('click', () => handleBossControlToggle('resetEnabled', btnToggleReset));
 
 btnSecretComplete?.addEventListener('click', async () => {
+    if (appControls.secretCompletionEnabled === false) {
+        alert('숨겨진 문장 완성 기능이 비활성화되어 있어요.');
+        return;
+    }
+
     const solverName = secretSolverInput?.value.trim() || '';
     if (!solverName) {
         alert('맞춘 사람을 입력해 주세요.');
@@ -1633,6 +1658,11 @@ btnSecretComplete?.addEventListener('click', async () => {
 });
 
 btnSecretCancel?.addEventListener('click', async () => {
+    if (appControls.secretCompletionEnabled === false) {
+        alert('숨겨진 문장 완성 기능이 비활성화되어 있어요.');
+        return;
+    }
+
     btnSecretCancel.disabled = true;
     btnSecretCancel.innerText = '취소 중...';
     try {
@@ -1658,20 +1688,26 @@ async function handleSecretDisableCompletion(event) {
     if (!btnSecretDisableCompletion) return;
 
     btnSecretDisableCompletion.disabled = true;
-    btnSecretDisableCompletion.innerText = '비활성화 중...';
+    const nextEnabled = appControls.secretCompletionEnabled === false;
+    btnSecretDisableCompletion.innerText = nextEnabled ? '활성화 중...' : '비활성화 중...';
     try {
-        appControls.secretSolvedBy = '';
+        appControls.secretCompletionEnabled = nextEnabled;
+        if (!nextEnabled) {
+            appControls.secretSolvedBy = '';
+        }
         if (secretSolverInput) secretSolverInput.value = '';
         await saveBossControls();
         updateBossControlUI();
         renderSecretCourageMessage(lastTotalCourage);
-        alert('숨겨진 문장 완성 상태를 비활성화했습니다.');
+        alert(nextEnabled ? '숨겨진 문장 완성 기능을 활성화했습니다.' : '숨겨진 문장 완성 기능을 비활성화했습니다.');
     } catch (e) {
         console.error('Secret message completion disable failed', e);
-        alert('숨겨진 문장 완성 비활성화에 실패했어요.');
+        alert('숨겨진 문장 완성 기능 설정에 실패했어요.');
     } finally {
         btnSecretDisableCompletion.disabled = false;
-        btnSecretDisableCompletion.innerText = '숨겨진 문장 완성 비활성화하기';
+        btnSecretDisableCompletion.innerText = appControls.secretCompletionEnabled === false
+            ? '숨겨진 문장 완성 활성화하기'
+            : '숨겨진 문장 완성 비활성화하기';
     }
 }
 
